@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14532d">
+<meta name="description" content="Free penny-deal and clearance alerts for Aurora, CO 80017. Watches public deal lists for local Walmart, Target, Dollar General and Home Depot stores.">
+<title>Penny Alerts — Aurora, CO</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>🪙 Penny Alerts</h1>
+  <p class="sub">Aurora, CO 80017 · free signals only · no paid APIs</p>
+  <div id="briefingBar" class="briefing-bar">Loading the latest deal briefing…</div>
+  <div id="staleBar" class="stale-bar" hidden></div>
+  <div class="notif-row">
+    <button id="notifBtn" type="button">🔔 Enable alerts</button>
+    <span id="notifState" class="notif-state">Alerts are checked when you open the app.</span>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <button type="button" class="tab active" data-tab="deals" role="tab">Deals <span id="dealCount" class="count"></span></button>
+  <button type="button" class="tab" data-tab="watchlist" role="tab">Watchlist <span id="watchCount" class="count"></span></button>
+  <button type="button" class="tab" data-tab="stores" role="tab">Stores</button>
+  <button type="button" class="tab" data-tab="lists" role="tab">Lists &amp; Sources</button>
+</nav>
+
+<main>
+  <section id="tab-deals" class="tab-panel">
+    <div class="filters">
+      <input id="searchBox" type="search" placeholder="Search deals…" aria-label="Search deals">
+      <select id="retailerFilter" aria-label="Filter by store">
+        <option value="">All stores</option>
+      </select>
+      <select id="deptFilter" aria-label="Filter by department">
+        <option value="">All departments</option>
+      </select>
+      <label class="check"><input id="pennyOnly" type="checkbox"> Pennies only ($0.01)</label>
+      <label class="check"><input id="showExpired" type="checkbox"> Show expired</label>
+    </div>
+    <p class="hint">Leads, not confirmations. A deal here means “go check it” — the register is the final truth.</p>
+    <div id="dealList" class="deal-list"></div>
+  </section>
+
+  <section id="tab-watchlist" class="tab-panel" hidden>
+    <p class="hint">Items you tapped “Watch”. Open the in-store checklist when you go — scan in the store’s app, then let the register decide.</p>
+    <div id="watchList" class="deal-list"></div>
+    <h2>Marked off — don’t show again</h2>
+    <p class="hint">Hidden everywhere in the feed. Un-mark anything to see it again.</p>
+    <div id="ignoredList" class="deal-list"></div>
+  </section>
+
+  <section id="tab-stores" class="tab-panel" hidden>
+    <p class="hint">Your local stores. Tap a phone number to call. “Check” links open the store’s own checker page — you do the check, the app never scrapes a store.</p>
+    <div id="storeList"></div>
+  </section>
+
+  <section id="tab-lists" class="tab-panel" hidden>
+    <h2>Weekly lists — the live sources</h2>
+    <p class="hint">These pages are the current lists. The app can’t read them automatically (they block cross-site reads), so open them here — they’re updated every week, usually Tuesday morning for Dollar General.</p>
+    <ul class="link-list" id="sourceLinks"></ul>
+
+    <h2>What this app does NOT do</h2>
+    <ul class="plain">
+      <li>It never checks a store’s price by itself. No Walmart, BrickSeek or retailer site is ever called automatically.</li>
+      <li>It cannot confirm a penny at a specific store. Only a scan in the store’s app — and the register — can do that.</li>
+      <li>Dollar General has no remote price check at all, paid or free. DG pennies are list → drive → scan in the DG app.</li>
+      <li>Alerts are checked when you open the app. A static site has no server to push to your phone while it’s closed.</li>
+    </ul>
+
+    <h2>Planned for v2</h2>
+    <ul class="plain">
+      <li>True background push: push subscription stored in Supabase, a small sender that checks the briefing daily and pushes new deals. Needs a server piece — designed, not built.</li>
+      <li>Parsing the weekly DG lists into the feed automatically (needs a server or a scheduled job; a plain web page can’t fetch those pages).</li>
+      <li>Optional King Soopers auto price-check via Kroger’s free public API (needs a free Kroger developer account).</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="app-footer">
+  <p>Free forever. Data: Penny Hunter’s public briefing + the community penny lists linked above. Not affiliated with Walmart, Target, Dollar General, Home Depot or Penny Hunter.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
