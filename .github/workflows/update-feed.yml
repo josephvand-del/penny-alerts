@@ -1,4 +1,4 @@
-# Penny Alerts — weekly feed updater.
+# Penny Alerts — weekly feed updater + background push sender.
 #
 # HOW TO ADD IT (Joseph, on github.com — the GitHub App cannot push
 # workflow files, so this file is added by hand):
@@ -7,13 +7,29 @@
 #   2. Set the path to: .github/workflows/update-feed.yml
 #   3. Paste this whole file, then Commit directly to main.
 #   4. It runs daily at 6am ET. You can also run it on demand from the
-#      Actions tab → "Update weekly feed" → Run workflow.
+#      Actions tab → "Update weekly feed + push alerts" → Run workflow.
+#
+# THIS FILE REPLACES the earlier feed-only version. If you already added
+# the old update-feed.yml, replace its whole contents with this file —
+# do NOT add this as a second workflow.
 #
 # WHAT IT DOES: checks out the repo, installs the parser's Python deps,
 # runs scripts/parse-lists.py (reads the free community lists — never a
-# retailer site), and commits feed/weekly.json ONLY if it changed. No
-# push trigger, so it can never loop on its own commits.
-name: Update weekly feed
+# retailer site), then runs scripts/send-push.py, then commits
+# feed/weekly.json ONLY if it changed. No push trigger, so it can never
+# loop on its own commits.
+#
+# ORDER MATTERS: send-push runs AFTER the parse and BEFORE the commit,
+# because it diffs the fresh feed in the working tree against the
+# committed feed at HEAD. The push step can never fail the workflow
+# (|| true) — a push problem must never block the feed update.
+#
+# SECRETS (repo → Settings → Secrets and variables → Actions):
+#   VAPID_PRIVATE_KEY          — the VAPID private key (Joseph's file)
+#   SUPABASE_SERVICE_ROLE_KEY  — Supabase dashboard → Project Settings → API
+# Both are used ONLY by the send-push step. If either is missing, the
+# sender logs a line and skips quietly.
+name: Update weekly feed + push alerts
 
 on:
   schedule:
@@ -38,6 +54,11 @@ jobs:
         run: pip install -r scripts/requirements.txt
       - name: Parse weekly lists
         run: python scripts/parse-lists.py
+      - name: Send push alerts for new deals
+        env:
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/send-push.py || true
       - name: Commit feed if changed
         run: |
           git config user.name "penny-alerts-bot"
