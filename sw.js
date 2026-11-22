@@ -3,9 +3,10 @@
  * NEVER cached here — it is always fetched fresh (network-first) because
  * penny lists go stale fast.
  */
-var CACHE = 'penny-alerts-v1';
+var CACHE = 'penny-alerts-v2';
 var SHELL = ['index.html', 'styles.css', 'app.js', 'manifest.json', 'icon.svg'];
 var BRIEFING = 'rocketshon.github.io/penny-finder-backend/briefings/latest.json';
+var WEEKLY = 'feed/weekly.json';
 
 self.addEventListener('install', function (event) {
   event.waitUntil(
@@ -25,8 +26,9 @@ self.addEventListener('activate', function (event) {
 
 self.addEventListener('fetch', function (event) {
   var url = event.request.url;
-  if (url.indexOf(BRIEFING) !== -1) {
-    /* Briefing: always network, fall back to cache only if offline. */
+  if (url.indexOf(BRIEFING) !== -1 || url.indexOf(WEEKLY) !== -1) {
+    /* Briefing + weekly feed: always network, fall back to cache only if
+     * offline. Penny lists go stale fast — never serve a cached feed. */
     event.respondWith(
       fetch(event.request).then(function (resp) {
         var copy = resp.clone();

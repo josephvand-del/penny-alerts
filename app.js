@@ -5,14 +5,16 @@
  * fetches walmart.com, brickseek.com, or any retailer endpoint. Check
  * links below are plain <a> links the USER taps; the user does the check.
  *
- * v2 design (not built): true background push needs a server. Plan is a
- * push subscription stored in Supabase + a small scheduled sender that
- * fetches the briefing daily and pushes new deals. A static Pages site
- * cannot push to a closed phone by itself, so v1 labels its alerts
- * honestly: "checked when you open the app."
+ * v2 (this version): the weekly feed — scripts/parse-lists.py runs daily
+ * (GitHub Actions, workflow file added by Joseph on github.com) and writes
+ * feed/weekly.json, which the app reads alongside the briefing. Parsing
+ * reuses Penny Hunter's approach (MIT). True background push is still a
+ * v2-design item: a static Pages site cannot push to a closed phone, so
+ * v1/v2 alerts stay honestly labelled: "checked when you open the app."
  */
 
 var BRIEFING_URL = 'https://rocketshon.github.io/penny-finder-backend/briefings/latest.json';
+var WEEKLY_URL = 'feed/weekly.json';
 
 /* Friendly retailer names for store_ids found in the briefing. */
 var STORE_NAMES = {
@@ -217,11 +219,50 @@ function normalizeBriefing(data) {
   return { meta: meta, deals: deals };
 }
 
+/* Normalize the weekly feed (feed/weekly.json, written by
+ * scripts/parse-lists.py) into the same flat deal list. Never throws. */
+function normalizeWeekly(data) {
+  var meta = { generatedAt: '', sources: [] };
+  var deals = [];
+  if (!data || typeof data !== 'object') return { meta: meta, deals: deals };
+  meta.generatedAt = data.generated_at || '';
+  meta.sources = Array.isArray(data.sources) ? data.sources : [];
+  var items = Array.isArray(data.items) ? data.items : [];
+  items.forEach(function (it) {
+    if (!it || !it.name) return;
+    var upc = it.upc ? String(it.upc) : '';
+    var slug = String(it.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'item';
+    var kind = it.price === '$0.01' ? 'penny' : 'deal';
+    deals.push({
+      id: 'w-' + (upc || (slug + '-' + (it.retailer || 'x'))),
+      kind: kind,
+      name: it.name,
+      upc: upc,
+      storeId: it.retailer || 'online',
+      source: it.source || 'weekly feed',
+      note: it.note || '',
+      price: it.price || '',
+      originalPrice: it.was || '',
+      saleStory: 'WEEKLY FEED',
+      dept: it.department || 'General',
+      confirmedOn: it.first_seen || '',
+      validTo: it.valid_to || '',
+      url: it.url || '',
+      sku: it.sku || ''
+    });
+  });
+  return { meta: meta, deals: deals };
+}
+
 /* ---------------- app state ---------------- */
 var state = {
   deals: [],
+  briefingDeals: [],
+  weeklyDeals: [],
   meta: { generatedAt: '', weekId: '', weekOf: '', headline: '' },
+  weeklyMeta: { generatedAt: '', sources: [] },
   loadError: '',
+  weeklyError: '',
   today: new Date().toISOString().slice(0, 10),
   watch: {},      // id -> deal snapshot
   ignored: {},    // id -> true
@@ -415,24 +456,52 @@ function renderBriefingBar() {
   var bar = $('briefingBar');
   var stale = $('staleBar');
   if (!bar) return;
-  if (state.loadError) {
+  if (state.loadError && !state.deals.length && !state.weeklyDeals.length) {
     bar.textContent = 'Couldn’t load the deal briefing: ' + state.loadError;
     return;
   }
   var m = state.meta;
   var gen = m.generatedAt ? m.generatedAt.slice(0, 10) : '';
   var age = gen ? daysSince(gen, state.today) : null;
+  var wgen = state.weeklyMeta.generatedAt ? state.weeklyMeta.generatedAt.slice(0, 10) : '';
+  var wage = wgen ? daysSince(wgen, state.today) : null;
+  var weeklyPart;
+  if (wgen) {
+    var when = wage === 0 ? 'today' : wage === 1 ? 'yesterday' : wage + ' days ago';
+    weeklyPart = 'Weekly feed: updated ' + wgen + ' (' + when + ') · ' + state.weeklyDeals.length + ' items';
+  } else if (state.weeklyError) {
+    weeklyPart = 'Weekly feed: not loaded (' + state.weeklyError + ')';
+  } else {
+    weeklyPart = 'Weekly feed: not loaded yet';
+  }
   bar.textContent = 'Briefing: week ' + (m.weekId || '—') + ' (' + (m.weekOf || '—') + ') · generated ' + (gen || 'unknown') +
-    ' · ' + state.deals.length + ' deals';
+    ' · ' + state.deals.length + ' deals — ' + weeklyPart;
   if (stale) {
     if (age !== null && age > 7) {
       stale.hidden = false;
-      stale.textContent = '⚠ This briefing is ' + age + ' days old — Penny Hunter hasn’t published a newer one. Penny lists rotate weekly, so treat these as leads, not this week’s list. Use the Lists & Sources tab for the current weekly lists.';
+      stale.textContent = '⚠ This briefing is ' + age + ' days old — Penny Hunter hasn’t published a newer one. Penny lists rotate weekly, so treat these as leads, not this week’s list.' +
+        (wgen ? ' The weekly feed above was updated ' + wgen + ' — use it first.' : ' Use the Lists & Sources tab for the current weekly lists.');
     } else {
       stale.hidden = true;
       stale.textContent = '';
     }
   }
+}
+function renderWeeklySources() {
+  var el = $('weeklySources');
+  if (!el) return;
+  var srcs = state.weeklyMeta.sources || [];
+  if (!srcs.length) {
+    el.innerHTML = '<li><span class="meta">Weekly feed not loaded yet — the scheduled job publishes it daily. See the links below.</span></li>';
+    return;
+  }
+  el.innerHTML = srcs.map(function (s) {
+    var status = s.status === 'ok' ? '✓ ' + s.item_count + ' item' + (s.item_count === 1 ? '' : 's')
+      : s.status === 'link-only' ? 'link only — ' + (s.note || 'open it manually')
+      : 'failed — ' + (s.note || s.status);
+    return '<li><strong>' + esc(s.name) + '</strong> — ' + esc(status) +
+      '<br><span class="meta"><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.url) + '</a></span></li>';
+  }).join('');
 }
 function renderNotif() {
   var btn = $('notifBtn');
@@ -506,25 +575,48 @@ function markSeenAndNotify(newIds) {
   }
   return fresh.length;
 }
+/* Weekly feed first (it is the fresh one): briefing deals whose UPC also
+ * appears in the weekly feed are dropped — the weekly copy is fresher. */
+function mergeFeeds() {
+  var weeklyUpcs = {};
+  (state.weeklyDeals || []).forEach(function (d) { if (d.upc) weeklyUpcs[d.upc] = true; });
+  var briefingDeals = (state.briefingDeals || []).filter(function (d) { return !(d.upc && weeklyUpcs[d.upc]); });
+  state.deals = (state.weeklyDeals || []).concat(briefingDeals);
+}
 function loadBriefing() {
   if (typeof fetch === 'undefined') {
     state.loadError = 'This browser can’t fetch the briefing (no fetch).';
     renderBriefingBar(); renderDeals();
     return Promise.resolve();
   }
-  return fetch(BRIEFING_URL, { cache: 'no-store' }).then(function (resp) {
+  var weeklyP = fetch(WEEKLY_URL, { cache: 'no-store' }).then(function (resp) {
+    if (!resp.ok) throw new Error('weekly feed returned HTTP ' + resp.status);
+    return resp.json();
+  }).then(function (data) {
+    var norm = normalizeWeekly(data);
+    state.weeklyMeta = norm.meta;
+    state.weeklyDeals = norm.deals;
+  }).catch(function (err) {
+    state.weeklyError = (err && err.message) ? err.message : 'network error';
+    state.weeklyMeta = { generatedAt: '', sources: [] };
+    state.weeklyDeals = [];
+  });
+  var briefingP = fetch(BRIEFING_URL, { cache: 'no-store' }).then(function (resp) {
     if (!resp.ok) throw new Error('briefing returned HTTP ' + resp.status);
     return resp.json();
   }).then(function (data) {
     var norm = normalizeBriefing(data);
     state.meta = norm.meta;
-    state.deals = norm.deals;
-    var fresh = markSeenAndNotify(state.deals.map(function (d) { return d.id; }));
-    renderBriefingBar(); renderFilters(); renderDeals(); renderWatchlist();
-    return fresh;
+    state.briefingDeals = norm.deals;
   }).catch(function (err) {
     state.loadError = (err && err.message) ? err.message : 'network error';
-    renderBriefingBar(); renderDeals();
+    state.briefingDeals = [];
+  });
+  return Promise.all([weeklyP, briefingP]).then(function () {
+    mergeFeeds();
+    var fresh = markSeenAndNotify(state.deals.map(function (d) { return d.id; }));
+    renderBriefingBar(); renderFilters(); renderDeals(); renderWatchlist(); renderWeeklySources();
+    return fresh;
   });
 }
 
@@ -599,7 +691,10 @@ if (typeof document !== 'undefined' && document.addEventListener) {
 if (typeof window !== 'undefined') {
   window.PennyAlerts = {
     BRIEFING_URL: BRIEFING_URL,
+    WEEKLY_URL: WEEKLY_URL,
     normalizeBriefing: normalizeBriefing,
+    normalizeWeekly: normalizeWeekly,
+    mergeFeeds: mergeFeeds,
     deriveDepartment: deriveDepartment,
     isExpired: isExpired,
     daysSince: daysSince,

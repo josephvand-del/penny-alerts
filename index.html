@@ -61,8 +61,12 @@
   </section>
 
   <section id="tab-lists" class="tab-panel" hidden>
+    <h2>Weekly feed — what the job found</h2>
+    <p class="hint">Parsed automatically every morning from the lists below. “Link only” means the page can’t be read by a script — open it yourself.</p>
+    <ul class="link-list" id="weeklySources"></ul>
+
     <h2>Weekly lists — the live sources</h2>
-    <p class="hint">These pages are the current lists. The app can’t read them automatically (they block cross-site reads), so open them here — they’re updated every week, usually Tuesday morning for Dollar General.</p>
+    <p class="hint">The job parses most of these every morning into the feed. Pages marked link-only can’t be read by a script — open them here. DG lists update every week, usually Tuesday morning.</p>
     <ul class="link-list" id="sourceLinks"></ul>
 
     <h2>What this app does NOT do</h2>
@@ -73,10 +77,9 @@
       <li>Alerts are checked when you open the app. A static site has no server to push to your phone while it’s closed.</li>
     </ul>
 
-    <h2>Planned for v2</h2>
+    <h2>Planned next</h2>
     <ul class="plain">
-      <li>True background push: push subscription stored in Supabase, a small sender that checks the briefing daily and pushes new deals. Needs a server piece — designed, not built.</li>
-      <li>Parsing the weekly DG lists into the feed automatically (needs a server or a scheduled job; a plain web page can’t fetch those pages).</li>
+      <li>True background push: push subscription stored in Supabase, a small sender that checks the feed daily and pushes new deals. Needs a server piece — designed, not built.</li>
       <li>Optional King Soopers auto price-check via Kroger’s free public API (needs a free Kroger developer account).</li>
     </ul>
   </section>

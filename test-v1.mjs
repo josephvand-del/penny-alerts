@@ -43,6 +43,8 @@ class StubEl {
 const realData = JSON.parse(fs.readFileSync('/tmp/ph-latest.json', 'utf8'));
 const lsMem = {};
 const notifCalls = [];
+const fetchCalls = [];
+let weeklyFixture = null;
 function NotificationStub(title, opts) { notifCalls.push({ title: title, opts: opts }); }
 NotificationStub.permission = 'granted';
 NotificationStub.requestPermission = async function () { return 'granted'; };
@@ -70,6 +72,11 @@ const sandbox = {
   navigator: {},
   Notification: NotificationStub,
   fetch: async function (url) {
+    fetchCalls.push(url);
+    if (url.indexOf('feed/weekly.json') !== -1) {
+      if (!weeklyFixture) throw new Error('weekly fixture not set');
+      return { ok: true, json: async function () { return weeklyFixture; } };
+    }
     if (url.indexOf('rocketshon.github.io') === -1) throw new Error('UNEXPECTED FETCH: ' + url);
     return { ok: true, json: async function () { return realData; } };
   },
@@ -113,28 +120,59 @@ const PA = sandbox.window.PennyAlerts;
   const noUpc = PA.checkLinks({ storeId: 'target', upc: '' });
   check('no-UPC item gets no checker link', noUpc.length, 0);
 
-  /* 5. full init() with stub DOM + stub fetch */
+  /* 5. weekly feed fixture: one dup of the first briefing penny (by UPC),
+   * one Home Depot penny (no UPC), one Slickdeals deal. Merged total is
+   * 1790 briefing - 2 sharing the fixture UPC (the penny + one deal) + 3
+   * weekly = 1791. */
+  weeklyFixture = {
+    generated_at: '2026-11-22T10:00:00+00:00',
+    sources: [
+      { name: 'Freebie Guy — DG penny list', url: 'https://THEFREEBIEGUY.COM/DOLLAR-GENERAL-PENNY-SHOPPING-MASTER-LIST/', status: 'ok', item_count: 1 },
+      { name: 'SavingK — Walmart hidden clearance', url: 'https://savingk.com/walmart-hidden-clearance-how-to-find-these-secret-deals/', status: 'link-only', item_count: 0, note: 'Guide page only' }
+    ],
+    items: [
+      { name: pennies[0].name, upc: pennies[0].upc, price: '$0.01', was: '', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', first_seen: '2026-11-22', valid_to: '', url: '' },
+      { name: 'Weekly Test HD Screw', upc: '', price: '$0.01', was: '$12.98', retailer: 'home-depot', department: 'Penny', source: 'pennyrecon.com', first_seen: '2026-11-22', valid_to: '', url: 'https://www.pennyrecon.com/item/123/' },
+      { name: 'Weekly Test Charger', upc: '', price: '$39.99', was: '', retailer: 'amazon', department: 'Electronics', source: 'slickdeals.net', first_seen: '2026-11-22', valid_to: '2026-11-22', url: '' }
+    ]
+  };
+  const wnorm = PA.normalizeWeekly(weeklyFixture);
+  check('weekly normalize count', wnorm.deals.length, 3);
+  check('weekly penny kind', wnorm.deals[0].kind, 'penny');
+  check('weekly deal kind', wnorm.deals[2].kind, 'deal');
+  check('weekly meta generatedAt', wnorm.meta.generatedAt, '2026-11-22T10:00:00+00:00');
+  check('weekly meta sources', wnorm.meta.sources.length, 2);
+
+  /* 6. full init() with stub DOM + stub fetch */
   domListeners['DOMContentLoaded']();
   await new Promise(function (r) { setTimeout(r, 200); });
   const st = PA._state;
-  check('state deals loaded', st.deals.length, 1790);
+  check('both feeds fetched', fetchCalls.length, 2);
+  check('weekly feed fetched', fetchCalls.some(function (u) { return u.indexOf('feed/weekly.json') !== -1; }), true);
+  check('state deals loaded (1790 briefing - 2 sharing fixture UPC + 3 weekly)', st.deals.length, 1791);
+  check('briefing dup dropped, weekly copy kept', st.deals.some(function (d) { return d.id === 'w-' + pennies[0].upc; }) && !st.deals.some(function (d) { return d.id === 'penny-' + pennies[0].upc; }), true);
+  check('weekly meta stored', st.weeklyMeta.generatedAt, '2026-11-22T10:00:00+00:00');
   check('briefing bar mentions week', els['briefingBar'].textContent.indexOf('2026-W40') !== -1, true);
+  check('briefing bar mentions weekly feed date', els['briefingBar'].textContent.indexOf('2026-11-22') !== -1, true);
+  check('weekly sources rendered', els['weeklySources'].innerHTML.indexOf('Freebie Guy') !== -1, true);
+  check('weekly sources show link-only', els['weeklySources'].innerHTML.indexOf('link only') !== -1, true);
   check('stale bar shown (briefing 50 days old)', els['staleBar'].hidden, false);
   check('stale bar mentions days old', els['staleBar'].textContent.indexOf('50 days old') !== -1, true);
+  check('stale bar mentions weekly feed', els['staleBar'].textContent.indexOf('weekly feed') !== -1, true);
   check('deal list rendered cards', (els['dealList'].innerHTML.match(/<article/g) || []).length > 0, true);
   check('retailer filter populated', els['retailerFilter'].options.length > 5, true);
   check('notification fired for new deals', notifCalls.length >= 1, true);
   check('notification title mentions new deals', /new deal/.test(notifCalls[0].title), true);
 
-  /* 6. filters: penny-only + ignore + expired */
+  /* 7. filters: penny-only + ignore + expired */
   st.filters.pennyOnly = true;
-  check('penny-only filter', PA._visibleDeals().length, 146);
+  check('penny-only filter', PA._visibleDeals().length, 147);
   st.filters.pennyOnly = false;
-  check('expired hidden by default', PA._visibleDeals().length, 146); // only penny items have no validTo
+  check('expired hidden by default', PA._visibleDeals().length, 148); // 145 briefing pennies + 3 weekly
   st.filters.showExpired = true;
-  check('show-expired reveals all', PA._visibleDeals().length, 1790);
+  check('show-expired reveals all', PA._visibleDeals().length, 1791);
   st.filters.showExpired = false;
-  const firstPenny = pennies[0].id;
+  const firstPenny = pennies[1].id; // pennies[0] was deduped out by the weekly fixture
   PA._handleAction('ignore', firstPenny);
   check('ignored item hidden', PA._visibleDeals().some(function (d) { return d.id === firstPenny; }), false);
   PA._handleAction('unignore', firstPenny);
@@ -146,7 +184,7 @@ const PA = sandbox.window.PennyAlerts;
   PA._handleAction('unignore', firstPenny);
   check('ignored list empty again', Object.keys(st.ignored).length, 0);
 
-  /* 7. stores data intact */
+  /* 8. stores data intact */
   check('store groups', PA.STORES.length, 4);
   check('walmart store count', PA.STORES[0].items.length, 6);
   check('target store count', PA.STORES[1].items.length, 5);
