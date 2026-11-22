@@ -1,0 +1,47 @@
+# Penny Alerts — weekly feed updater.
+#
+# HOW TO ADD IT (Joseph, on github.com — the GitHub App cannot push
+# workflow files, so this file is added by hand):
+#   1. In the penny-alerts repo, go to Actions → New workflow, or
+#      Add file → Create new file.
+#   2. Set the path to: .github/workflows/update-feed.yml
+#   3. Paste this whole file, then Commit directly to main.
+#   4. It runs daily at 6am ET. You can also run it on demand from the
+#      Actions tab → "Update weekly feed" → Run workflow.
+#
+# WHAT IT DOES: checks out the repo, installs the parser's Python deps,
+# runs scripts/parse-lists.py (reads the free community lists — never a
+# retailer site), and commits feed/weekly.json ONLY if it changed. No
+# push trigger, so it can never loop on its own commits.
+name: Update weekly feed
+
+on:
+  schedule:
+    # Daily 6am ET. GitHub cron is UTC: 11:00 UTC is 6am EST, 7am EDT.
+    # Close enough — the DG lists land Tuesday morning and the job
+    # re-runs daily anyway.
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-feed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+      - name: Parse weekly lists
+        run: python scripts/parse-lists.py
+      - name: Commit feed if changed
+        run: |
+          git config user.name "penny-alerts-bot"
+          git config user.email "penny-alerts-bot@users.noreply.github.com"
+          git add feed/weekly.json
+          git diff --cached --quiet || git commit -m "Weekly feed update $(date -u +%Y-%m-%d)"
+          git push
