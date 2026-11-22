@@ -18,6 +18,13 @@
  * pushes one summary message when the feed gains new items. Until the
  * migration + workflow + secrets are in place, alerts stay honestly
  * labelled: "checked when you open the app."
+ *
+ * v4: automatic deal photos. The parser records an `image` URL per item
+ * (list-page photos, Open Food Facts, optionally UPCitemdb — see
+ * scripts/parse-lists.py and README.md). Cards show a lazy thumbnail;
+ * items with no photo anywhere get a clean placeholder tile. The <img>
+ * URLs come from the feed only — the app makes no new fetch()/XHR to any
+ * retailer. A failed image hides itself and reveals the placeholder.
  */
 
 var BRIEFING_URL = 'https://rocketshon.github.io/penny-finder-backend/briefings/latest.json';
@@ -209,7 +216,8 @@ function normalizeBriefing(data) {
       saleStory: 'PENNY LIST',
       dept: 'Penny',
       confirmedOn: p.confirmed_on || '',
-      validTo: ''
+      validTo: '',
+      image: ''
     });
   });
   var items = Array.isArray(data.all_items) ? data.all_items : [];
@@ -228,7 +236,8 @@ function normalizeBriefing(data) {
       saleStory: it.sale_story || '',
       dept: 'General',
       confirmedOn: '',
-      validTo: it.valid_to || ''
+      validTo: it.valid_to || '',
+      image: it.image_url || ''
     };
     d.dept = deriveDepartment(d);
     deals.push(d);
@@ -265,7 +274,8 @@ function normalizeWeekly(data) {
       confirmedOn: it.first_seen || '',
       validTo: it.valid_to || '',
       url: it.url || '',
-      sku: it.sku || ''
+      sku: it.sku || '',
+      image: it.image || ''
     });
   });
   return { meta: meta, deals: deals };
@@ -367,6 +377,15 @@ function pushSupported() {
 
 /* ---------------- rendering ---------------- */
 function $(id) { return (typeof document !== 'undefined') ? document.getElementById(id) : null; }
+/* Deal photo (v4). The placeholder tile sits underneath the <img>; if the
+ * image fails to load, onerror removes it and the placeholder shows. The
+ * letter is the department initial — an honest "no photo" state, never a
+ * fabricated image. */
+function thumbHtml(d) {
+  var letter = ((d.dept || 'General').charAt(0) || 'P').toUpperCase();
+  var img = d.image ? '<img src="' + esc(d.image) + '" alt="" loading="lazy" onerror="this.remove()">' : '';
+  return '<div class="deal-thumb"><span class="deal-thumb-ph">' + esc(letter) + '</span>' + img + '</div>';
+}
 function dealCard(d) {
   var isW = !!state.watch[d.id];
   var links = checkLinks(d).map(function (l) {
@@ -379,7 +398,7 @@ function dealCard(d) {
   var upc = d.upc ? '<span class="meta">UPC ' + esc(d.upc) + '</span>' : '<span class="meta">no UPC in this listing</span>';
   var badge = isNew(d.id) ? '<span class="badge-new">NEW</span>' : '';
   var penny = d.kind === 'penny' ? '<span class="badge-penny">PENNY</span>' : '';
-  return '<article class="deal">' +
+  return '<article class="deal"><div class="deal-row">' + thumbHtml(d) + '<div class="deal-main">' +
     '<div class="deal-top">' + penny + badge + '<span class="retailer">' + esc(prettyStore(d.storeId)) + '</span>' +
     '<span class="dept">' + esc(d.dept) + '</span></div>' +
     '<h3>' + esc(d.name) + '</h3>' +
@@ -390,7 +409,7 @@ function dealCard(d) {
       '<button type="button" class="btn" data-action="watch" data-id="' + esc(d.id) + '">' + (isW ? '✓ Watching' : '＋ Watch') + '</button>' +
       '<button type="button" class="btn quiet" data-action="ignore" data-id="' + esc(d.id) + '">Don’t show again</button>' +
       links +
-    '</div></article>';
+    '</div></div></div></article>';
 }
 function renderDeals() {
   var el = $('dealList');
@@ -443,7 +462,7 @@ function watchCard(d) {
     return '<a class="btn small" href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>';
   }).join(' ');
   var badge = isNew(d.id) ? '<span class="badge-new">NEW</span>' : '';
-  return '<article class="deal">' +
+  return '<article class="deal"><div class="deal-row">' + thumbHtml(d) + '<div class="deal-main">' +
     '<div class="deal-top"><span class="retailer">' + esc(prettyStore(d.storeId)) + '</span>' +
     '<span class="dept">' + esc(d.dept) + '</span>' + badge + '</div>' +
     '<h3>' + esc(d.name) + '</h3>' +
@@ -457,7 +476,7 @@ function watchCard(d) {
       '<p class="hint">If the register rings full price or locks up, the deal isn’t real at this store. A manager can refuse a penny sale.</p></div>' +
     '<div class="deal-actions">' + links +
       '<button type="button" class="btn quiet" data-action="unwatch" data-id="' + esc(d.id) + '">Stop watching</button></div>' +
-    '</article>';
+    '</div></div></article>';
 }
 function renderWatchlist() {
   var el = $('watchList');
@@ -855,6 +874,7 @@ if (typeof window !== 'undefined') {
     daysSince: daysSince,
     prettyStore: prettyStore,
     checkLinks: checkLinks,
+    thumbHtml: thumbHtml,
     STORES: STORES,
     SOURCE_LINKS: SOURCE_LINKS,
     _state: state,

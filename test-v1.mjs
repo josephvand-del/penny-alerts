@@ -124,7 +124,8 @@ const PA = sandbox.window.PennyAlerts;
   check('no-UPC item gets no checker link', noUpc.length, 0);
 
   /* 5. weekly feed fixture: one dup of the first briefing penny (by UPC),
-   * one Home Depot penny (no UPC), one Slickdeals deal. Merged total is
+   * one Home Depot penny (no UPC, WITH a list image), one Slickdeals deal
+   * (no image). Merged total is
    * 1790 briefing - 2 sharing the fixture UPC (the penny + one deal) + 3
    * weekly = 1791. */
   weeklyFixture = {
@@ -134,9 +135,9 @@ const PA = sandbox.window.PennyAlerts;
       { name: 'SavingK — Walmart hidden clearance', url: 'https://savingk.com/walmart-hidden-clearance-how-to-find-these-secret-deals/', status: 'link-only', item_count: 0, note: 'Guide page only' }
     ],
     items: [
-      { name: pennies[0].name, upc: pennies[0].upc, price: '$0.01', was: '', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', first_seen: '2026-11-22', valid_to: '', url: '' },
-      { name: 'Weekly Test HD Screw', upc: '', price: '$0.01', was: '$12.98', retailer: 'home-depot', department: 'Penny', source: 'pennyrecon.com', first_seen: '2026-11-22', valid_to: '', url: 'https://www.pennyrecon.com/item/123/' },
-      { name: 'Weekly Test Charger', upc: '', price: '$39.99', was: '', retailer: 'amazon', department: 'Electronics', source: 'slickdeals.net', first_seen: '2026-11-22', valid_to: '2026-11-22', url: '' }
+      { name: pennies[0].name, upc: pennies[0].upc, price: '$0.01', was: '', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', first_seen: '2026-11-22', valid_to: '', url: '', image: '' },
+      { name: 'Weekly Test HD Screw', upc: '', price: '$0.01', was: '$12.98', retailer: 'home-depot', department: 'Penny', source: 'pennyrecon.com', first_seen: '2026-11-22', valid_to: '', url: 'https://www.pennyrecon.com/item/123/', image: 'https://images.thdstatic.com/productImages/test/svn/test-screw-64_600.jpg' },
+      { name: 'Weekly Test Charger', upc: '', price: '$39.99', was: '', retailer: 'amazon', department: 'Electronics', source: 'slickdeals.net', first_seen: '2026-11-22', valid_to: '2026-11-22', url: '', image: '' }
     ]
   };
   const wnorm = PA.normalizeWeekly(weeklyFixture);
@@ -145,6 +146,10 @@ const PA = sandbox.window.PennyAlerts;
   check('weekly deal kind', wnorm.deals[2].kind, 'deal');
   check('weekly meta generatedAt', wnorm.meta.generatedAt, '2026-11-22T10:00:00+00:00');
   check('weekly meta sources', wnorm.meta.sources.length, 2);
+  check('weekly normalize carries image', wnorm.deals[1].image, 'https://images.thdstatic.com/productImages/test/svn/test-screw-64_600.jpg');
+  check('weekly normalize empty image stays empty', wnorm.deals[2].image, '');
+  check('briefing normalize carries image_url', norm.deals.some(function (d) { return d.image && d.image.indexOf('f.wishabi.net') !== -1; }), true);
+  check('briefing penny items have no image', norm.deals.filter(function (d) { return d.kind === 'penny'; }).every(function (d) { return d.image === ''; }), true);
 
   /* 6. full init() with stub DOM + stub fetch */
   domListeners['DOMContentLoaded']();
@@ -218,7 +223,7 @@ const PA = sandbox.window.PennyAlerts;
   check('pushSupported false in stub env (no serviceWorker)', PA.pushSupported(), false);
   check('supabase URL is the shared bulk-finder project', PA.SUPABASE_URL, 'https://xwekulsnfarjibawqqih.supabase.co');
   const swText = fs.readFileSync('/home/hatch/workspace/penny-alerts/sw.js', 'utf8');
-  check('sw cache bumped to v3', swText.indexOf("penny-alerts-v3") !== -1, true);
+  check('sw cache bumped to v4', swText.indexOf("penny-alerts-v4") !== -1, true);
   check('sw has push handler', swText.indexOf("addEventListener('push'") !== -1, true);
   check('sw push shows a notification', swText.indexOf('showNotification') !== -1, true);
   check('sw has notificationclick handler', swText.indexOf("addEventListener('notificationclick'") !== -1, true);
@@ -226,12 +231,12 @@ const PA = sandbox.window.PennyAlerts;
 
   /* 10. sender dry-run with fixtures (real scripts/send-push.py) */
   const senderOld = { generated_at: '2026-11-22T10:00:00+00:00', sources: [], items: [
-    { name: 'Old Penny Item', upc: '012345678901', price: '$0.01', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', first_seen: '2026-11-21' },
-    { name: 'Old Named Deal', upc: '', price: '$5.00', retailer: 'amazon', department: 'General', source: 'slickdeals.net', first_seen: '2026-11-21' }
+    { name: 'Old Penny Item', upc: '012345678901', price: '$0.01', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', first_seen: '2026-11-21', image: '' },
+    { name: 'Old Named Deal', upc: '', price: '$5.00', retailer: 'amazon', department: 'General', source: 'slickdeals.net', first_seen: '2026-11-21', image: '' }
   ] };
   const senderNew = { generated_at: '2026-11-22T11:00:00+00:00', sources: [], items: senderOld.items.concat([
-    { name: 'New Penny Item', upc: '012345678902', price: '$0.01', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', first_seen: '2026-11-22' },
-    { name: 'Brand New Deal', upc: '', price: '$9.99', retailer: 'target', department: 'General', source: 'slickdeals.net', first_seen: '2026-11-22' }
+    { name: 'New Penny Item', upc: '012345678902', price: '$0.01', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', first_seen: '2026-11-22', image: 'https://images.openfoodfacts.org/images/products/test.jpg' },
+    { name: 'Brand New Deal', upc: '', price: '$9.99', retailer: 'target', department: 'General', source: 'slickdeals.net', first_seen: '2026-11-22', image: '' }
   ]) };
   fs.writeFileSync('/tmp/pa-sender-old.json', JSON.stringify(senderOld));
   fs.writeFileSync('/tmp/pa-sender-new.json', JSON.stringify(senderNew));
@@ -243,6 +248,56 @@ const PA = sandbox.window.PennyAlerts;
   check('sender dry-run sends nothing', dryOut.indexOf('dry run') !== -1, true);
   const drySame = execFileSync('python3', [senderPath, '--dry-run', '--feed', '/tmp/pa-sender-old.json', '--old-feed', '/tmp/pa-sender-old.json'], { encoding: 'utf8' });
   check('sender dry-run no new items', drySame.indexOf('no new items') !== -1, true);
+  /* Adding an image to an existing item is NOT a new item: the diff keys
+   * on UPC / name+retailer, never on the image field. */
+  const senderImgOnly = { generated_at: '2026-11-22T12:00:00+00:00', sources: [], items: [
+    { name: 'Old Penny Item', upc: '012345678901', price: '$0.01', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', first_seen: '2026-11-21', image: 'https://images.openfoodfacts.org/images/products/test.jpg' },
+    { name: 'Old Named Deal', upc: '', price: '$5.00', retailer: 'amazon', department: 'General', source: 'slickdeals.net', first_seen: '2026-11-21', image: '' }
+  ] };
+  fs.writeFileSync('/tmp/pa-sender-img.json', JSON.stringify(senderImgOnly));
+  const dryImg = execFileSync('python3', [senderPath, '--dry-run', '--feed', '/tmp/pa-sender-img.json', '--old-feed', '/tmp/pa-sender-old.json'], { encoding: 'utf8' });
+  check('sender: image-only change is not a new item', dryImg.indexOf('no new items') !== -1, true);
+
+  /* 11. deal photos (v4) */
+  const withImg = PA.thumbHtml({ dept: 'Penny', image: 'https://images.thdstatic.com/productImages/test/svn/test-screw-64_600.jpg' });
+  check('thumb with image renders lazy img', withImg.indexOf('<img src="https://images.thdstatic.com/productImages/test/svn/test-screw-64_600.jpg" alt="" loading="lazy"') !== -1, true);
+  check('thumb img has onerror fallback', withImg.indexOf('onerror="this.remove()"') !== -1, true);
+  const noImg = PA.thumbHtml({ dept: 'Penny', image: '' });
+  check('thumb without image renders placeholder', noImg.indexOf('deal-thumb-ph') !== -1, true);
+  check('thumb without image has no img tag', noImg.indexOf('<img') === -1, true);
+  check('thumb placeholder shows dept initial', noImg.indexOf('>P<') !== -1, true);
+  const dealHtml = els['dealList'].innerHTML;
+  check('rendered cards include the fixture HD image', dealHtml.indexOf('https://images.thdstatic.com/productImages/test/svn/test-screw-64_600.jpg') !== -1, true);
+  check('rendered cards use lazy loading', dealHtml.indexOf('loading="lazy"') !== -1, true);
+  check('rendered cards include placeholders', dealHtml.indexOf('deal-thumb-ph') !== -1, true);
+  /* Real feed (written by the parser run): every item carries an image
+   * field; every image is an absolute http(s) URL; no image points at a
+   * retailer store/checker domain. PennyRecon's photos live on Home
+   * Depot's image CDN (images.thdstatic.com) — the URL PennyRecon itself
+   * embeds, not a scraped retailer page — so thdstatic is allowed here
+   * and documented in README.md. */
+  const realWeekly = JSON.parse(fs.readFileSync('/home/hatch/workspace/penny-alerts/feed/weekly.json', 'utf8'));
+  check('real feed items all carry an image field', realWeekly.items.every(function (it) { return typeof it.image === 'string'; }), true);
+  const RETAILER_IMG_HOSTS = ['walmart.com', 'homedepot.com', 'target.com', 'dollargeneral.com', 'brickseek.com', 'amazon.com', 'ebay.com'];
+  const badImgs = realWeekly.items.filter(function (it) {
+    if (!it.image) return false;
+    if (!/^https?:\/\//.test(it.image)) return true;
+    const host = it.image.split('/')[2] || '';
+    return RETAILER_IMG_HOSTS.some(function (h) { return host === h || host.endsWith('.' + h); });
+  });
+  check('real feed has no retailer-store image domains', badImgs.length, 0);
+  const imgCount = realWeekly.items.filter(function (it) { return !!it.image; }).length;
+  console.log('COVERAGE real feed: ' + imgCount + '/' + realWeekly.items.length + ' items with images');
+  const bySrc = {};
+  realWeekly.items.forEach(function (it) {
+    bySrc[it.source] = bySrc[it.source] || { total: 0, img: 0 };
+    bySrc[it.source].total++;
+    if (it.image) bySrc[it.source].img++;
+  });
+  Object.keys(bySrc).sort().forEach(function (s) {
+    console.log('COVERAGE ' + s + ': ' + bySrc[s].img + '/' + bySrc[s].total);
+  });
+  check('real feed has some images', imgCount > 0, true);
 
   console.log(failures === 0 ? 'ALL PASS' : failures + ' FAILURES');
   process.exit(failures === 0 ? 0 : 1);

@@ -30,6 +30,79 @@ phone's home screen (it's a PWA).
   Until the one-time setup below is done, alerts are honestly labelled:
   **checked when you open the app.** Tap the button again to turn
   alerts off (the sender then prunes the dead subscription).
+- **Deal photos**: every home-page card shows a thumbnail of the item
+  (lazy-loaded). Items with no photo anywhere get a clean placeholder
+  tile with the department initial — never a fabricated image. See
+  "Deal photos — where they come from" below.
+
+## Deal photos — where they come from
+
+Photos are added at parse time, never by the app at runtime. The
+parser (`scripts/parse-lists.py`) records one `image` URL per item, in
+this priority order:
+
+1. **List-page photos** — captured from the item's own card/row:
+   RetailShout (every card carries a product photo) and PennyRecon
+   (every card carries a product photo). Freebie Guy, Krazy Coupon
+   Lady, PennyPinchinMom and FreeStuffFinder carry no per-item photos
+   (KCL and FreeStuffFinder embed one generic store photo above their
+   lists — the parser drops shared images like that on purpose).
+   Slickdeals frontpage RSS carries no thumbnails.
+2. **Previous-feed cache** — if a UPC already had a photo in the last
+   feed, it is reused and never looked up again.
+3. **Open Food Facts** (free, no key) — food/grocery UPCs only, looked
+   up at ~1/sec, capped at 150 UPCs per run (env
+   `OFF_LOOKUPS_PER_RUN`); candidates rotate daily so every UPC gets
+   a turn over successive runs.
+4. **UPCitemdb** — only if a paid key is set (see below).
+
+Coverage is partial by design — measured on the 2026-11-22 run
+(683 items): **280/683 (40%) have a photo**. Per source:
+PennyRecon 166/166, RetailShout 50/50, FreeStuffFinder 35/180,
+Krazy Coupon Lady 17/105, Freebie Guy 11/52, PennyPinchinMom 1/105,
+Slickdeals 0/25. The gaps are structural, not bugs: Slickdeals
+carries no thumbnails and no UPCs; the DG lists carry no per-item
+photos, so only their food UPCs get one (Open Food Facts is
+food-only — 64 of 442 UPCs matched); PennyPinchinMom's list is
+almost entirely non-food UPCs Open Food Facts doesn't know. The
+remaining 403 items show the placeholder tile.
+
+One honest note: PennyRecon's product photos live on Home Depot's
+image CDN (`images.thdstatic.com`) — that is the URL PennyRecon
+itself embeds on its own list pages, and the parser records exactly
+that URL. The app never fetches or scrapes any retailer site: it makes
+no `fetch()`/XHR call to any retailer domain, and the `<img>` tags
+only load URLs already recorded in the feed. The only hosts images
+come from are the list authors' own hosts (retailshout.com),
+`images.thdstatic.com` (via PennyRecon), `images.openfoodfacts.org`,
+and `f.wishabi.net` (Penny Hunter's briefing images).
+
+### Optional: UPCitemdb (paid, $99/mo — almost certainly not worth it)
+
+UPCitemdb's free tier is keyless (100 lookups/day on the trial
+endpoint) — but that budget is per IP, and from shared IPs (this VM,
+GitHub Actions runners) it answers `429 EXCEED_LIMIT` with 0
+remaining on the very first call (verified live 2026-11-22). So the
+only working UPCitemdb path is the paid DEV plan ($99/mo, 20,000
+lookups/day). Open Food Facts + the list photos cover most items
+already, so this is an optional upgrade, not a requirement. If you
+ever want it: sign up for DEV at upcitemdb.com, copy the `user_key`
+(and the `key_type` shown next to it — DEV keys use `3`), add a
+GitHub Secret named `UPCITEMDB_KEY` (and `UPCITEMDB_KEY_TYPE` only
+if the dashboard shows a different value), and add this env line to
+the workflow file's "Parse weekly lists" step
+(`.github/workflows/update-feed.yml`, edited on github.com):
+
+```yaml
+      - name: Parse weekly lists
+        env:
+          UPCITEMDB_KEY: ${{ secrets.UPCITEMDB_KEY }}
+        run: python scripts/parse-lists.py
+```
+
+The parser caps UPCitemdb at 30 lookups per run (env
+`UPCITEMDB_LOOKUPS_PER_RUN`) and stops on a 429, so a bad key or an
+exhausted quota can never fail the feed job.
 
 ## Background push — how it works + one-time setup
 
@@ -121,7 +194,7 @@ previous good items; the Lists & Sources tab shows each source's status.
 ## Files
 
 `index.html`, `app.js`, `styles.css`, `manifest.json`, `sw.js`
-(service-worker cache `penny-alerts-v3`), `icon.svg`, `README.md`,
+(service-worker cache `penny-alerts-v4`), `icon.svg`, `README.md`,
 `scripts/parse-lists.py` + `scripts/send-push.py` +
 `scripts/requirements.txt` (the weekly-feed parser and the push sender),
 `feed/weekly.json` (generated daily by the parser; committed when it

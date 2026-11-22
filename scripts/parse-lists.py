@@ -23,12 +23,15 @@ and the script exits 1 so a bad run never wipes a good feed.
 
 from __future__ import annotations
 
+import hashlib
 import html
 import json
 import os
 import re
 import sys
+import time
 from datetime import datetime, timezone
+from urllib.parse import urljoin
 
 import feedparser
 import httpx
@@ -106,7 +109,7 @@ def department_for(name: str, kind: str) -> str:
 
 
 def make_item(name, retailer, source, kind="deal", upc="", price="", was="",
-              valid_to="", url=""):
+              valid_to="", url="", image=""):
     name = clean(name)[:140] or "Unknown item"
     return {
         "name": name,
@@ -119,7 +122,43 @@ def make_item(name, retailer, source, kind="deal", upc="", price="", was="",
         "first_seen": today_str(),
         "valid_to": valid_to,
         "url": url,
+        "image": image,
     }
+
+
+def clean_image_url(url: str, base_url: str = "") -> str:
+    """Validate a candidate image URL: absolute http(s) only, no data: URIs,
+    no empty values, sane length. Resolves relative URLs against the page."""
+    url = (url or "").strip()
+    if not url or url.startswith("data:"):
+        return ""
+    if base_url:
+        url = urljoin(base_url, url)
+    if not url.startswith(("http://", "https://")) or len(url) > 500:
+        return ""
+    return url
+
+
+def nearest_image(el, base_url: str = "") -> str:
+    """First <img> in the element itself, else in ancestors up to 3 levels.
+    Returns a validated absolute URL or ''. A shared page/header image is
+    caught later by the shared-image guard, not here."""
+    node = el
+    for _ in range(4):
+        if node is None:
+            break
+        try:
+            for img in node.css("img"):
+                attrs = img.attributes or {}
+                src = (attrs.get("src") or attrs.get("data-src")
+                       or attrs.get("data-lazy-src") or "")
+                url = clean_image_url(src, base_url)
+                if url:
+                    return url
+        except Exception:
+            pass
+        node = getattr(node, "parent", None)
+    return ""
 
 
 def safe_get(client: httpx.Client, url: str, timeout: float = 25.0):
@@ -137,8 +176,9 @@ def safe_get(client: httpx.Client, url: str, timeout: float = 25.0):
 
 
 # ---------------------------------------------------------------- penny pages
-def extract_upc_lines(html_text: str, retailer: str, source: str):
-    """Penny Hunter penny_pages.py approach: UPC-line regex over list text."""
+def extract_upc_lines(html_text: str, retailer: str, source: str, base_url: str = ""):
+    """Penny Hunter penny_pages.py approach: UPC-line regex over list text.
+    Also captures a nearby <img> per item when the markup has one."""
     tree = HTMLParser(html_text)
     seen = set()
     items = []
@@ -157,7 +197,8 @@ def extract_upc_lines(html_text: str, retailer: str, source: str):
             continue
         seen.add(upc)
         items.append(make_item(item, retailer, source, kind="penny",
-                               upc=upc, price="$0.01"))
+                               upc=upc, price="$0.01",
+                               image=nearest_image(el, base_url)))
     return items
 
 
@@ -178,8 +219,17 @@ def parse_retailshout(html_text: str):
         date_el = card.css_first("p.dg-penny-date")
         name = clean(name_el.text()) if name_el else "Dollar General penny item"
         note = clean(date_el.text()) if date_el else ""
+        # Each card carries its own product photo (webp on retailshout.com).
+        img = ""
+        img_el = card.css_first("img")
+        if img_el is not None:
+            attrs = img_el.attributes or {}
+            img = clean_image_url(
+                attrs.get("src") or attrs.get("data-src")
+                or attrs.get("data-lazy-src") or "",
+                "https://retailshout.com/")
         it = make_item(name, "dollar-general", "retailshout.com",
-                       kind="penny", upc=upc, price="$0.01")
+                       kind="penny", upc=upc, price="$0.01", image=img)
         if note:
             it["note"] = note
         items.append(it)
@@ -238,9 +288,12 @@ def parse_pennyrecon(html_text: str):
             continue
         # Walk up to THIS card (div.card-body) and read its own SKU/price —
         # never the page-level text, which mixes every card together.
+        # The card also carries its own product photo (Home Depot's image
+        # CDN, images.thdstatic.com — the URL PennyRecon itself embeds).
         node = card_link
         sku = ""
         retail = ""
+        img = ""
         for _ in range(4):
             node = node.parent
             if node is None:
@@ -257,10 +310,25 @@ def parse_pennyrecon(html_text: str):
                 if span is not None:
                     m = re.search(r"\$([\d,]+\.\d{2})", span.text() or "")
                     retail = ("$" + m.group(1)) if m else ""
+                # The photo is a sibling of card-body, inside the
+                # <article class="card ..."> wrapper — look at the card
+                # node's parent first, then fall back to the node itself.
+                img_el = None
+                parent = getattr(node, "parent", None)
+                if parent is not None and hasattr(parent, "css_first"):
+                    img_el = parent.css_first("img")
+                if img_el is None:
+                    img_el = node.css_first("img") if hasattr(node, "css_first") else None
+                if img_el is not None:
+                    attrs = img_el.attributes or {}
+                    img = clean_image_url(
+                        attrs.get("src") or attrs.get("data-src")
+                        or attrs.get("data-lazy-src") or "",
+                        "https://www.pennyrecon.com/")
                 break
         it = make_item(name, "home-depot", "pennyrecon.com",
                        kind="penny", upc="", price="$0.01",
-                       was=retail, url=url)
+                       was=retail, url=url, image=img)
         if sku:
             it["sku"] = sku
         items.append(it)
@@ -431,10 +499,120 @@ def parse_slickdeals(raw: str):
         link = (getattr(entry, "link", "") or "").split("?")[0]
         store_id = _retailer_for(title, summary)
         cur, orig = _extract_price(title, summary)
+        # Slickdeals frontpage RSS carries no media thumbnails (verified
+        # 2026-11-22) — this is defensive only.
+        thumb = ""
+        media = getattr(entry, "media_thumbnail", None) or []
+        if media:
+            thumb = clean_image_url((media[0] or {}).get("url", ""))
         items.append(make_item(title, store_id, "slickdeals.net",
                                kind="deal", upc="", price=cur, was=orig,
-                               valid_to=today, url=link))
+                               valid_to=today, url=link, image=thumb))
     return items
+
+
+# ----------------------------------------------------------------- images
+# Image enrichment for items whose list page carries no photo.
+# Priority per item: list-page photo > previous-feed cache > Open Food Facts
+# > UPCitemdb (paid key only). The previous feed is the image cache — no
+# new committed files, and a UPC is looked up at most once per rotation.
+OFF_BASE = "https://world.openfoodfacts.org/api/v2/product/"
+OFF_UA = "PennyAlerts/0.1"
+UPCDB_PAID = "https://api.upcitemdb.com/prod/v1/lookup"
+
+
+def load_image_cache() -> dict:
+    """UPC -> image URL from the previous feed/weekly.json (if any)."""
+    cache = {}
+    try:
+        with open(OUT_PATH, encoding="utf-8") as f:
+            prev = json.load(f)
+        for it in prev.get("items", []) or []:
+            if it.get("upc") and it.get("image"):
+                cache.setdefault(it["upc"], it["image"])
+    except Exception:
+        pass
+    return cache
+
+
+def rotate_candidates(upcs, today: str):
+    """Deterministic per-day rotation so every imageless UPC gets a fair
+    shot at the lookup caps over successive runs, instead of the same
+    misses blocking the front of the queue every day."""
+    return sorted(upcs, key=lambda u: hashlib.md5((u + today).encode()).hexdigest())
+
+
+def off_image(client: httpx.Client, upc: str) -> str:
+    """Open Food Facts (free, no key, food/grocery only). Returns an image
+    URL or ''. Never raises."""
+    try:
+        resp = client.get(OFF_BASE + upc + ".json", timeout=15.0,
+                          headers={"User-Agent": OFF_UA})
+    except httpx.HTTPError:
+        return ""
+    if resp.status_code != 200:
+        return ""
+    try:
+        data = resp.json()
+    except Exception:
+        return ""
+    if data.get("status") != 1:
+        return ""
+    img = ((data.get("product") or {}).get("image_url") or "").strip()
+    return clean_image_url(img, OFF_BASE)
+
+
+def upcdb_image(client: httpx.Client, upc: str, key: str):
+    """UPCitemdb paid endpoint. Returns (image_url_or_'', rate_limited).
+    Only called when UPCITEMDB_KEY is set. The keyless trial endpoint is
+    NOT used: it is 100/day per IP and returns 429 EXCEED_LIMIT with 0
+    remaining from shared IPs (this VM and GitHub Actions runners) —
+    verified live 2026-11-22. key_type comes from the UPCitemdb account
+    page (DEV keys use 3); override with UPCITEMDB_KEY_TYPE if it shows
+    a different value."""
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "user_key": key,
+        "key_type": os.environ.get("UPCITEMDB_KEY_TYPE", "3"),
+    }
+    try:
+        resp = client.get(UPCDB_PAID, params={"upc": upc}, headers=headers,
+                          timeout=20.0)
+    except httpx.HTTPError:
+        return "", False
+    if resp.status_code == 429:
+        return "", True
+    if resp.status_code != 200:
+        return "", False
+    try:
+        data = resp.json()
+    except Exception:
+        return "", False
+    items = data.get("items") or []
+    if not items:
+        return "", False
+    imgs = items[0].get("images") or []
+    return (clean_image_url(imgs[0], UPCDB_PAID) if imgs else ""), False
+
+
+def drop_shared_images(deduped):
+    """A URL covering >50% of one source's items (and >=5 items) is a page
+    header/section photo, not a product photo — drop it for that source.
+    (Krazy Coupon Lady and FreeStuffFinder both embed one generic Dollar
+    General store photo above their lists; verified 2026-11-22.)"""
+    from collections import Counter
+    per_source = {}
+    for it in deduped:
+        if it.get("image"):
+            per_source.setdefault(it["source"], Counter())[it["image"]] += 1
+    for src, counts in per_source.items():
+        total = sum(1 for it in deduped if it["source"] == src)
+        for url, n in counts.items():
+            if n >= 5 and n > total / 2:
+                for it in deduped:
+                    if it["source"] == src and it.get("image") == url:
+                        it["image"] = ""
 
 
 # ------------------------------------------------------------------- sources
@@ -486,15 +664,15 @@ def run_source(client: httpx.Client, key: str, name: str, url: str, kind: str):
             return [], {"name": name, "url": url, "status": status,
                         "item_count": 0, "note": err or "fetch failed"}
         if key == "freebie-guy-dg":
-            items = extract_upc_lines(body, "dollar-general", "thefreebieguy.com")
+            items = extract_upc_lines(body, "dollar-general", "thefreebieguy.com", url)
         elif key == "retailshout-dg":
             items = parse_retailshout(body)
         elif key == "kcl-dg":
-            items = extract_upc_lines(body, "dollar-general", "krazycouponlady.com")
+            items = extract_upc_lines(body, "dollar-general", "krazycouponlady.com", url)
         elif key == "pennypinchinmom-dg":
             items = parse_ppm_table(body)
         elif key == "freestufffinder-dg":
-            items = extract_upc_lines(body, "dollar-general", "freestufffinder.com")
+            items = extract_upc_lines(body, "dollar-general", "freestufffinder.com", url)
         elif key == "slickdeals":
             items = parse_slickdeals(body)
         elif key == "pennyrecon-hd":
@@ -526,21 +704,99 @@ def main() -> int:
                   + (f" — {status['note']}" if status.get("note") else ""))
 
         # Dedupe: by UPC first (keep the first source's copy), else name+retailer.
-        seen_upc = set()
-        seen_name = set()
+        # A later copy replaces an earlier one when it has a photo and the
+        # earlier one does not — the photo is the more useful copy. Item
+        # identity (UPC, else name+retailer) never changes, so the push
+        # sender's diff is unaffected by the image field.
+        seen_upc = {}
+        seen_name = {}
         deduped = []
         for it in all_items:
             if it["upc"]:
-                if it["upc"] in seen_upc:
-                    continue
-                seen_upc.add(it["upc"])
+                idx = seen_upc.get(it["upc"])
+                if idx is None:
+                    seen_upc[it["upc"]] = len(deduped)
+                    deduped.append(it)
+                elif it.get("image") and not deduped[idx].get("image"):
+                    it["first_seen"] = min(it["first_seen"], deduped[idx]["first_seen"])
+                    deduped[idx] = it
             else:
                 k = (it["name"].lower(), it["retailer"])
-                if k in seen_name:
-                    continue
-                seen_name.add(k)
-            deduped.append(it)
+                idx = seen_name.get(k)
+                if idx is None:
+                    seen_name[k] = len(deduped)
+                    deduped.append(it)
+                elif it.get("image") and not deduped[idx].get("image"):
+                    it["first_seen"] = min(it["first_seen"], deduped[idx]["first_seen"])
+                    deduped[idx] = it
         deduped.sort(key=lambda d: (d["retailer"], d["name"].lower()))
+
+        # Shared decorative images (page header photos) are not product
+        # photos — drop them before enrichment.
+        drop_shared_images(deduped)
+
+        # Image cache: the previous feed, read before this run overwrites it.
+        cache = load_image_cache()
+        for it in deduped:
+            if not it.get("image") and it.get("upc") and it["upc"] in cache:
+                it["image"] = cache[it["upc"]]
+
+        # Open Food Facts enrichment (free, no key) for UPCs still imageless.
+        today = today_str()
+        off_cap = int(os.environ.get("OFF_LOOKUPS_PER_RUN", "150"))
+        need = sorted({it["upc"] for it in deduped
+                       if it.get("upc") and not it.get("image")})
+        need = rotate_candidates(need, today)[:off_cap]
+        off_hits = 0
+        for i, upc in enumerate(need):
+            img = off_image(client, upc)
+            if img:
+                off_hits += 1
+                for it in deduped:
+                    if it.get("upc") == upc and not it.get("image"):
+                        it["image"] = img
+            if i < len(need) - 1:
+                time.sleep(1.0)
+        print(f"openfoodfacts: {off_hits}/{len(need)} UPCs got an image")
+
+        # UPCitemdb enrichment, paid key only. Without a key this is skipped
+        # entirely (the keyless trial is unusable from shared IPs — see
+        # upcdb_image). The optional step is in README.md.
+        key = os.environ.get("UPCITEMDB_KEY", "")
+        if key:
+            cap = int(os.environ.get("UPCITEMDB_LOOKUPS_PER_RUN", "30"))
+            need2 = rotate_candidates(sorted(
+                {it["upc"] for it in deduped
+                 if it.get("upc") and not it.get("image")}), today)[:cap]
+            hits = 0
+            stopped = False
+            for i, upc in enumerate(need2):
+                img, limited = upcdb_image(client, upc, key)
+                if limited:
+                    print("upcitemdb: rate-limited, stopping lookups for this run")
+                    stopped = True
+                    break
+                if img:
+                    hits += 1
+                    for it in deduped:
+                        if it.get("upc") == upc and not it.get("image"):
+                            it["image"] = img
+                if i < len(need2) - 1:
+                    time.sleep(2.1)
+            print(f"upcitemdb: {hits}/{len(need2)} UPCs got an image"
+                  + (" (stopped early)" if stopped else ""))
+        else:
+            print("upcitemdb: skipped (no UPCITEMDB_KEY)")
+
+        # Coverage report — the honest numbers for this run.
+        total = len(deduped)
+        with_img = sum(1 for it in deduped if it.get("image"))
+        print(f"images: {with_img}/{total} items "
+              f"({(100 * with_img // total) if total else 0}%)")
+        for src in sorted({it["source"] for it in deduped}):
+            s_items = [it for it in deduped if it["source"] == src]
+            s_img = sum(1 for it in s_items if it.get("image"))
+            print(f"  {src:22} {s_img}/{len(s_items)}")
 
         feed = {
             "generated_at": utc_now_iso(),
