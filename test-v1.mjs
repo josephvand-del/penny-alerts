@@ -4,6 +4,7 @@
 'use strict';
 import fs from 'fs';
 import vm from 'vm';
+import { execFileSync } from 'child_process';
 
 let failures = 0;
 function check(label, actual, expected) {
@@ -56,6 +57,8 @@ const sandbox = {
   setTimeout: setTimeout,
   Promise: Promise,
   JSON: JSON,
+  atob: atob,
+  btoa: btoa,
   document: {
     getElementById: function (id) {
       if (!els[id]) els[id] = new StubEl('div');
@@ -191,6 +194,55 @@ const PA = sandbox.window.PennyAlerts;
   check('DG closed store flagged', PA.STORES[2].items[0].closed, true);
   check('DG active count', PA.STORES[2].items.filter(function (s) { return !s.closed; }).length, 2);
   check('home depot count', PA.STORES[3].items.length, 5);
+
+  /* 9. background push (v3) */
+  check('VAPID public key present', typeof PA.VAPID_PUBLIC_KEY, 'string');
+  check('VAPID public key length (65-byte point, base64url)', PA.VAPID_PUBLIC_KEY.length, 87);
+  check('VAPID public key is base64url', /^[A-Za-z0-9_-]+$/.test(PA.VAPID_PUBLIC_KEY), true);
+  const keyBytes = PA.urlBase64ToUint8Array(PA.VAPID_PUBLIC_KEY);
+  check('VAPID public key decodes to 65 bytes', keyBytes.length, 65);
+  check('VAPID public key is an uncompressed point (0x04)', keyBytes[0], 4);
+  check('urlBase64ToUint8Array handles unpadded input', PA.urlBase64ToUint8Array('BAECAw').join(','), '4,1,2,3');
+  const fakeSub = {
+    endpoint: 'https://fcm.googleapis.com/fcm/send/test-endpoint',
+    getKey: function (name) {
+      if (name === 'p256dh') return new Uint8Array([4, 1, 2, 3]).buffer;
+      if (name === 'auth') return new Uint8Array([9, 8, 7]).buffer;
+      return null;
+    }
+  };
+  const subBody = PA.buildSubscriptionBody(fakeSub);
+  check('subscription body endpoint', subBody.endpoint, 'https://fcm.googleapis.com/fcm/send/test-endpoint');
+  check('subscription body p256dh base64url', subBody.p256dh, 'BAECAw');
+  check('subscription body auth base64url', subBody.auth, 'CQgH');
+  check('pushSupported false in stub env (no serviceWorker)', PA.pushSupported(), false);
+  check('supabase URL is the shared bulk-finder project', PA.SUPABASE_URL, 'https://xwekulsnfarjibawqqih.supabase.co');
+  const swText = fs.readFileSync('/home/hatch/workspace/penny-alerts/sw.js', 'utf8');
+  check('sw cache bumped to v3', swText.indexOf("penny-alerts-v3") !== -1, true);
+  check('sw has push handler', swText.indexOf("addEventListener('push'") !== -1, true);
+  check('sw push shows a notification', swText.indexOf('showNotification') !== -1, true);
+  check('sw has notificationclick handler', swText.indexOf("addEventListener('notificationclick'") !== -1, true);
+  check('app.js has no VAPID private key', fs.readFileSync('/home/hatch/workspace/penny-alerts/app.js', 'utf8').indexOf('VAPID_PRIVATE_KEY') === -1, true);
+
+  /* 10. sender dry-run with fixtures (real scripts/send-push.py) */
+  const senderOld = { generated_at: '2026-11-22T10:00:00+00:00', sources: [], items: [
+    { name: 'Old Penny Item', upc: '012345678901', price: '$0.01', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', first_seen: '2026-11-21' },
+    { name: 'Old Named Deal', upc: '', price: '$5.00', retailer: 'amazon', department: 'General', source: 'slickdeals.net', first_seen: '2026-11-21' }
+  ] };
+  const senderNew = { generated_at: '2026-11-22T11:00:00+00:00', sources: [], items: senderOld.items.concat([
+    { name: 'New Penny Item', upc: '012345678902', price: '$0.01', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', first_seen: '2026-11-22' },
+    { name: 'Brand New Deal', upc: '', price: '$9.99', retailer: 'target', department: 'General', source: 'slickdeals.net', first_seen: '2026-11-22' }
+  ]) };
+  fs.writeFileSync('/tmp/pa-sender-old.json', JSON.stringify(senderOld));
+  fs.writeFileSync('/tmp/pa-sender-new.json', JSON.stringify(senderNew));
+  const senderPath = '/home/hatch/workspace/penny-alerts/scripts/send-push.py';
+  const dryOut = execFileSync('python3', [senderPath, '--dry-run', '--feed', '/tmp/pa-sender-new.json', '--old-feed', '/tmp/pa-sender-old.json'], { encoding: 'utf8' });
+  check('sender dry-run counts new items', dryOut.indexOf('2 new item(s)') !== -1, true);
+  check('sender dry-run penny title', dryOut.indexOf('1 new penny deal') !== -1, true);
+  check('sender dry-run names new penny', dryOut.indexOf('New Penny Item') !== -1, true);
+  check('sender dry-run sends nothing', dryOut.indexOf('dry run') !== -1, true);
+  const drySame = execFileSync('python3', [senderPath, '--dry-run', '--feed', '/tmp/pa-sender-old.json', '--old-feed', '/tmp/pa-sender-old.json'], { encoding: 'utf8' });
+  check('sender dry-run no new items', drySame.indexOf('no new items') !== -1, true);
 
   console.log(failures === 0 ? 'ALL PASS' : failures + ' FAILURES');
   process.exit(failures === 0 ? 0 : 1);

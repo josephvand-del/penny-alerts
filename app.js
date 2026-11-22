@@ -5,16 +5,33 @@
  * fetches walmart.com, brickseek.com, or any retailer endpoint. Check
  * links below are plain <a> links the USER taps; the user does the check.
  *
- * v2 (this version): the weekly feed — scripts/parse-lists.py runs daily
- * (GitHub Actions, workflow file added by Joseph on github.com) and writes
- * feed/weekly.json, which the app reads alongside the briefing. Parsing
- * reuses Penny Hunter's approach (MIT). True background push is still a
- * v2-design item: a static Pages site cannot push to a closed phone, so
- * v1/v2 alerts stay honestly labelled: "checked when you open the app."
+ * v2: the weekly feed — scripts/parse-lists.py runs daily (GitHub Actions,
+ * workflow file added by Joseph on github.com) and writes feed/weekly.json,
+ * which the app reads alongside the briefing. Parsing reuses Penny
+ * Hunter's approach (MIT).
+ *
+ * v3 (this version): true background push. "Enable alerts" subscribes this
+ * phone via the Web Push API (VAPID public key below — public, safe to
+ * commit) and stores the subscription in Supabase (push_subscriptions
+ * table; migration in supabase/migrations/, run by Joseph in the
+ * dashboard). scripts/send-push.py runs in the same daily workflow and
+ * pushes one summary message when the feed gains new items. Until the
+ * migration + workflow + secrets are in place, alerts stay honestly
+ * labelled: "checked when you open the app."
  */
 
 var BRIEFING_URL = 'https://rocketshon.github.io/penny-finder-backend/briefings/latest.json';
 var WEEKLY_URL = 'feed/weekly.json';
+
+/* Background push (v3). The VAPID public key and the Supabase publishable
+ * key are public by design and safe to commit. The VAPID *private* key and
+ * the service_role key are NEVER in this repo — they live in GitHub Secrets
+ * for the sender script. Supabase project is the shared "bulk finder"
+ * project (free tier is at its 2-project limit, so no new project). */
+var APP_URL = 'https://josephvand-del.github.io/penny-alerts/';
+var SUPABASE_URL = 'https://xwekulsnfarjibawqqih.supabase.co';
+var SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_EIBE-riBIT2UCrfP0X0HmA_gUSRTGpD';
+var VAPID_PUBLIC_KEY = 'BKrLIraB-gkEEseuViMkpmgA5SuJylbJ0xOIJvaHcezUVqUNI72pFYnBNnjNMVeV404-JvKUuG3xeLSYycDvefY';
 
 /* Friendly retailer names for store_ids found in the briefing. */
 var STORE_NAMES = {
@@ -126,7 +143,7 @@ var store = {
     memStore[key] = val;
   }
 };
-var LS = { watch: 'pa:watch', ignored: 'pa:ignored', seen: 'pa:seen', checks: 'pa:checks' };
+var LS = { watch: 'pa:watch', ignored: 'pa:ignored', seen: 'pa:seen', checks: 'pa:checks', push: 'pa:push' };
 
 /* ---------------- pure helpers (tested) ---------------- */
 function esc(s) {
@@ -311,6 +328,41 @@ function checkLinks(deal) {
     out.push({ label: 'Open walmart.com (search the UPC there)', url: 'https://www.walmart.com/' });
   }
   return out;
+}
+
+/* ---------------- background push (v3) ---------------- */
+function b64encode(bin) {
+  if (typeof btoa !== 'undefined') return btoa(bin);
+  if (typeof Buffer !== 'undefined') return Buffer.from(bin, 'binary').toString('base64');
+  return '';
+}
+function b64decode(b64) {
+  if (typeof atob !== 'undefined') return atob(b64);
+  if (typeof Buffer !== 'undefined') return Buffer.from(b64, 'base64').toString('binary');
+  return '';
+}
+function urlBase64ToUint8Array(base64String) {
+  var padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  var raw = b64decode(base64);
+  var out = new Uint8Array(raw.length);
+  for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+/* Map a PushSubscription to the row stored in Supabase. Keys are base64url. */
+function buildSubscriptionBody(sub) {
+  function key(name) {
+    var k = sub.getKey ? sub.getKey(name) : null;
+    if (!k) return '';
+    var bytes = new Uint8Array(k);
+    var bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return b64encode(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  return { endpoint: sub.endpoint, p256dh: key('p256dh'), auth: key('auth') };
+}
+function pushSupported() {
+  return (typeof window !== 'undefined') && ('serviceWorker' in navigator) && ('PushManager' in window) && (typeof Notification !== 'undefined');
 }
 
 /* ---------------- rendering ---------------- */
@@ -503,27 +555,119 @@ function renderWeeklySources() {
       '<br><span class="meta"><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.url) + '</a></span></li>';
   }).join('');
 }
-function renderNotif() {
+/* Push state lives in localStorage ('pa:push' = 'on' when subscribed) and
+ * is confirmed against the browser's real subscription on load. */
+function setNotifUI(mode, text) {
   var btn = $('notifBtn');
   var st = $('notifState');
   if (!btn || !st) return;
-  var supported = (typeof Notification !== 'undefined');
-  if (!supported) {
+  if (mode === 'on') {
+    btn.textContent = '🔔 Alerts on — tap to turn off';
+    btn.disabled = false;
+    st.textContent = text || 'On. New deals push to this phone, even when the app is closed.';
+  } else if (mode === 'off') {
+    btn.textContent = '🔔 Enable alerts';
+    btn.disabled = false;
+    st.textContent = text || 'Tap “Enable alerts” — new deals will push to this phone.';
+  } else {
+    btn.textContent = '🔔 Enable alerts';
     btn.disabled = true;
-    st.textContent = 'This browser doesn’t support notifications. Alerts are checked when you open the app.';
+    st.textContent = text;
+  }
+}
+function renderNotif() {
+  if (typeof Notification === 'undefined') {
+    setNotifUI('disabled', 'This browser doesn’t support notifications. Alerts are checked when you open the app.');
     return;
   }
-  if (Notification.permission === 'granted') {
-    btn.textContent = '🔔 Alerts on';
-    btn.disabled = true;
-    st.textContent = 'On. New deals alert you when you open the app. (Background push while the app is closed is a v2 feature — a static site has no server to send it.)';
-  } else if (Notification.permission === 'denied') {
-    btn.disabled = true;
-    st.textContent = 'Notifications are blocked for this site in your browser settings. Alerts are checked when you open the app.';
-  } else {
-    btn.disabled = false;
-    st.textContent = 'Tap “Enable alerts” and new deals will pop up when you open the app.';
+  if (Notification.permission === 'denied') {
+    setNotifUI('disabled', 'Notifications are blocked for this site in your browser settings. Alerts are checked when you open the app.');
+    return;
   }
+  if (!pushSupported()) {
+    /* No service worker / PushManager (e.g. an old browser or a plain tab):
+     * on-open alerts only, as in v1/v2. */
+    setNotifUI('off', 'This browser can’t do background push. Tap “Enable alerts” and new deals will pop up when you open the app.');
+    return;
+  }
+  setNotifUI(store.get(LS.push, '') === 'on' ? 'on' : 'off');
+  refreshPushState();
+}
+function refreshPushState() {
+  if (!pushSupported()) return Promise.resolve(false);
+  try {
+    return navigator.serviceWorker.ready.then(function (reg) {
+      return reg.pushManager.getSubscription();
+    }).then(function (sub) {
+      var on = !!sub;
+      store.set(LS.push, on ? 'on' : '');
+      setNotifUI(on ? 'on' : 'off');
+      return on;
+    }).catch(function () { return false; });
+  } catch (e) { return Promise.resolve(false); }
+}
+function saveSubscription(sub) {
+  var body = buildSubscriptionBody(sub);
+  if (!body.endpoint || !body.p256dh || !body.auth) return Promise.resolve(false);
+  if (typeof fetch === 'undefined') return Promise.resolve(false);
+  return fetch(SUPABASE_URL + '/rest/v1/push_subscriptions', {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_PUBLISHABLE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_PUBLISHABLE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(body)
+  }).then(function (resp) {
+    /* 409 = this endpoint is already stored. Either way the phone is covered. */
+    return resp.ok || resp.status === 409;
+  }).catch(function () { return false; });
+}
+function enablePush() {
+  if (!pushSupported()) return Promise.resolve(false);
+  return Notification.requestPermission().then(function (perm) {
+    if (perm !== 'granted') { renderNotif(); return false; }
+    return navigator.serviceWorker.ready.then(function (reg) {
+      return reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }).then(function (sub) {
+      return saveSubscription(sub);
+    }).then(function (ok) {
+      store.set(LS.push, ok ? 'on' : '');
+      renderNotif();
+      return ok;
+    }).catch(function () {
+      renderNotif();
+      return false;
+    });
+  });
+}
+function disablePush() {
+  if (!pushSupported()) { store.set(LS.push, ''); renderNotif(); return Promise.resolve(false); }
+  return navigator.serviceWorker.ready.then(function (reg) {
+    return reg.pushManager.getSubscription();
+  }).then(function (sub) {
+    if (sub) return sub.unsubscribe();
+    return false;
+  }).then(function () {
+    /* The endpoint is now dead; the sender prunes it on the next 404/410.
+     * Anon cannot DELETE rows (by design — see the migration), so there is
+     * no server delete from the app. */
+    store.set(LS.push, '');
+    renderNotif();
+    return true;
+  }).catch(function () {
+    store.set(LS.push, '');
+    renderNotif();
+    return false;
+  });
+}
+function togglePush() {
+  if (store.get(LS.push, '') === 'on') return disablePush();
+  return enablePush();
 }
 
 /* ---------------- actions ---------------- */
@@ -676,8 +820,13 @@ function init() {
   if (se) se.addEventListener('change', function () { state.filters.showExpired = se.checked; renderDeals(); });
   var nb = $('notifBtn');
   if (nb) nb.addEventListener('click', function () {
-    if (typeof Notification === 'undefined') return;
-    Notification.requestPermission().then(function () { renderNotif(); });
+    if (!pushSupported()) {
+      if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        Notification.requestPermission().then(function () { renderNotif(); });
+      }
+      return;
+    }
+    togglePush();
   });
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(function () { /* offline cache is best-effort */ });
@@ -692,6 +841,12 @@ if (typeof window !== 'undefined') {
   window.PennyAlerts = {
     BRIEFING_URL: BRIEFING_URL,
     WEEKLY_URL: WEEKLY_URL,
+    APP_URL: APP_URL,
+    SUPABASE_URL: SUPABASE_URL,
+    VAPID_PUBLIC_KEY: VAPID_PUBLIC_KEY,
+    urlBase64ToUint8Array: urlBase64ToUint8Array,
+    buildSubscriptionBody: buildSubscriptionBody,
+    pushSupported: pushSupported,
     normalizeBriefing: normalizeBriefing,
     normalizeWeekly: normalizeWeekly,
     mergeFeeds: mergeFeeds,

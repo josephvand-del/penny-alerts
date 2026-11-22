@@ -25,9 +25,36 @@ phone's home screen (it's a PWA).
 - **One-tap check links**: each item links to the retailer's BrickSeek
   inventory checker (Walmart / Dollar General / Target / Home Depot).
   These open in a new tab — **you** do the check manually.
-- **Alerts**: tap "Enable alerts" and the app notifies you about new deals
-  when you open it, plus an in-app "NEW" badge. v1 alerts are honestly
-  labelled: **checked when you open the app.**
+- **Alerts**: tap "Enable alerts" and this phone subscribes for true
+  background push — new deals push to it even when the app is closed.
+  Until the one-time setup below is done, alerts are honestly labelled:
+  **checked when you open the app.** Tap the button again to turn
+  alerts off (the sender then prunes the dead subscription).
+
+## Background push — how it works + one-time setup
+
+The app subscribes this phone with the Web Push API (VAPID public key in
+`app.js` — public, safe to commit) and stores the subscription in
+Supabase (`push_subscriptions` table, shared "bulk finder" project).
+`scripts/send-push.py` runs in the same daily workflow right after the
+parser: it diffs the new feed against the committed one and, when there
+are new items, sends ONE summary push per subscribed phone ("3 new penny
+deals", naming the top items). Subscriptions the push service rejects
+(404/410) are pruned automatically. Push errors never fail the workflow.
+
+One-time setup, in order (Joseph):
+1. Add the workflow file on github.com (see
+   `.github/workflows/update-feed.yml` — it now does feed + push in one
+   file, and REPLACES the earlier feed-only version; do not add the old one).
+2. Run `supabase/migrations/20261122153000_push_subscriptions.sql` in the
+   Supabase dashboard → SQL editor. It creates the table with RLS +
+   explicit grants (anon may INSERT only; reads/deletes are service_role
+   only).
+3. Add two GitHub Secrets (repo → Settings → Secrets and variables →
+   Actions): `VAPID_PRIVATE_KEY` (the private key — kept outside the
+   repo, delete the file after pasting) and `SUPABASE_SERVICE_ROLE_KEY`
+   (Supabase dashboard → Project Settings → API — never put it in chat).
+4. Install the PWA on the phone home screen, open it, tap Enable alerts.
 
 ## Data sources (all free)
 
@@ -75,8 +102,6 @@ feed. Weekly DG penny lists are also linked out below, as before:
   store's app — and the register — can do that. A deal here is a lead:
   "go check it."
 - Dollar General has no remote price check at all, paid or free.
-- It does not send background push notifications while closed. A static
-  GitHub Pages site has no server to push from.
 
 ## Honest caveat — the briefing can go stale
 
@@ -90,18 +115,18 @@ previous good items; the Lists & Sources tab shows each source's status.
 
 ## Planned next
 
-- True background push: push subscription stored in Supabase + a small
-  scheduled sender that fetches the feed daily and pushes new deals.
-  Needs a server piece — designed, not built.
 - Optional King Soopers auto price-check via Kroger's free public API
   (needs a free Kroger developer account).
 
 ## Files
 
 `index.html`, `app.js`, `styles.css`, `manifest.json`, `sw.js`
-(service-worker cache `penny-alerts-v2`), `icon.svg`, `README.md`,
-`scripts/parse-lists.py` + `scripts/requirements.txt` (the weekly-feed
-parser), `feed/weekly.json` (generated daily by the parser; committed
-when it changes). Plain HTML/CSS/JS, no build step, no backend. The
-scheduled job is `.github/workflows/update-feed.yml` — added on
-github.com, not pushed from here.
+(service-worker cache `penny-alerts-v3`), `icon.svg`, `README.md`,
+`scripts/parse-lists.py` + `scripts/send-push.py` +
+`scripts/requirements.txt` (the weekly-feed parser and the push sender),
+`feed/weekly.json` (generated daily by the parser; committed when it
+changes), `supabase/migrations/20261122153000_push_subscriptions.sql`
+(run by Joseph in the Supabase dashboard SQL editor). Plain HTML/CSS/JS,
+no build step, no backend. The scheduled job is
+`.github/workflows/update-feed.yml` — added on github.com, not pushed
+from here.

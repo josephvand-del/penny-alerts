@@ -74,12 +74,11 @@
       <li>It never checks a store’s price by itself. No Walmart, BrickSeek or retailer site is ever called automatically.</li>
       <li>It cannot confirm a penny at a specific store. Only a scan in the store’s app — and the register — can do that.</li>
       <li>Dollar General has no remote price check at all, paid or free. DG pennies are list → drive → scan in the DG app.</li>
-      <li>Alerts are checked when you open the app. A static site has no server to push to your phone while it’s closed.</li>
+      <li>Background push is live once setup is done (see README): enable alerts and new deals push to this phone, even when the app is closed. Until the setup is done, alerts are checked when you open the app.</li>
     </ul>
 
     <h2>Planned next</h2>
     <ul class="plain">
-      <li>True background push: push subscription stored in Supabase, a small sender that checks the feed daily and pushes new deals. Needs a server piece — designed, not built.</li>
       <li>Optional King Soopers auto price-check via Kroger’s free public API (needs a free Kroger developer account).</li>
     </ul>
   </section>

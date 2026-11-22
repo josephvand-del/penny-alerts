@@ -1,9 +1,10 @@
-/* Penny Alerts v1 service worker.
+/* Penny Alerts v3 service worker.
  * Caches the app shell so the app opens offline. The deal briefing JSON is
  * NEVER cached here — it is always fetched fresh (network-first) because
- * penny lists go stale fast.
+ * penny lists go stale fast. v3 adds background push: the 'push' event
+ * shows the sender's summary notification, and tapping it opens the app.
  */
-var CACHE = 'penny-alerts-v2';
+var CACHE = 'penny-alerts-v3';
 var SHELL = ['index.html', 'styles.css', 'app.js', 'manifest.json', 'icon.svg'];
 var BRIEFING = 'rocketshon.github.io/penny-finder-backend/briefings/latest.json';
 var WEEKLY = 'feed/weekly.json';
@@ -49,4 +50,37 @@ self.addEventListener('fetch', function (event) {
       })
     );
   }
+});
+
+/* Background push (v3). The sender posts {title, body, url}; the tap opens
+ * (or focuses) the app. */
+self.addEventListener('push', function (event) {
+  var data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
+  var title = data.title || 'Penny Alerts: new deals';
+  var body = data.body || 'Open the app to see them.';
+  var url = data.url || './index.html';
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: body,
+      icon: 'icon.svg',
+      badge: 'icon.svg',
+      tag: 'penny-alerts-new',
+      data: { url: url }
+    })
+  );
+});
+
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  var url = (event.notification.data && event.notification.data.url) || './index.html';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+      for (var i = 0; i < list.length; i++) {
+        if ('focus' in list[i]) return list[i].focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(url);
+      return undefined;
+    })
+  );
 });
