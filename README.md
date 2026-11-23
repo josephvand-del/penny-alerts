@@ -22,9 +22,11 @@ phone's home screen (it's a PWA).
   5 Targets, Dollar General (nearest Aurora location is permanently closed;
   nearest active are Commerce City and Denver), and 5 Home Depots — with
   addresses, phones, and per-store notes.
-- **One-tap check links**: each item links to the retailer's BrickSeek
-  inventory checker (Walmart / Dollar General / Target / Home Depot).
-  These open in a new tab — **you** do the check manually.
+- **One-tap app links**: each card has one link — "Open in {Store} app"
+  for Walmart, Target, and Home Depot. On Android it opens the store's
+  app (falling back to a Google search for the item if the app isn't
+  installed); on other phones it opens the store's own page for the
+  item. Stores with no app link get a Google Shopping search instead.
 - **Alerts**: tap "Enable alerts" and this phone subscribes for true
   background push — new deals push to it even when the app is closed.
   Until the one-time setup below is done, alerts are honestly labelled:
@@ -34,13 +36,14 @@ phone's home screen (it's a PWA).
   (lazy-loaded). Items with no photo anywhere get a clean placeholder
   tile — a small product glyph plus the department name — never a
   fabricated image. See "Deal photos — where they come from" below.
-- **Seller links**: every card has a Google Shopping search for the
-  item (by UPC when known, else by name) and, where the retailer is
-  known and the item has a UPC, a search link for that retailer
-  (Walmart, Target, Home Depot — patterns verified live; Dollar
-  General's could not be confirmed, so no DG link). Labels say
-  "search", never "buy". Tapping one opens the seller in your browser;
-  nothing is embedded.
+- **Seller links**: every card has exactly one link. For Walmart, Target,
+  and Home Depot it is "Open in {Store} app" — on Android an intent URL
+  that opens the store app (Google Shopping search for the item is the
+  fallback if the app isn't installed); elsewhere the store's own page
+  for the item. Other stores get a Google Shopping search for the item
+  (by UPC when known, else by name). Labels say "app" / "search", never
+  "buy". Tapping one opens the store app or your browser; nothing is
+  embedded.
 
 ## Deal photos — where they come from
 
@@ -153,15 +156,21 @@ exhausted quota can never fail the feed job.
 
 ## Seller links — where they go
 
-Every deal card carries seller links — plain `<a>` tags, no popup, no
-embedded page (retailers block framing, so the modal idea was dropped;
-tapping a link opens the seller in your browser):
+Every deal card carries exactly one link — a plain `<a>` tag, no popup,
+no embedded page (retailers block framing, so the modal idea was dropped):
 
-- **Google Shopping search** (every card): `google.com/search?tbm=shop&q=<UPC>`
+- **"Open in {Store} app"** (Walmart, Target, Home Depot): on Android
+  this is an `intent://` URL with the store's Android package
+  (`com.walmart.android`, `com.target.ui`, `com.thehomedepot`) and the
+  Google Shopping search for the item as `browser_fallback_url` — so a
+  tap opens the store app when it is installed, and falls back to a
+  Google search for the item when it is not (never to the store
+  website). On other phones it is the plain store URL for the item
+  (iOS Universal Links open the app there). Home Depot searches by
+  store SKU first (dashes stripped), then UPC, then name; Walmart and
+  Target by UPC, then name.
+- **Google Shopping search** (every other store): `google.com/search?tbm=shop&q=<UPC>`
   when the item has a UPC, else `q=<item name, URL-encoded>`.
-- **Retailer search** (only when the retailer is known AND the item
-  has a UPC): Walmart `walmart.com/search?q=<UPC>`, Target
-  `target.com/s?searchTerm=<UPC>`, Home Depot `homedepot.com/s/<UPC>`.
 
 All three retailer patterns were verified live 2026-11-22: Walmart's
 own homepage search form is `action=/search` with input `name=q`
@@ -242,8 +251,7 @@ feed. Weekly DG penny lists are also linked out below, as before:
 
 ## What it does NOT do
 
-- It never calls walmart.com, brickseek.com, or any retailer endpoint
-  automatically. No scraping, no paid APIs, no Discord.
+- It never calls walmart.com or any retailer endpoint automatically. No scraping, no paid APIs, no Discord.
 - It cannot confirm a penny at a specific store. Only a scan in the
   store's app — and the register — can do that. A deal here is a lead:
   "go check it."

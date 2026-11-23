@@ -113,15 +113,9 @@ const PA = sandbox.window.PennyAlerts;
   check('toy dept', PA.deriveDepartment({ kind: 'deal', name: 'LEGO Classic Bricks', saleStory: '' }), 'Toys & Games');
   check('grocery dept', PA.deriveDepartment({ kind: 'deal', name: 'Chex Mix Snack 15oz', saleStory: '' }), 'Grocery');
 
-  /* 4. check links — verified patterns only, no walmart.com/search guess */
-  const dg = PA.checkLinks(pennies[0]);
-  check('DG checker link', dg[0].url, 'https://brickseek.com/dollar-general-inventory-checker?sku=' + encodeURIComponent(pennies[0].upc));
-  const wmLinks = PA.checkLinks({ storeId: 'wm-ct', upc: '012345678905' });
-  check('Walmart checker link present', wmLinks.some(function (l) { return l.url.indexOf('brickseek.com/walmart-inventory-checker?sku=') !== -1; }), true);
-  check('no walmart.com/search URL anywhere', JSON.stringify(wmLinks).indexOf('walmart.com/search') === -1, true);
-  check('no walmart.com homepage entry in checkLinks (v6: sellerLinks covers Walmart)', wmLinks.some(function (l) { return l.url === 'https://www.walmart.com/'; }), false);
-  const noUpc = PA.checkLinks({ storeId: 'target', upc: '' });
-  check('no-UPC item gets no checker link', noUpc.length, 0);
+  /* 4. BrickSeek is gone (v7) — Joseph has no account there, so the
+   * checker links and the checkLinks export were removed entirely. */
+  check('checkLinks is removed from the app', typeof PA.checkLinks, 'undefined');
 
   /* 5. weekly feed fixture: one dup of the first briefing penny (by UPC),
    * one Home Depot penny (no UPC, WITH a list image), one Slickdeals deal
@@ -223,7 +217,7 @@ const PA = sandbox.window.PennyAlerts;
   check('pushSupported false in stub env (no serviceWorker)', PA.pushSupported(), false);
   check('supabase URL is the shared bulk-finder project', PA.SUPABASE_URL, 'https://xwekulsnfarjibawqqih.supabase.co');
   const swText = fs.readFileSync('/home/hatch/workspace/penny-alerts/sw.js', 'utf8');
-  check('sw cache bumped to v6', swText.indexOf("penny-alerts-v6") !== -1, true);
+  check('sw cache bumped to v7', swText.indexOf("penny-alerts-v7") !== -1, true);
   check('sw has push handler', swText.indexOf("addEventListener('push'") !== -1, true);
   check('sw push shows a notification', swText.indexOf('showNotification') !== -1, true);
   check('sw has notificationclick handler', swText.indexOf("addEventListener('notificationclick'") !== -1, true);
@@ -302,40 +296,60 @@ const PA = sandbox.window.PennyAlerts;
   });
   check('real feed has some images', imgCount > 0, true);
 
-  /* 12. seller links (v6) — retailer app first, Google Shopping backup, no modal anywhere */
+  /* 12. seller links (v7) — ONE link per card: an Android intent: URL
+   * (store app, Google fallback) on Android, the plain https retailer
+   * URL elsewhere, Google Shopping only for unmapped stores. No
+   * BrickSeek anywhere, no modal anywhere. */
+  function intentUrl(host, pathQ, pkg, deal) {
+    var g = 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(deal.upc || deal.name || '');
+    return 'intent://' + host + pathQ + '#Intent;scheme=https;package=' + pkg + ';S.browser_fallback_url=' + encodeURIComponent(g) + ';end';
+  }
+  function fallbackOf(intent) {
+    var m = intent.match(/;S\.browser_fallback_url=([^;]*);end$/);
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+  const ANDROID_UA = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36';
+  const IPHONE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+  sandbox.navigator.userAgent = ANDROID_UA;
+  const slHdSku = PA.sellerLinks({ storeId: 'home-depot', sku: '1012-308-531', upc: '', name: 'Test Screw' });
+  check('seller links: HD SKU intent URL, dashes stripped', slHdSku[0].url, intentUrl('www.homedepot.com', '/s/1012308531', 'com.thehomedepot', { upc: '', name: 'Test Screw' }));
+  check('seller links: HD label is app-first', slHdSku[0].label, 'Open in Home Depot app');
+  check('seller links: HD is exactly one link', slHdSku.length, 1);
+  const slHdSkuWins = PA.sellerLinks({ storeId: 'home-depot', sku: '1001-685-761', upc: '012345678905', name: 'Test Screw' });
+  check('seller links: HD SKU beats UPC', slHdSkuWins[0].url, intentUrl('www.homedepot.com', '/s/1001685761', 'com.thehomedepot', { upc: '012345678905', name: 'Test Screw' }));
+  const slHdUpc = PA.sellerLinks({ storeId: 'home-depot', upc: '123456', name: 'Test Screw' });
+  check('seller links: HD UPC when no SKU', slHdUpc[0].url, intentUrl('www.homedepot.com', '/s/123456', 'com.thehomedepot', { upc: '123456', name: 'Test Screw' }));
+  const slHd = PA.sellerLinks({ storeId: 'home-depot', upc: '', name: 'Test Screw' });
+  check('seller links: HD without SKU/UPC searches by name', slHd[0].url, intentUrl('www.homedepot.com', '/s/Test%20Screw', 'com.thehomedepot', { upc: '', name: 'Test Screw' }));
   const slWm = PA.sellerLinks({ storeId: 'wm-ct', upc: '012345678905', name: 'Test Item' });
-  check('seller links: Walmart app link first for wm-ct + UPC', slWm[0].url, 'https://www.walmart.com/search?q=012345678905');
+  check('seller links: Walmart intent URL for wm-ct + UPC', slWm[0].url, intentUrl('www.walmart.com', '/search?q=012345678905', 'com.walmart.android', { upc: '012345678905', name: 'Test Item' }));
   check('seller links: Walmart label is app-first', slWm[0].label, 'Open in Walmart app');
-  check('seller links: Google Shopping is the backup', slWm[1].url, 'https://www.google.com/search?tbm=shop&q=012345678905');
-  check('seller links: Google label is a search', slWm[1].label, 'Google Shopping search');
+  check('seller links: Walmart is exactly one link', slWm.length, 1);
   const slWmNoUpc = PA.sellerLinks({ storeId: 'walmart', upc: '', name: 'Blue Widget 12oz' });
-  check('seller links: Walmart without UPC searches by name', slWmNoUpc[0].url, 'https://www.walmart.com/search?q=Blue%20Widget%2012oz');
-  check('seller links: Walmart without UPC still app-first', slWmNoUpc[0].label, 'Open in Walmart app');
+  check('seller links: Walmart without UPC searches by name', slWmNoUpc[0].url, intentUrl('www.walmart.com', '/search?q=Blue%20Widget%2012oz', 'com.walmart.android', { upc: '', name: 'Blue Widget 12oz' }));
   const slTg = PA.sellerLinks({ storeId: 'target', upc: '012345678905', name: 'Test Item' });
-  check('seller links: Target link', slTg[0].url, 'https://www.target.com/s?searchTerm=012345678905');
+  check('seller links: Target intent URL', slTg[0].url, intentUrl('www.target.com', '/s?searchTerm=012345678905', 'com.target.ui', { upc: '012345678905', name: 'Test Item' }));
   check('seller links: Target label is app-first', slTg[0].label, 'Open in Target app');
   const slTgNoUpc = PA.sellerLinks({ storeId: 'target', upc: '', name: 'Blue Widget 12oz' });
-  check('seller links: Target without UPC searches by name', slTgNoUpc[0].url, 'https://www.target.com/s?searchTerm=Blue%20Widget%2012oz');
-  const slHdSku = PA.sellerLinks({ storeId: 'home-depot', sku: '1012-308-531', upc: '', name: 'Test Screw' });
-  check('seller links: Home Depot SKU first, dashes stripped', slHdSku[0].url, 'https://www.homedepot.com/s/1012308531');
-  check('seller links: Home Depot label is app-first', slHdSku[0].label, 'Open in Home Depot app');
-  const slHdSkuWins = PA.sellerLinks({ storeId: 'home-depot', sku: '1001-685-761', upc: '012345678905', name: 'Test Screw' });
-  check('seller links: Home Depot SKU beats UPC', slHdSkuWins[0].url, 'https://www.homedepot.com/s/1001685761');
-  const slHdUpc = PA.sellerLinks({ storeId: 'home-depot', upc: '123456', name: 'Test Screw' });
-  check('seller links: Home Depot UPC when no SKU', slHdUpc[0].url, 'https://www.homedepot.com/s/123456');
-  const slHd = PA.sellerLinks({ storeId: 'home-depot', upc: '', name: 'Test Screw' });
-  check('seller links: Home Depot without SKU/UPC searches by name', slHd[0].url, 'https://www.homedepot.com/s/Test%20Screw');
+  check('seller links: Target without UPC searches by name', slTgNoUpc[0].url, intentUrl('www.target.com', '/s?searchTerm=Blue%20Widget%2012oz', 'com.target.ui', { upc: '', name: 'Blue Widget 12oz' }));
+  check('seller links: intent fallback is the Google Shopping URL (HD)', fallbackOf(slHdSkuWins[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
+  check('seller links: intent fallback is the Google Shopping URL (WM)', fallbackOf(slWm[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
+  check('seller links: intent fallback is the Google Shopping URL (TG)', fallbackOf(slTg[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   const slDg = PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' });
-  check('seller links: NO Dollar General link (pattern unconfirmed)', slDg.length, 1);
-  const slNoUpc = PA.sellerLinks({ storeId: 'target', upc: '', name: 'Blue Widget 12oz' });
-  check('seller links: Google Shopping by name when no UPC', slNoUpc[1].url, 'https://www.google.com/search?tbm=shop&q=Blue%20Widget%2012oz');
-  check('seller links: no retailer link for unknown retailer', PA.sellerLinks({ storeId: 'amazon', upc: '012345678905', name: 'X' }).length, 1);
+  check('seller links: DG gets only the Google link (no intent)', slDg.length, 1);
+  check('seller links: DG link is plain Google Shopping', slDg[0].url, 'https://www.google.com/search?tbm=shop&q=012345678905');
+  check('seller links: DG label is Google Shopping search', slDg[0].label, 'Google Shopping search');
+  check('seller links: unknown retailer gets only the Google link', PA.sellerLinks({ storeId: 'amazon', upc: '012345678905', name: 'X' }).length, 1);
   check('seller links: no buy language anywhere', JSON.stringify([].concat(slWm, slTg, slHdUpc, slHdSku)).toLowerCase().indexOf('buy') === -1, true);
   check('seller links: no utm params in any link', JSON.stringify([].concat(slWm, slWmNoUpc, slTg, slHdSku, slHdUpc, slHd, slDg)).indexOf('utm_') === -1, true);
-  check('seller links: all links are plain https (no custom app schemes)', [].concat(slWm, slWmNoUpc, slTg, slHdSku, slHdUpc, slHd, slDg).every(function (l) { return l.url.indexOf('https://') === 0; }), true);
-  const clWm = PA.checkLinks({ storeId: 'walmart', upc: '012345678905' });
-  check('check links: no walmart.com homepage entry', clWm.some(function (l) { return l.url === 'https://www.walmart.com/'; }), false);
-  check('check links: BrickSeek checker still present for Walmart', clWm.some(function (l) { return l.url.indexOf('brickseek.com/walmart-inventory-checker') !== -1; }), true);
+  check('seller links: Android links are intent: URLs', [].concat(slWm, slWmNoUpc, slTg, slHdSku, slHdUpc, slHd).every(function (l) { return l.url.indexOf('intent://') === 0; }), true);
+  /* Non-Android: same deals return the plain https retailer URLs (v6 behavior). */
+  sandbox.navigator.userAgent = IPHONE_UA;
+  check('seller links: non-Android Walmart is plain https', PA.sellerLinks({ storeId: 'wm-ct', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.walmart.com/search?q=012345678905');
+  check('seller links: non-Android HD SKU is plain https', PA.sellerLinks({ storeId: 'home-depot', sku: '1012-308-531', upc: '', name: 'Test Screw' })[0].url, 'https://www.homedepot.com/s/1012308531');
+  check('seller links: non-Android Target is plain https', PA.sellerLinks({ storeId: 'target', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.target.com/s?searchTerm=012345678905');
+  check('seller links: non-Android DG is still Google only', PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.google.com/search?tbm=shop&q=012345678905');
+  sandbox.navigator.userAgent = '';
   const realHd = realWeekly.items.filter(function (it) { return it.retailer === 'home-depot'; })[0];
   const realHdNorm = realHd ? PA.normalizeWeekly({ items: [realHd] }).deals[0] : null;
   check('real feed: an HD deal carries a non-empty sku through normalizeWeekly', !!(realHdNorm && realHdNorm.sku), true);
@@ -345,6 +359,8 @@ const PA = sandbox.window.PennyAlerts;
   const htmlText = fs.readFileSync('/home/hatch/workspace/penny-alerts/index.html', 'utf8');
   const cssText = fs.readFileSync('/home/hatch/workspace/penny-alerts/styles.css', 'utf8');
   check('no modal code in app.js', appText.toLowerCase().indexOf('modal') === -1, true);
+  check('no brickseek string anywhere in app.js', appText.toLowerCase().indexOf('brickseek') === -1, true);
+  check('no Check on BrickSeek label anywhere in app.js', appText.indexOf('Check on BrickSeek') === -1, true);
   check('no modal markup in index.html', htmlText.toLowerCase().indexOf('modal') === -1, true);
   check('no modal styles in styles.css', cssText.toLowerCase().indexOf('modal') === -1, true);
 

@@ -2,7 +2,7 @@
 /* Penny Alerts v1 — Aurora, CO 80017
  * Free signals only. The ONLY automatic network fetch this app makes is
  * Penny Hunter's PUBLIC daily briefing JSON on GitHub Pages. It never
- * fetches walmart.com, brickseek.com, or any retailer endpoint. Check
+ * fetches walmart.com or any retailer endpoint. Check
  * links below are plain <a> links the USER taps; the user does the check.
  *
  * v2: the weekly feed — scripts/parse-lists.py runs daily (GitHub Actions,
@@ -76,20 +76,6 @@ var STORE_NAMES = {
   'online': 'Online'
 };
 
-/* Per-retailer "check it yourself" links. Every pattern below was verified
- * live (HTTP 200) on 2026-11-22. BrickSeek's checker takes a SKU/UPC.
- * walmart.com/search?q= could NOT be verified live (Walmart's bot wall
- * answers automated requests with a challenge), so per the build rules we
- * link to walmart.com itself instead of guessing the search URL works. */
-var CHECKERS = {
-  'dollar-general': 'https://brickseek.com/dollar-general-inventory-checker?sku=',
-  'target': 'https://brickseek.com/target-inventory-checker?sku=',
-  'home-depot': 'https://brickseek.com/home-depot-inventory-checker?sku=',
-  'wm-ct': 'https://brickseek.com/walmart-inventory-checker?sku=',
-  'walmart': 'https://brickseek.com/walmart-inventory-checker?sku='
-};
-var CHECKER_LABEL = 'Check on BrickSeek';
-
 /* Hardcoded local stores — verified in the 2026-11-22 research. Do not add
  * stores that were not verified. */
 var STORES = [
@@ -102,7 +88,7 @@ var STORES = [
       { name: '#5334', addr: '3301 Tower Rd, Aurora, CO 80011', phone: '720-374-0278' },
       { name: 'Iliff Ave', addr: '15240 E Iliff Ave, Aurora, CO 80014', phone: '303-481-3904' }
     ] },
-  { group: 'Target — clearance only, no penny system', hours: '', note: 'Store-specific markdowns. BrickSeek covers ordinary clearance here.',
+  { group: 'Target — clearance only, no penny system', hours: '', note: 'Store-specific markdowns — check the shelf tag in the Target app.',
     items: [
       { name: 'Quincy Ave — closest', addr: '16910 E Quincy Ave, Aurora, CO 80015', phone: '303-699-1020' },
       { name: 'Ellsworth Ave (#1471)', addr: '14200 E Ellsworth Ave, Aurora, CO 80012', phone: '303-214-0114' },
@@ -329,43 +315,42 @@ function visibleDeals() {
     return true;
   });
 }
-function checkLinks(deal) {
-  var out = [];
-  var base = CHECKERS[deal.storeId];
-  if (deal.upc && base) {
-    out.push({ label: CHECKER_LABEL + ' (' + prettyStore(deal.storeId) + ')', url: base + encodeURIComponent(deal.upc) });
-  } else if (deal.upc) {
-    out.push({ label: CHECKER_LABEL, url: 'https://brickseek.com/' });
-  }
-  return out;
-}
-/* Seller links (v6) — retailer first, Google Shopping as backup. Plain
- * <a> links the USER taps — they open in the user's own browser or, when
- * the retailer app is installed, in the app (Android App Links / iOS
- * Universal Links resolve plain https links to the retailer's own domain;
- * no custom URL schemes are used). Nothing is embedded (retailers block
- * framing) and the app makes no fetch to any seller. The retailer link
- * comes FIRST, labelled 'Open in {Store} app'; Google Shopping is second.
- * Retailer query priority: Home Depot — store SKU first (dashes stripped),
- * then UPC, then name (verified live 2026-11-22: homedepot.com/s/1012308531
- * and /s/1001685761 both resolve to the exact product page); Walmart and
- * Target — UPC, then name. Retailer search links exist only for patterns
- * verified live 2026-11-22: Walmart (its own search form is action=/search
- * with input name=q), Target (live results page, UPC in body), Home Depot
- * (live results page). Dollar General is NOT included: its search URL could
- * not be confirmed (403 on /search?query=, 404 on the Magento-style
- * /catalogsearch/result/?q=), so no DG link is rendered — nor any other
- * unverified retailer (no Lowe's, no Amazon). No affiliate, utm, or
- * redirector parameters in any link. Labels say "app" / "search", never
- * "buy" — a search link is not a verified price or a confirmed listing. */
+/* Seller links (v7) — ONE link per card. For the three app-mapped
+ * stores the link is labelled 'Open in {Store} app'. On Android it is an
+ * intent: URL (scheme https, the store's Android package, and the Google
+ * Shopping search for the item as browser_fallback_url), so a tap opens
+ * the store app when it is installed and falls back to a Google search
+ * for the item when it is not — never to the store website. On
+ * non-Android the same link is the plain https retailer URL (iOS
+ * Universal Links open the app there). Stores with no app mapping get
+ * the plain Google Shopping search only. Third-party checker links were
+ * removed entirely in v7 (Joseph has no account with any of them).
+ * Home Depot query priority: store SKU first (dashes stripped), then
+ * UPC, then name (verified live 2026-11-22: homedepot.com/s/1012308531
+ * and /s/1001685761 both resolve to the exact product page); Walmart
+ * and Target — UPC, then name. Retailer patterns were verified live
+ * 2026-11-22: Walmart (its own search form is action=/search with
+ * input name=q), Target (live results page, UPC in body), Home Depot
+ * (live results page). Dollar General is NOT included: its search URL
+ * could not be confirmed (403 on /search?query=, 404 on the
+ * Magento-style /catalogsearch/result/?q=), so no DG link is rendered —
+ * nor any other unverified retailer (no Lowe's, no Amazon). No
+ * affiliate, utm, or redirector parameters in any link. Labels say
+ * "app" / "search", never "buy" — a search link is not a verified
+ * price or a confirmed listing. */
 var SELLER_SEARCH = {
-  'wm-ct': { label: 'Walmart', base: 'https://www.walmart.com/search?q=' },
-  'walmart': { label: 'Walmart', base: 'https://www.walmart.com/search?q=' },
-  'target': { label: 'Target', base: 'https://www.target.com/s?searchTerm=' },
-  'home-depot': { label: 'Home Depot', base: 'https://www.homedepot.com/s/' }
+  'wm-ct': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
+  'walmart': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
+  'target': { label: 'Target', host: 'www.target.com', path: '/s?searchTerm=', pkg: 'com.target.ui' },
+  'home-depot': { label: 'Home Depot', host: 'www.homedepot.com', path: '/s/', pkg: 'com.thehomedepot' }
 };
+function isAndroid() {
+  return (typeof navigator !== 'undefined' && navigator && /Android/i.test(navigator.userAgent || ''));
+}
+function googleShoppingUrl(deal) {
+  return 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(deal.upc || deal.name || '');
+}
 function sellerLinks(deal) {
-  var out = [];
   var s = SELLER_SEARCH[deal.storeId];
   if (s) {
     var q = '';
@@ -374,10 +359,18 @@ function sellerLinks(deal) {
     } else {
       q = deal.upc || deal.name || '';
     }
-    if (q) out.push({ label: 'Open in ' + s.label + ' app', url: s.base + encodeURIComponent(q) });
+    if (q) {
+      var plain = 'https://' + s.host + s.path + encodeURIComponent(q);
+      var url = plain;
+      if (isAndroid()) {
+        url = 'intent://' + s.host + s.path + encodeURIComponent(q) +
+          '#Intent;scheme=https;package=' + s.pkg +
+          ';S.browser_fallback_url=' + encodeURIComponent(googleShoppingUrl(deal)) + ';end';
+      }
+      return [{ label: 'Open in ' + s.label + ' app', url: url }];
+    }
   }
-  out.push({ label: 'Google Shopping search', url: 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(deal.upc || deal.name || '') });
-  return out;
+  return [{ label: 'Google Shopping search', url: googleShoppingUrl(deal) }];
 }
 function sellerLinksHtml(d) {
   return sellerLinks(d).map(function (l) {
@@ -435,9 +428,6 @@ function thumbHtml(d) {
 }
 function dealCard(d) {
   var isW = !!state.watch[d.id];
-  var links = checkLinks(d).map(function (l) {
-    return '<a class="btn small" href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>';
-  }).join(' ');
   var price = d.price ? '<span class="price">' + esc(d.price) + '</span>' : '';
   var was = d.originalPrice ? '<span class="was">was ' + esc(d.originalPrice) + '</span>' : '';
   var valid = d.validTo ? '<span class="meta">valid to ' + esc(d.validTo) + (isExpired(d, state.today) ? ' · EXPIRED' : '') + '</span>' : '';
@@ -455,7 +445,7 @@ function dealCard(d) {
     '<div class="deal-actions">' +
       '<button type="button" class="btn" data-action="watch" data-id="' + esc(d.id) + '">' + (isW ? '✓ Watching' : '＋ Watch') + '</button>' +
       '<button type="button" class="btn quiet" data-action="ignore" data-id="' + esc(d.id) + '">Don’t show again</button>' +
-      links + ' ' + sellerLinksHtml(d) +
+      sellerLinksHtml(d) +
     '</div></div></div></article>';
 }
 function renderDeals() {
@@ -505,9 +495,6 @@ function watchCard(d) {
     return '<label class="check"><input type="checkbox" data-check="' + key + '" data-id="' + esc(d.id) + '"' +
       (c[key] ? ' checked' : '') + '> ' + label + '</label>';
   }
-  var links = checkLinks(d).map(function (l) {
-    return '<a class="btn small" href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>';
-  }).join(' ');
   var badge = isNew(d.id) ? '<span class="badge-new">NEW</span>' : '';
   return '<article class="deal"><div class="deal-row">' + thumbHtml(d) + '<div class="deal-main">' +
     '<div class="deal-top"><span class="retailer">' + esc(prettyStore(d.storeId)) + '</span>' +
@@ -521,7 +508,7 @@ function watchCard(d) {
       cb('shelf', 'Found it on the shelf') +
       cb('register', 'Register rang the deal price') +
       '<p class="hint">If the register rings full price or locks up, the deal isn’t real at this store. A manager can refuse a penny sale.</p></div>' +
-    '<div class="deal-actions">' + links + ' ' + sellerLinksHtml(d) +
+    '<div class="deal-actions">' + sellerLinksHtml(d) +
       '<button type="button" class="btn quiet" data-action="unwatch" data-id="' + esc(d.id) + '">Stop watching</button></div>' +
     '</div></div></article>';
 }
@@ -920,7 +907,6 @@ if (typeof window !== 'undefined') {
     isExpired: isExpired,
     daysSince: daysSince,
     prettyStore: prettyStore,
-    checkLinks: checkLinks,
     sellerLinks: sellerLinks,
     thumbHtml: thumbHtml,
     STORES: STORES,
