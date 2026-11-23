@@ -337,23 +337,27 @@ function checkLinks(deal) {
   } else if (deal.upc) {
     out.push({ label: CHECKER_LABEL, url: 'https://brickseek.com/' });
   }
-  if (deal.storeId === 'wm-ct' || deal.storeId === 'walmart') {
-    out.push({ label: 'Open walmart.com (search the UPC there)', url: 'https://www.walmart.com/' });
-  }
   return out;
 }
-/* Seller links (v5). Plain <a> links the USER taps — they open in the
- * user's own browser; nothing is embedded (retailers block framing) and
- * the app makes no fetch to any seller. Google Shopping is the primary
- * search (by UPC when known, else by name). A retailer search link is
- * added only when the retailer is known AND the item has a UPC, and only
- * for patterns verified live 2026-11-22: Walmart (its own search form is
- * action=/search with input name=q), Target (live results page, UPC in
- * body), Home Depot (live results page). Dollar General is NOT included:
- * its search URL could not be confirmed (403 on /search?query=, 404 on
- * the Magento-style /catalogsearch/result/?q=), so no DG link is rendered.
- * Labels say "search", never "buy" — a search link is not a verified
- * price or a confirmed listing. */
+/* Seller links (v6) — retailer first, Google Shopping as backup. Plain
+ * <a> links the USER taps — they open in the user's own browser or, when
+ * the retailer app is installed, in the app (Android App Links / iOS
+ * Universal Links resolve plain https links to the retailer's own domain;
+ * no custom URL schemes are used). Nothing is embedded (retailers block
+ * framing) and the app makes no fetch to any seller. The retailer link
+ * comes FIRST, labelled 'Open in {Store} app'; Google Shopping is second.
+ * Retailer query priority: Home Depot — store SKU first (dashes stripped),
+ * then UPC, then name (verified live 2026-11-22: homedepot.com/s/1012308531
+ * and /s/1001685761 both resolve to the exact product page); Walmart and
+ * Target — UPC, then name. Retailer search links exist only for patterns
+ * verified live 2026-11-22: Walmart (its own search form is action=/search
+ * with input name=q), Target (live results page, UPC in body), Home Depot
+ * (live results page). Dollar General is NOT included: its search URL could
+ * not be confirmed (403 on /search?query=, 404 on the Magento-style
+ * /catalogsearch/result/?q=), so no DG link is rendered — nor any other
+ * unverified retailer (no Lowe's, no Amazon). No affiliate, utm, or
+ * redirector parameters in any link. Labels say "app" / "search", never
+ * "buy" — a search link is not a verified price or a confirmed listing. */
 var SELLER_SEARCH = {
   'wm-ct': { label: 'Walmart', base: 'https://www.walmart.com/search?q=' },
   'walmart': { label: 'Walmart', base: 'https://www.walmart.com/search?q=' },
@@ -362,12 +366,17 @@ var SELLER_SEARCH = {
 };
 function sellerLinks(deal) {
   var out = [];
-  var q = deal.upc || deal.name || '';
-  out.push({ label: 'Google Shopping search', url: 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(q) });
-  if (deal.upc) {
-    var s = SELLER_SEARCH[deal.storeId];
-    if (s) out.push({ label: 'Search ' + s.label + ' for this UPC', url: s.base + encodeURIComponent(deal.upc) });
+  var s = SELLER_SEARCH[deal.storeId];
+  if (s) {
+    var q = '';
+    if (deal.storeId === 'home-depot') {
+      q = (deal.sku || '').replace(/-/g, '') || deal.upc || deal.name || '';
+    } else {
+      q = deal.upc || deal.name || '';
+    }
+    if (q) out.push({ label: 'Open in ' + s.label + ' app', url: s.base + encodeURIComponent(q) });
   }
+  out.push({ label: 'Google Shopping search', url: 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(deal.upc || deal.name || '') });
   return out;
 }
 function sellerLinksHtml(d) {
