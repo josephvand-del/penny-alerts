@@ -366,20 +366,30 @@ function visibleDeals() {
  * page). DG catalog limit: a UPC search often returns 0 results for
  * penny items (the UPC matches nothing in DG's online catalog; name
  * searches return near-matches only) — that is expected for DG pennies,
- * not a bug. Home Depot name queries have their '/' replaced with a
- * space BEFORE encoding (v9): encodeURIComponent turns '/' into '%2F',
- * but Android's Uri.getPath() decodes it back to '/' and the HD app
- * then searched only the first path segment ("1-1" for "1-1/2 in. ...").
+ * not a bug. Store queries are PUNCTUATION-FREE (v11): the HD app
+ * choked on '/' (v9, searched only "1-1") and on '#' (v10, the screw
+ * still would not open), and the screw still failed with other
+ * punctuation left in the path — so every non-alphanumeric character
+ * is stripped from the store query instead of chasing one symbol at a
+ * time. The Google fallback keeps the raw name/UPC. Dollar General's
+ * fallback is a Google WEB search for "<UPC or name> Dollar General"
+ * (v11): the Shopping fallback showed irrelevant products (the penny
+ * UPC matches nothing in Google's catalog), while a web search
+ * surfaces the community penny lists that describe the item.
  * No other unverified retailer (no Lowe's, no Amazon). No affiliate,
  * utm, or redirector parameters in any link. Labels say "app" /
  * "search", never "buy" — a search link is not a verified price or a
  * confirmed listing. */
+var APP_VERSION = 'v11';
 var SELLER_SEARCH = {
   'wm-ct': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
   'walmart': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
   'target': { label: 'Target', host: 'www.target.com', path: '/s?searchTerm=', pkg: 'com.target.ui' },
   'home-depot': { label: 'Home Depot', host: 'www.homedepot.com', path: '/s/', pkg: 'com.thehomedepot' },
-  'dollar-general': { label: 'Dollar General', host: 'www.dollargeneral.com', path: '/', pkg: 'com.dollargeneral.android', noQuery: true }
+  'dollar-general': { label: 'Dollar General', host: 'www.dollargeneral.com', path: '/', pkg: 'com.dollargeneral.android', noQuery: true,
+    /* Web search, not Shopping: the Shopping fallback showed irrelevant
+     * products for a penny UPC (it matches nothing in Google's catalog). */
+    fallback: function (deal) { return 'https://www.google.com/search?q=' + encodeURIComponent((deal.upc || deal.name || '') + ' Dollar General'); } }
 };
 function isAndroid() {
   return (typeof navigator !== 'undefined' && navigator && /Android/i.test(navigator.userAgent || ''));
@@ -394,19 +404,22 @@ function sellerLinks(deal) {
     if (deal.storeId === 'home-depot') {
       /* Name search only: the SKU search server-redirects to the product
        * page and blanks the in-app view; the name search stays on the
-       * results page. Slashes become spaces BEFORE encoding: a '%2F'
-       * in the /s/ path is decoded back to '/' by Android and the HD
-       * app then searches only the first segment ("1-1"). */
-      q = (deal.name || '').replace(/\//g, ' ');
+       * results page. */
+      q = deal.name || '';
     } else {
       q = deal.upc || deal.name || '';
     }
-    /* '#' breaks store-app searches even when encoded as %23 (the HD app
-     * chokes on a query starting with '#10'), and it never helps a
-     * product search — strip it from every store query, then collapse
-     * the whitespace it leaves behind. The Google fallback keeps the
-     * raw name/UPC (googleShoppingUrl is untouched). */
-    q = q.replace(/#/g, '').replace(/\s+/g, ' ').trim();
+    /* Punctuation-free store queries (v11): the HD app choked on '/'
+     * (v9) and on '#' (v10) even when encoded, and the screw still
+     * would not open with other punctuation left in the path — so
+     * strip EVERY non-alphanumeric character, words intact, in order.
+     * The Google fallback keeps the raw name/UPC (googleShoppingUrl
+     * is untouched). A UPC is digits-only, so it passes through. */
+    q = q.replace(/[^a-zA-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+    /* Per-store fallback: Dollar General falls back to a Google WEB
+     * search (see SELLER_SEARCH); every other store keeps the Google
+     * Shopping search. The fallback only fires when the intent fails. */
+    var fallback = s.fallback ? s.fallback(deal) : googleShoppingUrl(deal);
     if (s.noQuery) {
       /* Home screen only: the DG app rejects /product-search deep links
        * (v8 with the suffix and v9 without both fell back to Google on
@@ -417,7 +430,7 @@ function sellerLinks(deal) {
       if (isAndroid()) {
         urlHome = 'intent://' + s.host + s.path +
           '#Intent;scheme=https;package=' + s.pkg +
-          ';S.browser_fallback_url=' + encodeURIComponent(googleShoppingUrl(deal)) + ';end';
+          ';S.browser_fallback_url=' + encodeURIComponent(fallback) + ';end';
       }
       return [{ label: 'Open in ' + s.label + ' app', url: urlHome }];
     }
@@ -427,7 +440,7 @@ function sellerLinks(deal) {
       if (isAndroid()) {
         url = 'intent://' + s.host + s.path + encodeURIComponent(q) +
           '#Intent;scheme=https;package=' + s.pkg +
-          ';S.browser_fallback_url=' + encodeURIComponent(googleShoppingUrl(deal)) + ';end';
+          ';S.browser_fallback_url=' + encodeURIComponent(fallback) + ';end';
       }
       return [{ label: 'Open in ' + s.label + ' app', url: url }];
     }
@@ -438,6 +451,46 @@ function sellerLinksHtml(d) {
   return sellerLinks(d).map(function (l) {
     return '<a class="btn small" href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>';
   }).join(' ');
+}
+/* Copy a deal's full original name (v11) — the RAW name as shown, with
+ * '#' and punctuation intact, so it can be pasted into a store app.
+ * navigator.clipboard first, textarea + execCommand fallback for
+ * contexts without the clipboard API. On success the button flips to
+ * "Copied" for ~1.5s. Exported so the harness can stub the clipboard
+ * and assert the exact text written. Returns the clipboard promise
+ * when there is one, else null. */
+function copyDealName(name, btn) {
+  function done() {
+    if (!btn) return;
+    var orig = btn.textContent;
+    btn.textContent = 'Copied';
+    setTimeout(function () { btn.textContent = orig; }, 1500);
+  }
+  function legacyCopy() {
+    try {
+      if (typeof document === 'undefined' || !document.body || !document.createElement) return false;
+      var ta = document.createElement('textarea');
+      ta.value = name;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand ? document.execCommand('copy') : false;
+      document.body.removeChild(ta);
+      return !!ok;
+    } catch (e) { return false; }
+  }
+  if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+    var p = null;
+    try { p = navigator.clipboard.writeText(name); } catch (e) { p = null; }
+    if (p && p.then) {
+      p.then(done, function () { if (legacyCopy()) done(); });
+      return p;
+    }
+    done();
+    return p;
+  }
+  if (legacyCopy()) done();
+  return null;
 }
 
 /* ---------------- background push (v3) ---------------- */
@@ -500,7 +553,7 @@ function dealCard(d) {
   return '<article class="deal"><div class="deal-row">' + thumbHtml(d) + '<div class="deal-main">' +
     '<div class="deal-top">' + penny + badge + '<span class="retailer">' + esc(prettyStore(d.storeId)) + '</span>' +
     '<span class="dept">' + esc(d.dept) + '</span></div>' +
-    '<h3>' + esc(d.name) + '</h3>' +
+    '<h3>' + esc(d.name) + ' <button type="button" class="btn small" data-action="copy" data-name="' + esc(d.name) + '">Copy</button></h3>' +
     '<div class="price-row">' + price + was + '</div>' +
     '<div class="deal-meta"><span class="meta">via ' + esc(d.source || 'briefing') + '</span>' + valid + conf + upc + '</div>' +
     (d.note ? '<p class="note">' + esc(d.note) + '</p>' : '') +
@@ -608,7 +661,7 @@ function watchCard(d) {
   return '<article class="deal"><div class="deal-row">' + thumbHtml(d) + '<div class="deal-main">' +
     '<div class="deal-top"><span class="retailer">' + esc(prettyStore(d.storeId)) + '</span>' +
     '<span class="dept">' + esc(d.dept) + '</span>' + badge + '</div>' +
-    '<h3>' + esc(d.name) + '</h3>' +
+    '<h3>' + esc(d.name) + ' <button type="button" class="btn small" data-action="copy" data-name="' + esc(d.name) + '">Copy</button></h3>' +
     '<div class="price-row">' + (d.price ? '<span class="price">' + esc(d.price) + '</span>' : '') +
     (d.originalPrice ? '<span class="was">was ' + esc(d.originalPrice) + '</span>' : '') + '</div>' +
     '<div class="deal-meta">' + (d.upc ? '<span class="meta">UPC ' + esc(d.upc) + '</span>' : '<span class="meta">no UPC in this listing</span>') + '</div>' +
@@ -943,6 +996,10 @@ function init() {
   renderSources();
   renderNotif();
   renderWatchlist();
+  /* Version footer (v11) — the one place the running version is
+   * visible, so a stale cached copy is obvious at a glance. */
+  var av = $('appVersion');
+  if (av) av.textContent = 'Penny Alerts ' + APP_VERSION;
   if (typeof document === 'undefined') return;
   document.querySelectorAll('.tab').forEach(function (t) {
     t.addEventListener('click', function () { switchTab(t.getAttribute('data-tab')); });
@@ -950,13 +1007,17 @@ function init() {
   var dl = $('dealList');
   if (dl) dl.addEventListener('click', function (ev) {
     var b = ev.target && ev.target.closest ? ev.target.closest('[data-action]') : null;
-    if (b) handleAction(b.getAttribute('data-action'), b.getAttribute('data-id'));
+    if (!b) return;
+    if (b.getAttribute('data-action') === 'copy') { copyDealName(b.getAttribute('data-name') || '', b); return; }
+    handleAction(b.getAttribute('data-action'), b.getAttribute('data-id'));
   });
   var wl = $('watchList');
   if (wl) {
     wl.addEventListener('click', function (ev) {
       var b = ev.target && ev.target.closest ? ev.target.closest('[data-action]') : null;
-      if (b) handleAction(b.getAttribute('data-action'), b.getAttribute('data-id'));
+      if (!b) return;
+      if (b.getAttribute('data-action') === 'copy') { copyDealName(b.getAttribute('data-name') || '', b); return; }
+      handleAction(b.getAttribute('data-action'), b.getAttribute('data-id'));
     });
     wl.addEventListener('change', function (ev) {
       var c = ev.target;
@@ -1020,6 +1081,8 @@ if (typeof window !== 'undefined') {
     storeFilterOptions: storeFilterOptions,
     deptFilterOptions: deptFilterOptions,
     sellerLinks: sellerLinks,
+    copyDealName: copyDealName,
+    APP_VERSION: APP_VERSION,
     thumbHtml: thumbHtml,
     STORES: STORES,
     SOURCE_LINKS: SOURCE_LINKS,

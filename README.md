@@ -163,26 +163,40 @@ no embedded page (retailers block framing, so the modal idea was dropped):
 
 - **"Open in {Store} app"** (Walmart, Target, Home Depot, Dollar General): on Android
   this is an `intent://` URL with the store's Android package
-  (`com.walmart.android`, `com.target.ui`, `com.thehomedepot`, `com.dollargeneral.android`) and the
-  Google Shopping search for the item as `browser_fallback_url` — so a
+  (`com.walmart.android`, `com.target.ui`, `com.thehomedepot`, `com.dollargeneral.android`) and a
+  Google search for the item as `browser_fallback_url` — so a
   tap opens the store app when it is installed, and falls back to a
   Google search for the item when it is not (never to the store
   website). On other phones it is the plain store URL for the item
   (iOS Universal Links open the app there). Home Depot searches by
-  product name — a `/` in the name is replaced with a space before
-  encoding (v9): `%2F` in the `/s/` path made the HD app search only
-  the first path segment ("1-1" for "1-1/2 in. ..."). A `#` is
-  stripped from every store query (v10): the HD app chokes on a query
-  starting with "#10" even when the `#` is encoded as `%23`. Walmart
-  and Target search by UPC, then name.
+  product name. Store queries are punctuation-free (v11): every
+  non-alphanumeric character is stripped from the query, words intact,
+  in order — the HD app choked on `/` (v9, searched only "1-1") and
+  on `#` (v10, the screw still would not open), and the screw still
+  failed with other punctuation left in the path, so one symbol at a
+  time was abandoned. Walmart and Target search by UPC, then name.
   Dollar General opens the app's home screen
   (`dollargeneral.com/`, v10): the DG app rejects `/product-search`
   deep links — the v8 link (with `&productSearchedMode=manual`) and
   the v9 link (bare) both fell back to Google on the phone — so the
   link lands in the app and the search/scan happens from there.
+  Dollar General's fallback is a Google **web** search for
+  "`<UPC or name>` Dollar General" (v11): the Shopping fallback
+  showed irrelevant products (a penny UPC matches nothing in
+  Google's catalog), while a web search surfaces the community
+  penny lists that describe the item. Other stores keep the
+  Google Shopping fallback.
   DG catalog limit: most DG penny items are not in DG's online
   catalog at all, so an in-app search may not find them either —
   the in-store scan is the check for DG pennies.
+- **Copy** (every deal card and watchlist card, v11): a small button
+  next to the item name copies the full original name — `#` and
+  punctuation intact — to paste into a store app. It flips to
+  "Copied" for a moment on success.
+- **Version footer** (v11): the page footer reads "Penny Alerts v11"
+  (bumped every release) so the version a phone is actually running
+  is visible at a glance — the repeated stale-cache confusion is
+  why it exists.
 - **Google Shopping search** (every other store): `google.com/search?tbm=shop&q=<UPC>`
   when the item has a UPC, else `q=<item name, URL-encoded>`.
 

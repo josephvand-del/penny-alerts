@@ -230,7 +230,7 @@ const PA = sandbox.window.PennyAlerts;
   check('pushSupported false in stub env (no serviceWorker)', PA.pushSupported(), false);
   check('supabase URL is the shared bulk-finder project', PA.SUPABASE_URL, 'https://xwekulsnfarjibawqqih.supabase.co');
   const swText = fs.readFileSync('/home/hatch/workspace/penny-alerts/sw.js', 'utf8');
-  check('sw cache bumped to v10', swText.indexOf("penny-alerts-v10") !== -1, true);
+  check('sw cache bumped to v11', swText.indexOf("penny-alerts-v11") !== -1, true);
   check('sw has push handler', swText.indexOf("addEventListener('push'") !== -1, true);
   check('sw push shows a notification', swText.indexOf('showNotification') !== -1, true);
   check('sw has notificationclick handler', swText.indexOf("addEventListener('notificationclick'") !== -1, true);
@@ -309,16 +309,24 @@ const PA = sandbox.window.PennyAlerts;
   });
   check('real feed has some images', imgCount > 0, true);
 
-  /* 12. seller links (v10) — ONE link per card: an Android intent: URL
+  /* 12. seller links (v11) — ONE link per card: an Android intent: URL
    * (store app, Google fallback) on Android, the plain https retailer
    * URL elsewhere, Google Shopping only for unmapped stores. Home Depot
-   * searches by name with '/' turned into a space before encoding and
-   * '#' stripped from every store query; Dollar General opens the
-   * app's home screen (the DG app rejects /product-search deep links).
-   * No BrickSeek anywhere, no modal anywhere. */
+   * searches by name; Dollar General opens the app's home screen (the
+   * DG app rejects /product-search deep links). Store queries are
+   * PUNCTUATION-FREE (v11): every non-alphanumeric character is
+   * stripped — the HD app choked on '/' (v9) and '#' (v10) even when
+   * encoded, and the screw still would not open with other punctuation
+   * left in the path. The Google fallback keeps the RAW name/UPC.
+   * DG's fallback is a Google WEB search for "<UPC or name> Dollar
+   * General" (v11), not Shopping. No BrickSeek anywhere, no modal. */
   function intentUrl(host, pathQ, pkg, deal) {
     var g = 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(deal.upc || deal.name || '');
     return 'intent://' + host + pathQ + '#Intent;scheme=https;package=' + pkg + ';S.browser_fallback_url=' + encodeURIComponent(g) + ';end';
+  }
+  function intentUrlDg(deal) {
+    var g = 'https://www.google.com/search?q=' + encodeURIComponent((deal.upc || deal.name || '') + ' Dollar General');
+    return 'intent://www.dollargeneral.com/#Intent;scheme=https;package=com.dollargeneral.android;S.browser_fallback_url=' + encodeURIComponent(g) + ';end';
   }
   function fallbackOf(intent) {
     var m = intent.match(/;S\.browser_fallback_url=([^;]*);end$/);
@@ -350,34 +358,42 @@ const PA = sandbox.window.PennyAlerts;
   check('seller links: intent fallback is the Google Shopping URL (WM)', fallbackOf(slWm[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   check('seller links: intent fallback is the Google Shopping URL (TG)', fallbackOf(slTg[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   const slDg = PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' });
-  check('seller links: DG intent opens app home screen', slDg[0].url, intentUrl('www.dollargeneral.com', '/', 'com.dollargeneral.android', { upc: '012345678905', name: 'Test Item' }));
+  check('seller links: DG intent opens app home screen', slDg[0].url, intentUrlDg({ upc: '012345678905', name: 'Test Item' }));
   check('seller links: DG label is app-first', slDg[0].label, 'Open in Dollar General app');
   check('seller links: DG is exactly one link', slDg.length, 1);
   const slDgNoUpc = PA.sellerLinks({ storeId: 'dollar-general', upc: '', name: 'Blue Widget 12oz' });
-  check('seller links: DG without UPC still opens app home screen', slDgNoUpc[0].url, intentUrl('www.dollargeneral.com', '/', 'com.dollargeneral.android', { upc: '', name: 'Blue Widget 12oz' }));
+  check('seller links: DG without UPC still opens app home screen', slDgNoUpc[0].url, intentUrlDg({ upc: '', name: 'Blue Widget 12oz' }));
+  check('seller links: DG fallback is a Google WEB search (UPC)', fallbackOf(slDg[0].url), 'https://www.google.com/search?q=012345678905%20Dollar%20General');
+  check('seller links: DG fallback is a Google WEB search (name)', fallbackOf(slDgNoUpc[0].url), 'https://www.google.com/search?q=Blue%20Widget%2012oz%20Dollar%20General');
+  check('seller links: DG fallback has no tbm=shop', fallbackOf(slDg[0].url).indexOf('tbm=shop') === -1, true);
   check('seller links: no product-search anywhere', JSON.stringify([].concat(slWm, slWmNoUpc, slTg, slHdName, slHdSkuUpc, slHd, slDg, slDgNoUpc)).indexOf('product-search') === -1, true);
   check('seller links: no productSearchedMode anywhere', JSON.stringify([].concat(slWm, slWmNoUpc, slTg, slHdName, slHdSkuUpc, slHd, slDg, slDgNoUpc)).indexOf('productSearchedMode') === -1, true);
-  /* Home Depot slash fix: "1-1/2 in." must become "1-1 2 in." in the
-   * /s/ path — a %2F there is decoded back to '/' by Android and the
-   * HD app then searches only the first segment. */
+  /* v11: store queries are PUNCTUATION-FREE — every non-alphanumeric
+   * character is stripped, words intact, in order. The HD app choked
+   * on '/' (v9) and '#' (v10) even when encoded, and the screw still
+   * would not open with other punctuation left in the path. */
   const slHdSlash = PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' });
-  check('seller links: HD slash becomes space in the path', slHdSlash[0].url, intentUrl('www.homedepot.com', '/s/1-1%202%20in.%20x%205%20in.%20Nail%20Plate%20Bulk%20(100-Pack)', 'com.thehomedepot', { upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' }));
+  check('seller links: HD nail plate is punctuation-free', slHdSlash[0].url, intentUrl('www.homedepot.com', '/s/1%201%202%20in%20x%205%20in%20Nail%20Plate%20Bulk%20100%20Pack', 'com.thehomedepot', { upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' }));
   check('seller links: HD /s/ path has no %2F', slHdSlash[0].url.split('/s/')[1].split('#Intent')[0].indexOf('%2F') === -1, true);
   check('seller links: HD /s/ path has no literal slash', slHdSlash[0].url.split('/s/')[1].split('#Intent')[0].indexOf('/') === -1, true);
-  /* v10: '#' is stripped from every store query — the HD app chokes on
-   * a query starting with '#10' even encoded as %23. The Google
-   * fallback keeps the raw name, so it still carries %23 — the data
-   * part (before #Intent) must not. */
+  check('seller links: HD /s/ path has no %28 %29 %2E %2D', ['%28', '%29', '%2E', '%2D'].every(function (p) { return slHdSlash[0].url.split('/s/')[1].split('#Intent')[0].indexOf(p) === -1; }), true);
   const slHdHash = PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '#10 x 1-3/4 in. Black 6-Lobe Torx Drive Exterior Flat Head Multi-Material Screw 1 lb. -Box (106-Piece)' });
-  check('seller links: HD screw URL exact, hash stripped', slHdHash[0].url, intentUrl('www.homedepot.com', '/s/10%20x%201-3%204%20in.%20Black%206-Lobe%20Torx%20Drive%20Exterior%20Flat%20Head%20Multi-Material%20Screw%201%20lb.%20-Box%20(106-Piece)', 'com.thehomedepot', { upc: '', name: '#10 x 1-3/4 in. Black 6-Lobe Torx Drive Exterior Flat Head Multi-Material Screw 1 lb. -Box (106-Piece)' }));
-  check('seller links: HD screw query starts with 10', slHdHash[0].url.split('#Intent')[0].indexOf('10%20x%201-3') !== -1, true);
+  check('seller links: HD screw URL exact, punctuation-free', slHdHash[0].url, intentUrl('www.homedepot.com', '/s/10%20x%201%203%204%20in%20Black%206%20Lobe%20Torx%20Drive%20Exterior%20Flat%20Head%20Multi%20Material%20Screw%201%20lb%20Box%20106%20Piece', 'com.thehomedepot', { upc: '', name: '#10 x 1-3/4 in. Black 6-Lobe Torx Drive Exterior Flat Head Multi-Material Screw 1 lb. -Box (106-Piece)' }));
+  check('seller links: HD screw query starts with 10', slHdHash[0].url.split('#Intent')[0].indexOf('10%20x%201%203%204') !== -1, true);
   check('seller links: HD data part has no %23', slHdHash[0].url.split('#Intent')[0].indexOf('%23') === -1, true);
   check('seller links: HD data part has no literal #', slHdHash[0].url.split('#Intent')[0].indexOf('#') === -1, true);
+  check('seller links: HD screw data part has no %28 %29 %2E %2D', ['%28', '%29', '%2E', '%2D'].every(function (p) { return slHdHash[0].url.split('#Intent')[0].indexOf(p) === -1; }), true);
+  /* The Google fallback keeps the RAW name/UPC — punctuation still
+   * present, encoded — even though the store query is stripped. */
+  check('seller links: HD fallback keeps raw name with # and /', fallbackOf(slHdHash[0].url), 'https://www.google.com/search?tbm=shop&q=%2310%20x%201-3%2F4%20in.%20Black%206-Lobe%20Torx%20Drive%20Exterior%20Flat%20Head%20Multi-Material%20Screw%201%20lb.%20-Box%20(106-Piece)');
   const slHashMid = PA.sellerLinks({ storeId: 'home-depot', upc: '', name: 'Screw #10 Pack' });
   check('seller links: mid-string # stripped', slHashMid[0].url.split('#Intent')[0].indexOf('Screw%2010%20Pack') !== -1, true);
   const slWmHash = PA.sellerLinks({ storeId: 'wm-ct', upc: '', name: 'Item #5' });
   check('seller links: Walmart # stripped too', slWmHash[0].url.split('#Intent')[0].indexOf('Item%205') !== -1, true);
-  check('seller links: intent fallback is the Google Shopping URL (DG)', fallbackOf(slDg[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
+  const slWmPunct = PA.sellerLinks({ storeId: 'walmart', upc: '', name: 'Widget, 12-oz (2-Pack)!' });
+  check('seller links: Walmart name query is punctuation-free', slWmPunct[0].url.split('/search?q=')[1].split('#Intent')[0], 'Widget%2012%20oz%202%20Pack');
+  const slTgPunct = PA.sellerLinks({ storeId: 'target', upc: '', name: 'Widget, 12-oz (2-Pack)!' });
+  check('seller links: Target name query is punctuation-free', slTgPunct[0].url.split('searchTerm=')[1].split('#Intent')[0], 'Widget%2012%20oz%202%20Pack');
   check('seller links: unknown retailer gets only the Google link', PA.sellerLinks({ storeId: 'amazon', upc: '012345678905', name: 'X' }).length, 1);
   check('seller links: no buy language anywhere', JSON.stringify([].concat(slWm, slTg, slHd, slHdName, slDg)).toLowerCase().indexOf('buy') === -1, true);
   check('seller links: no utm params in any link', JSON.stringify([].concat(slWm, slWmNoUpc, slTg, slHdName, slHdSkuUpc, slHd, slDg, slDgNoUpc)).indexOf('utm_') === -1, true);
@@ -388,13 +404,13 @@ const PA = sandbox.window.PennyAlerts;
   check('seller links: non-Android HD is plain https by name', PA.sellerLinks({ storeId: 'home-depot', sku: '1012-308-531', upc: '', name: 'Test Screw' })[0].url, 'https://www.homedepot.com/s/Test%20Screw');
   check('seller links: non-Android Target is plain https', PA.sellerLinks({ storeId: 'target', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.target.com/s?searchTerm=012345678905');
   check('seller links: non-Android DG is plain https home screen', PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.dollargeneral.com/');
-  check('seller links: non-Android HD slash becomes space', PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' })[0].url, 'https://www.homedepot.com/s/1-1%202%20in.%20x%205%20in.%20Nail%20Plate%20Bulk%20(100-Pack)');
+  check('seller links: non-Android HD is punctuation-free', PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' })[0].url, 'https://www.homedepot.com/s/1%201%202%20in%20x%205%20in%20Nail%20Plate%20Bulk%20100%20Pack');
   check('seller links: non-Android HD plain URL has no %2F', PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' })[0].url.indexOf('%2F') === -1, true);
-  check('seller links: non-Android HD hash stripped', PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '#10 x 1-3/4 in. Black Screw' })[0].url, 'https://www.homedepot.com/s/10%20x%201-3%204%20in.%20Black%20Screw');
+  check('seller links: non-Android HD screw is punctuation-free', PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '#10 x 1-3/4 in. Black Screw' })[0].url, 'https://www.homedepot.com/s/10%20x%201%203%204%20in%20Black%20Screw');
   sandbox.navigator.userAgent = '';
   const realHd = realWeekly.items.filter(function (it) { return it.retailer === 'home-depot'; })[0];
   const realHdNorm = realHd ? PA.normalizeWeekly({ items: [realHd] }).deals[0] : null;
-  check('real feed: HD link searches by product name', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url : '', realHdNorm ? 'https://www.homedepot.com/s/' + encodeURIComponent(realHdNorm.name.replace(/\//g, ' ').replace(/#/g, '').replace(/\s+/g, ' ').trim()) : '');
+  check('real feed: HD link searches by product name', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url : '', realHdNorm ? 'https://www.homedepot.com/s/' + encodeURIComponent(realHdNorm.name.replace(/[^a-zA-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim()) : '');
   check('real feed: HD link does not contain the SKU', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url.indexOf(realHdNorm.sku.replace(/-/g, '')) === -1 : false, true);
   check('rendered cards include Google Shopping links', dealHtml.indexOf('google.com/search?tbm=shop') !== -1, true);
   const appText = fs.readFileSync('/home/hatch/workspace/penny-alerts/app.js', 'utf8');
@@ -436,6 +452,42 @@ const PA = sandbox.window.PennyAlerts;
   check('dept filter: rendered select has no Penny option', els['deptFilter'].options.map(function (o) { return o.value; }).indexOf('Penny') === -1, true);
   check('dept filter: rendered select matches weekly deals', els['deptFilter'].options.map(function (o) { return o.value; }).join(','), PA.deptFilterOptions(st.weeklyDeals).map(function (o) { return o.value; }).join(','));
   check('dept filter: All departments first', els['deptFilter'].options[0].value, '');
+
+  /* 15. copy button + version footer (v11). */
+  /* Every rendered deal card carries a Copy button next to the name,
+   * carrying the deal's full raw name in data-name. The fixture
+   * weekly deal is one of the first rendered cards. */
+  check('deal cards carry a Copy button', dealHtml.indexOf('data-action="copy"') !== -1, true);
+  check('deal Copy button carries the raw name', dealHtml.indexOf('data-name="Weekly Test HD Screw"') !== -1, true);
+  check('deal Copy button reads Copy', dealHtml.indexOf('>Copy</button>') !== -1, true);
+  /* The copy handler writes exactly the raw name (punctuation intact)
+   * to the stubbed clipboard and flips the button to "Copied". */
+  const written = [];
+  sandbox.navigator.clipboard = { writeText: function (t) { written.push(t); return Promise.resolve(); } };
+  const copyBtn = new StubEl('button');
+  copyBtn.textContent = 'Copy';
+  const rawName = '#10 x 1-3/4 in. Black 6-Lobe Torx Drive Exterior Flat Head Multi-Material Screw 1 lb. -Box (106-Piece)';
+  await PA.copyDealName(rawName, copyBtn);
+  check('copy handler writes the exact raw name', written, [rawName]);
+  check('copy button flips to Copied', copyBtn.textContent, 'Copied');
+  /* Without the clipboard API the handler falls back (no stub body in
+   * this env, so it returns null) and never throws. */
+  delete sandbox.navigator.clipboard;
+  const copyBtn2 = new StubEl('button');
+  copyBtn2.textContent = 'Copy';
+  check('copy without clipboard API returns null', await PA.copyDealName('Some Item', copyBtn2), null);
+  check('copy without clipboard API leaves button alone', copyBtn2.textContent, 'Copy');
+  /* Watchlist cards carry the same Copy button. */
+  PA._handleAction('watch', firstPenny);
+  const watchHtml = els['watchList'].innerHTML;
+  check('watchlist cards carry a Copy button', watchHtml.indexOf('data-action="copy"') !== -1, true);
+  check('watchlist Copy button carries the raw name', watchHtml.indexOf('data-name="' + pennies[1].name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;') + '"') !== -1, true);
+  PA._handleAction('unwatch', firstPenny);
+  /* Version footer: APP_VERSION is v11, the page footer reads
+   * "Penny Alerts v11", and init() set the rendered element. */
+  check('APP_VERSION is v11', PA.APP_VERSION, 'v11');
+  check('index.html footer reads Penny Alerts v11', htmlText.indexOf('Penny Alerts v11') !== -1, true);
+  check('rendered version footer reads Penny Alerts v11', els['appVersion'].textContent, 'Penny Alerts v11');
 
   console.log(failures === 0 ? 'ALL PASS' : failures + ' FAILURES');
   process.exit(failures === 0 ? 0 : 1);
