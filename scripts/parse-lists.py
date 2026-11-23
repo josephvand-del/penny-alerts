@@ -161,7 +161,8 @@ def department_for(name: str, kind: str) -> str:
 
 
 def make_item(name, retailer, source, kind="deal", upc="", price="", was="",
-              valid_to="", url="", image="", list_date=""):
+              valid_to="", url="", image="", list_date="", is_stack=False,
+              steps=None):
     name = clean(name)[:140] or "Unknown item"
     return {
         "name": name,
@@ -176,8 +177,15 @@ def make_item(name, retailer, source, kind="deal", upc="", price="", was="",
         "url": url,
         "image": image,
         # Date of the list section this item came from (YYYY-MM-DD).
-        # '' here means "unknown yet" — main() fills it from first_seen.
+        # '' means unknown — never the run date, never filled in later.
         "list_date": list_date or "",
+        # Coupon-stack / bundle deal (lives on the Bundles tab, not Deals).
+        "is_stack": bool(is_stack),
+        # How-to steps, copied ONLY from the source's own text (coupon
+        # lines, thread scenario sentences). [] = the source gave no
+        # usable steps; the app shows its generic checklist instead.
+        # Never invented.
+        "steps": [clean(s) for s in (steps or []) if clean(s)][:6],
     }
 
 
@@ -281,17 +289,28 @@ def og_image_for_url(client: httpx.Client, url: str) -> str:
 
 
 def safe_get(client: httpx.Client, url: str, timeout: float = 25.0):
-    """GET a URL. Returns (text_or_None, error_or_None)."""
-    try:
-        resp = client.get(url, timeout=timeout, follow_redirects=True)
-    except httpx.HTTPError as e:
-        return None, f"{type(e).__name__}"
-    if resp.status_code != 200:
-        return None, f"HTTP {resp.status_code}"
-    body = resp.text or ""
-    if any(m in body for m in CF_MARKERS):
-        return None, "blocked (bot challenge)"
-    return body, None
+    """GET a URL. Returns (text_or_None, error_or_None). A single retry
+    on timeout/connection errors: DealNews' editors feed answered 200
+    in ~1s on three manual retries after timing out twice inside parser
+    runs (Nov 23, 2026) — a slow moment, not a dead source. One retry
+    keeps a flaky minute from dropping a source for the whole day."""
+    last_err = None
+    for attempt in range(2):
+        try:
+            resp = client.get(url, timeout=timeout, follow_redirects=True)
+        except httpx.HTTPError as e:
+            last_err = f"{type(e).__name__}"
+            if attempt == 0:
+                time.sleep(3)
+                continue
+            return None, last_err
+        if resp.status_code != 200:
+            return None, f"HTTP {resp.status_code}"
+        body = resp.text or ""
+        if any(m in body for m in CF_MARKERS):
+            return None, "blocked (bot challenge)"
+        return body, None
+    return None, last_err or "fetch failed"
 
 
 # ---------------------------------------------------------------- penny pages
@@ -336,8 +355,9 @@ def extract_upc_lines_tracked(html_text: str, retailer: str, source: str,
     - a heading starting "This Week's" sets the current date to
       this_week_date (the page's H1 date, e.g. KCL's Nov 3);
     - a heading starting "Past" clears the current date (past lists on
-      that page carry no dates — those items fall back to the run date).
-    Items found before any dated heading get the run date."""
+      that page carry no dates — those items get '' (unknown), never
+      the run date).
+    Items found before any dated heading get '' (unknown)."""
     tree = HTMLParser(html_text)
     today = today_str()
     seen = set()
@@ -350,7 +370,7 @@ def extract_upc_lines_tracked(html_text: str, retailer: str, source: str,
         if el.tag in ("h2", "h3", "h4"):
             low = text.lower()
             if low.startswith("this week"):
-                current_date = this_week_date or today
+                current_date = this_week_date or ""
             elif low.startswith("past"):
                 current_date = None
             else:
@@ -373,7 +393,7 @@ def extract_upc_lines_tracked(html_text: str, retailer: str, source: str,
         items.append(make_item(item, retailer, source, kind="penny",
                                upc=upc, price="$0.01",
                                image=nearest_image(el, base_url),
-                               list_date=current_date or today))
+                               list_date=current_date or ""))
     return items
 
 
@@ -384,7 +404,7 @@ def extract_fg_dg(html_text: str, base_url: str = ""):
     General Penny Lists', each with a dated <summary>. Items are tagged
     with their block's date; anything outside a <details> block (the
     current section, if it ever gains items) gets the page's 'Effective'
-    date, else the run date."""
+    date, else '' (unknown)."""
     tree = HTMLParser(html_text)
     today = today_str()
     eff_m = re.search(r"Effective\s+[^<\n]{0,80}", html_text)
@@ -417,11 +437,11 @@ def extract_fg_dg(html_text: str, base_url: str = ""):
                 break
             node = getattr(node, "parent", None)
         if not found_details:
-            list_date = eff or today
+            list_date = eff or ""
         items.append(make_item(item, "dollar-general", "thefreebieguy.com",
                                kind="penny", upc=upc, price="$0.01",
                                image=nearest_image(el, base_url),
-                               list_date=list_date or today))
+                               list_date=list_date or ""))
     return items
 
 
@@ -458,7 +478,7 @@ def parse_retailshout(html_text: str):
                        kind="penny", upc=upc, price="$0.01", image=img,
                        # The card's own penny date ("Penny Date: Nov 20,
                        # 2026") is the list date for this item.
-                       list_date=parse_list_date(note) or today_str())
+                       list_date=parse_list_date(note) or "")
         if note:
             it["note"] = note
         items.append(it)
@@ -485,7 +505,7 @@ def parse_ppm_table(html_text: str, list_date: str = ""):
         seen.add(upc)
         items.append(make_item(name, "dollar-general", "pennypinchinmom.com",
                                kind="penny", upc=upc, price="$0.01",
-                               list_date=list_date or today_str()))
+                               list_date=list_date or ""))
     return items
 
 
@@ -574,7 +594,7 @@ def parse_pennyrecon(html_text: str):
         it = make_item(name, "home-depot", "pennyrecon.com",
                        kind="penny", upc="", price="$0.01",
                        was=retail, url=url, image=img,
-                       list_date=last or today_str())
+                       list_date=last or "")
         if sku:
             it["sku"] = sku
         items.append(it)
@@ -591,6 +611,29 @@ CATEGORY_STORE = {
     "walgreens": "walgreens",
     "meijer": "meijer",
     "kroger": "kroger",
+    "kohls": "kohls",
+    "kohl's": "kohls",
+    "jcpenney": "jcp",
+    "jcp": "jcp",
+    "michaels": "michaels",
+    "lowes": "lowes",
+    "lowe's": "lowes",
+    "best buy": "best-buy",
+    "amazon": "amazon",
+    "walmart": "wm-ct",
+    "home depot": "home-depot",
+    "hobby lobby": "hobby-lobby",
+    "sephora": "sephora",
+    "ulta": "ulta",
+    "publix": "publix",
+    "under armour": "under-armour",
+    "belk": "belk",
+    "nike": "nike",
+    "lululemon": "lululemon",
+    "macys": "macys",
+    "macy's": "macys",
+    "bj's": "bjs",
+    "rite aid": "rite-aid",
 }
 TITLE_STORE_HINTS = {
     "dollar general": "dollar-general",
@@ -600,6 +643,29 @@ TITLE_STORE_HINTS = {
     "walgreens": "walgreens",
     "meijer": "meijer",
     "kroger": "kroger",
+    "kohls": "kohls",
+    "kohl's": "kohls",
+    "jcpenney": "jcp",
+    "jcp": "jcp",
+    "michaels": "michaels",
+    "lowes": "lowes",
+    "lowe's": "lowes",
+    "best buy": "best-buy",
+    "amazon": "amazon",
+    "walmart": "wm-ct",
+    "home depot": "home-depot",
+    "hobby lobby": "hobby-lobby",
+    "sephora": "sephora",
+    "ulta": "ulta",
+    "publix": "publix",
+    "under armour": "under-armour",
+    "belk": "belk",
+    "nike": "nike",
+    "lululemon": "lululemon",
+    "macys": "macys",
+    "macy's": "macys",
+    "bj's": "bjs",
+    "rite aid": "rite-aid",
 }
 STRONG_PENNY = ("penny list", "1¢", "1 cent", "one cent", "penny item")
 WEAK_PENNY = ("penny", "markdown", "clearance", "discontinued")
@@ -612,6 +678,18 @@ def _classify_penny(text: str) -> str:
     if any(p in low for p in WEAK_PENNY):
         return "med"
     return "low"
+
+
+def _entry_date(entry) -> str:
+    """RSS published date as YYYY-MM-DD, or '' when the entry has none.
+    Used as list_date for RSS items (a real post date, never the run date)."""
+    pp = getattr(entry, "published_parsed", None)
+    if pp:
+        try:
+            return datetime(*pp[:6], tzinfo=timezone.utc).date().isoformat()
+        except Exception:
+            return ""
+    return ""
 
 
 def parse_rss(raw: str, source_name: str):
@@ -647,6 +725,7 @@ def parse_rss(raw: str, source_name: str):
                 continue
         if heat == "low" and "deals" in cats and len(cats) <= 2 and store_id != "dollar-general":
             continue
+        list_date = _entry_date(entry)
         if heat == "high":
             # Penny-list post: pull any UPCs out of the post text. If none
             # are in the post, skip it — the list pages already carry the
@@ -657,11 +736,12 @@ def parse_rss(raw: str, source_name: str):
                 seen_upcs.add(upc)
                 items.append(make_item(title, store_id, source_name,
                                        kind="penny", upc=upc, price="$0.01",
-                                       url=link))
+                                       url=link, list_date=list_date))
         elif heat == "med":
             items.append(make_item(title, store_id, source_name,
                                    kind="deal", upc="", price="",
-                                   valid_to=today, url=link))
+                                   valid_to=today, url=link,
+                                   list_date=list_date))
     return items, None
 
 
@@ -685,9 +765,11 @@ RETAILER_MAP = {
     "big lots": "big-lots", "barnes & noble": "barnes-noble",
     "staples": "staples", "office depot": "office-depot",
     "petsmart": "petsmart", "petco": "petco", "michaels": "michaels",
-    "hobby lobby": "hl", "dick's sporting goods": "dicks",
+    "hobby lobby": "hobby-lobby", "dick's sporting goods": "dicks",
     "dollar general": "dollar-general", "family dollar": "family-dollar",
-    "dollar tree": "dollar-tree",
+    "dollar tree": "dollar-tree", "belk": "belk", "lululemon": "lululemon",
+    "nike": "nike", "publix": "publix", "under armour": "under-armour",
+    "bj's": "bjs", "macy's": "macys",
 }
 PRICE_RE = re.compile(r"\$([\d,]+(?:\.\d{2})?)")
 RETAILER_TAIL_RE = re.compile(r"\b(?:at|via|from|on)\s+([A-Z][\w&'.-]*(?:\s+[A-Z][\w&'.-]*){0,3})", re.I)
@@ -733,17 +815,54 @@ def _extract_price(title: str, summary: str):
     return f"${cur:.2f}", ""
 
 
-def parse_slickdeals(raw: str):
+def parse_slickdeals(raw: str, force_retailer: str = "", require_title: str = "",
+                     max_age_days: int | None = None, no_stack: bool = False,
+                     require_text: str = "", force_stack: bool = False):
+    """Slickdeals RSS (frontpage, or a store search). Adds list_date from
+    the entry's published date, stack flagging (coupon-stack threads),
+    and how-to steps lifted from the thread summary — only sentences
+    that actually read like steps (clip/coupon/code/apply/get $/…);
+    plain sale descriptions get no steps. force_retailer is the fallback
+    retailer for a store search feed, used only when the thread itself
+    names no store. require_title keeps only entries whose title
+    contains the phrase (a relevance-ranked search returns old threads
+    too); require_text is the same test against title+summary (the
+    'dollar general' search is noisy — its first hit is a '1 Million
+    Dollar' sweepstakes, which names no Dollar General anywhere);
+    max_age_days drops entries published more than that many days
+    ago; no_stack forces is_stack False (a search feed routed to Deals);
+    force_stack forces is_stack True (a 'walgreens free' search is
+    stack-style by construction)."""
     parsed = feedparser.parse(raw)
     today = today_str()
+    today_d = datetime.now(timezone.utc).date()
     items = []
     for entry in parsed.entries[:40]:
         title = clean(getattr(entry, "title", "") or "")
         if not title:
             continue
+        if require_title and require_title.lower() not in title.lower():
+            continue
         summary = clean(TAG_STRIP.sub("", html.unescape(getattr(entry, "summary", "") or "")))
+        if require_text and require_text.lower() not in f"{title} {summary}".lower():
+            continue
+        list_date = _entry_date(entry)
+        if max_age_days is not None:
+            if not list_date:
+                continue
+            try:
+                age = (today_d - datetime.strptime(list_date, "%Y-%m-%d").date()).days
+            except ValueError:
+                continue
+            if age < 0 or age > max_age_days:
+                continue
         link = (getattr(entry, "link", "") or "").split("?")[0]
+        # The search query already pins the store; _retailer_for still
+        # wins when the thread names another store ('$6.71 With S&S @
+        # Amazon' in a CVS search is an Amazon deal, not a CVS one).
         store_id = _retailer_for(title, summary)
+        if store_id == "online" and force_retailer:
+            store_id = force_retailer
         cur, orig = _extract_price(title, summary)
         # Slickdeals frontpage RSS carries no media thumbnails (verified
         # 2026-11-22) — this is defensive only.
@@ -753,7 +872,1145 @@ def parse_slickdeals(raw: str):
             thumb = clean_image_url((media[0] or {}).get("url", ""))
         items.append(make_item(title, store_id, "slickdeals.net",
                                kind="deal", upc="", price=cur, was=orig,
-                               valid_to=today, url=link, image=thumb))
+                               valid_to=today, url=link, image=thumb,
+                               list_date=list_date,
+                               is_stack=True if force_stack else
+                               (False if no_stack else looks_like_stack(title, summary, store_id)),
+                               steps=_steps_from_text(summary)))
+    return items
+
+
+# ------------------------------------------------------- coupon stacks (v13)
+# A "stack" is a coupon-stack / bundle deal: buy the listed items, clip
+# the digitals, earn the rewards — the final price is the out-of-pocket
+# after rewards. Walgreens/CVS/Target stacks come from the coupon blogs
+# and deal forums in text form (Facebook reels can't be read by a script
+# — no public API, login wall, video — so the same stacks are read where
+# the blogs publish them with full math).
+
+_STEP_RES = [
+    r"\bclip\b", r"\bcoupon\b", r"\bcode\b", r"\bpromo\b", r"\bapply\b",
+    r"\bcheckout\b", r"\brewards?\b", r"\bwags cash\b", r"\bextra ?bucks\b",
+    r"\bregister rewards\b", r"\brebate\b", r"\bbogo\b",
+    r"\badd\b.{0,40}\bto cart\b", r"\bget \$", r"\buse\b.{0,30}\bcoupon\b",
+]
+
+
+def _steps_from_text(text: str) -> list:
+    """How-to steps, lifted ONLY from the source's own text: split it into
+    sentences and keep the ones that read like steps (clip the coupon,
+    apply the code, get $X back…). Plain sale descriptions match nothing
+    and come back []. Never invented, never reworded — the sentence is
+    kept verbatim (URLs and *markup* stripped)."""
+    if not text:
+        return []
+    t = re.sub(r"https?://\S+", " ", text).replace("*", "")
+    t = re.sub(r"\s+", " ", t).strip()
+    if not t:
+        return []
+    steps = []
+    for p in re.split(r"(?<=[.!?])\s+|\s*;\s*", t):
+        p = clean(p)
+        if not (10 <= len(p) <= 220):
+            continue
+        # Must read like a sentence, not a cut-off fragment ('$2.19)
+        # This rebate…' starts mid-parenthetical).
+        if not p[0].isalpha():
+            continue
+        low = p.lower()
+        if any(re.search(rx, low) for rx in _STEP_RES):
+            if p not in steps:
+                steps.append(p)
+        if len(steps) >= 5:
+            break
+    return steps
+
+
+def looks_like_stack(title: str, summary: str, retailer: str) -> bool:
+    """Is this Slickdeals thread a coupon stack? Drugstore reward phrases
+    (Walgreens Cash, Register Rewards, ExtraBucks, rebate) always count;
+    for Walgreens/CVS, 'ac/acs' (after coupons), 'pick up' and 'get $'
+    in the title count too; for Target only an explicit bundle does."""
+    text = f" {title} {summary} ".lower()
+    if any(p in text for p in ("wags cash", "walgreens cash", "register rewards",
+                               "extrabucks", "extra bucks", "rebate")):
+        return True
+    if re.search(r"\becb\b", text):
+        return True
+    if retailer in ("walgreens", "cvs"):
+        if re.search(r"\bac\b|\bacs\b", text) or "pick up" in text \
+                or "get $" in text or "bundle" in text:
+            return True
+    if retailer == "target" and "bundle" in text:
+        return True
+    return False
+
+
+def _parse_relative_time(text: str) -> str:
+    """'14 hours ago' / '45 minutes ago' / '2 days ago' -> the date that
+    was, in UTC (the parser's clock). 'today'/'yesterday' and ISO dates
+    also handled. '' when nothing parses."""
+    if not text:
+        return ""
+    now = datetime.now(timezone.utc)
+    m = re.search(r"(\d+)\s*(minute|hour|day|week)s?\s*ago", text, re.I)
+    if m:
+        n, unit = int(m.group(1)), m.group(2).lower()
+        delta = {"minute": timedelta(minutes=n), "hour": timedelta(hours=n),
+                 "day": timedelta(days=n), "week": timedelta(weeks=n)}[unit]
+        return (now - delta).date().isoformat()
+    low = text.strip().lower()
+    if low == "today":
+        return now.date().isoformat()
+    if low == "yesterday":
+        return (now - timedelta(days=1)).date().isoformat()
+    m = re.search(r"\b(\d{4})-(\d{2})-(\d{2})\b", text)
+    if m:
+        return f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
+    return ""
+
+
+def _parse_mdy(text: str) -> str:
+    """'11/22/26' (FG article dates) -> '2026-11-22'. '' when unparseable."""
+    m = re.search(r"\b(\d{1,2})/(\d{1,2})/(\d{2,4})\b", text or "")
+    if not m:
+        return ""
+    mo, dy, yr = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    if yr < 100:
+        yr += 2000
+    try:
+        return datetime(yr, mo, dy).date().isoformat()
+    except ValueError:
+        return ""
+
+
+def parse_kcl_store(html_text: str, page_url: str, retailer: str):
+    """Krazy Coupon Lady /coupons-for/<store> pages (verified 2026-11-22):
+    static HTML deal cards — h3._title_, _finalPrice_ / _originalPrice_
+    spans, _timestamp_ ('14 hours ago'), product photo on
+    content-images.thekrazycouponlady.com. The cards carry no link and no
+    coupon lines in the HTML; both live in the page's embedded deal-data
+    blob (devalue-serialized): each deal object starts at
+    [0,{"_id":[…], "title":[0,"…"] and holds its coupon "line" entries,
+    payLinePrice/payLineDetails ('Pay $7.00, get $5 Register Rewards')
+    and expiredAt just before finalPrice. Cards are matched to blob
+    objects by exact title; a card with no blob match gets steps [] and
+    no valid_to. The blob holds 20 deals, the page shows 11 cards —
+    only the cards are emitted."""
+    tree = HTMLParser(html_text)
+    unesc = html.unescape(html_text)
+    blob = {}
+    deal_start = re.compile(
+        r'\[0,\{"_id":\[0,"[A-Za-z0-9]{17,}"\],"title":\[0,"([^"]+)"\]')
+    starts = [(m.start(), m.group(1)) for m in deal_start.finditer(unesc)]
+    for i, (pos, title) in enumerate(starts):
+        end = starts[i + 1][0] if i + 1 < len(starts) else pos + 15000
+        seg = unesc[pos:end]
+        lines = [l for l in re.findall(r'"line":\[0,"([^"]+)"\]', seg)
+                 if l != "Deal availability varies by location"]
+        payp = re.findall(r'"payLinePrice":\[0,([\d.]+)\]', seg)
+        payd = re.findall(r'"payLineDetails":\[0,"([^"]+)"\]', seg)
+        steps = list(lines)
+        if payp and payd:
+            try:
+                steps.append(f"Pay ${float(payp[0]):.2f}, {payd[0]}")
+            except ValueError:
+                pass
+        exp = re.findall(r'"expiredAt":\[0,"(\d{4}-\d{2}-\d{2})', seg)
+        # First object wins: the blob can repeat a title (verified
+        # 2026-11-22: '2 Brach's Candy Cane Packs' twice, different pay
+        # lines) and the cards match the first.
+        key = title.strip().lower()
+        if key not in blob:
+            blob[key] = (steps[:5], exp[0] if exp else "")
+    items = []
+    for card in tree.css("[class*='_dealCard_']"):
+        title_el = card.css_first("h3[class*='_title_']") or card.css_first("h3")
+        if title_el is None:
+            continue
+        title = clean(title_el.text())
+        if not title:
+            continue
+        final_el = card.css_first("[class*='_finalPrice_']")
+        orig_el = card.css_first("[class*='_originalPrice_']")
+        final = clean(final_el.text()) if final_el is not None else ""
+        orig = clean(orig_el.text()) if orig_el is not None else ""
+        ts_el = card.css_first("[class*='_timestamp_']")
+        list_date = _parse_relative_time(clean(ts_el.text()) if ts_el is not None else "")
+        img = ""
+        for im in card.css("img"):
+            src = (im.attributes or {}).get("src", "") or ""
+            if "content-images.thekrazycouponlady.com" in src:
+                img = clean_image_url(src, page_url)
+                break
+        if not img:
+            img = nearest_image(card, page_url)
+        steps, valid_to = blob.get(title.lower(), ([], ""))
+        name = title
+        if final:
+            name = f"{title} — {final}" + (f" (was {orig})" if orig else "")
+        items.append(make_item(name, retailer, "krazycouponlady.com",
+                               kind="deal", price=final, was=orig,
+                               valid_to=valid_to, url=page_url, image=img,
+                               list_date=list_date, is_stack=True, steps=steps))
+    return items
+
+
+def _title_price_was(title: str):
+    """First real $ amount in a deal-post title -> (price, was).
+    '$3.xx' placeholders ('$3.xx Each' = 'three-something') are NOT a
+    price and are skipped; the 'Reg. $X' clause is the was price, never
+    the price (a Scott post reading '$3.xx Each (Reg. $5)' must not come
+    out as price $5.00); a was price at or below the price is dropped.
+    A '$47 Worth … Only $1.38' title is was $47.00 / price $1.38 — the
+    worth amount is never the price."""
+    t = re.sub(r"\$\s*[\d,]+(?:\.\d+)?\s*\.xx", "", title, flags=re.I)
+    was = ""
+    wm = re.search(r"(?:reg\.?|was|retail)\s*\$([\d,]+(?:\.\d{2})?)", t, re.I)
+    if wm:
+        try:
+            was = f"${float(wm.group(1).replace(',', '')):.2f}"
+        except ValueError:
+            was = ""
+    if not was:
+        wm2 = re.search(r"\$([\d,]+(?:\.\d{2})?)\s*(?:worth|value)\b", t, re.I) \
+            or re.search(r"(?:worth|value)\s*(?:of\s*)?\$([\d,]+(?:\.\d{2})?)", t, re.I)
+        if wm2:
+            try:
+                was = f"${float(wm2.group(1).replace(',', '')):.2f}"
+            except ValueError:
+                was = ""
+            t = t[:wm2.start()] + t[wm2.end():]
+    t2 = re.sub(r"\(?\s*(?:reg\.?|was|retail)\s*\$[\d,]+(?:\.\d{2})?\s*\)?",
+                "", t, flags=re.I)
+    # Shipping thresholds are not prices.
+    t2 = re.sub(r"free shipping\s+(?:w/|with)\s*\$[\d,]+(?:\.\d{2})?"
+                r"|orders of\s*\$[\d,]+(?:\.\d{2})?"
+                r"|\$[\d,]+(?:\.\d{2})?\s+or more",
+                "", t2, flags=re.I)
+    price = ""
+    dm = re.search(r"(?:drops?\s+to|down to|now|just|only)\s*\$([\d,]+(?:\.\d{2})?)",
+                   t2, re.I)
+    if dm:
+        try:
+            price = f"${float(dm.group(1).replace(',', '')):.2f}"
+        except ValueError:
+            price = ""
+        if price and not was:
+            # An earlier $ amount is the was price ('$100 Crock-Pot
+            # Drops to $40').
+            before = PRICE_RE.findall(t2[:dm.start()])
+            if before:
+                try:
+                    cand = float(before[-1].replace(',', ''))
+                    if cand > float(price[1:]):
+                        was = f"${cand:.2f}"
+                except ValueError:
+                    pass
+    if not price:
+        # First $ amount that is not a discount ('$5 off $25' — neither
+        # the $5 nor the $25 is a price).
+        for m in PRICE_RE.finditer(t2):
+            if re.match(r"\s*off\b", t2[m.end():m.end() + 6], re.I):
+                continue
+            if re.search(r"\boff\s*$", t2[max(0, m.start() - 5):m.start()], re.I):
+                continue
+            try:
+                price = f"${float(m.group(1).replace(',', '')):.2f}"
+            except ValueError:
+                price = ""
+            break
+    if price and was:
+        try:
+            if float(was[1:]) <= float(price[1:]):
+                was = ""
+        except ValueError:
+            pass
+    return price, was
+
+
+def _summary_image(entry) -> str:
+    """First <img> in an RSS entry's summary HTML (LRWC/TT post photos),
+    or ''. The summary is HTML — strip tags only after pulling the img."""
+    raw = getattr(entry, "summary", "") or ""
+    m = re.search(r'<img[^>]+src="([^"]+)"', raw)
+    if m:
+        return clean_image_url(m.group(1))
+    return ""
+
+
+def parse_fg_deals(html_text: str, base_url: str, default_retailer: str = "walgreens"):
+    """Freebie Guy /<store>-deals/ pages (verified 2026-11-22/23):
+    <article> cards, each with a heading, a post link, a thumbnail and
+    a <time> ('11/22/26'). The full scenario lives on the linked post —
+    the card title already carries the price hook, so steps stay [] and
+    the modal links through to the post. Retailer is detected from the
+    title+link (a Walgreens page can carry a Walmart deal); the page's
+    store is only the fallback. Stacks (is_stack=True) — these are
+    coupon-deal posts, Bundles-tab material."""
+    tree = HTMLParser(html_text)
+    items = []
+    seen = set()
+    for art in tree.css("article"):
+        head = art.css_first("h2") or art.css_first("h3")
+        link_el = art.css_first("a")
+        if head is None or link_el is None:
+            continue
+        title = clean(head.text())
+        link = (link_el.attributes or {}).get("href", "")
+        if not title or not link:
+            continue
+        link = urljoin(base_url, link)
+        if link in seen:
+            continue
+        seen.add(link)
+        tm = art.css_first("time")
+        list_date = _parse_mdy(clean(tm.text())) if tm is not None else ""
+        price, was = _title_price_was(title)
+        img = ""
+        img_el = art.css_first("img")
+        if img_el is not None:
+            img = clean_image_url(
+                (img_el.attributes or {}).get("src", "") or "", base_url)
+        low = f"{title} {link}".lower()
+        if "walgreens" in low:
+            retailer = "walgreens"
+        elif "walmart" in low:
+            retailer = "wm-ct"
+        elif "cvs" in low:
+            retailer = "cvs"
+        elif "target" in low:
+            retailer = "target"
+        else:
+            retailer = default_retailer
+        items.append(make_item(title, retailer, "thefreebieguy.com",
+                               kind="deal", price=price, was=was,
+                               url=link, image=img, list_date=list_date,
+                               is_stack=True))
+    return items
+
+
+def parse_fg_walgreens(html_text: str, base_url: str):
+    """Back-compat alias — the Walgreens page is parse_fg_deals with the
+    Walgreens fallback."""
+    return parse_fg_deals(html_text, base_url, "walgreens")
+
+
+def parse_retailshout_ad(html_text: str, retailer: str):
+    """RetailShout weekly-ad pages (Walgreens verified 2026-11-22: 70
+    .finds-item cards with .finds-item-title / .finds-item-price).
+    These are weekly-ad sale items, not coupon stacks — they go to the
+    Deals tab (is_stack=False). The H2 carries the ad week
+    ('Walgreens Weekly Ad for 11-22-26 to 11-28-26') -> list_date and
+    valid_to. Price is the first $ amount in the price string ('$4 or
+    $4.50', '2/$9 or $5.99 each'); BOGO-only offers have no $ price and
+    keep the whole offer text as the note."""
+    tree = HTMLParser(html_text)
+    start = end = ""
+    # The ad week is body text ('Walgreens Weekly Ad for 11-22-26 to
+    # 11-28-26'), not a heading — search the page text.
+    m = re.search(r"(\d{1,2})-(\d{1,2})-(\d{2})\s+to\s+(\d{1,2})-(\d{1,2})-(\d{2})",
+                  clean(tree.text(separator=" ")))
+    if m:
+        y = 2000 + int(m.group(3))
+        try:
+            start = datetime(y, int(m.group(1)), int(m.group(2))).date().isoformat()
+            end = datetime(y, int(m.group(4)), int(m.group(5))).date().isoformat()
+        except ValueError:
+            start = end = ""
+    items = []
+    seen = set()
+    for el in tree.css(".finds-item"):
+        title_el = el.css_first(".finds-item-title")
+        price_el = el.css_first(".finds-item-price")
+        title = clean(title_el.text()) if title_el is not None else ""
+        title = re.sub(r"^\d+\)\s*", "", title)
+        offer = clean(price_el.text()) if price_el is not None else ""
+        if not title:
+            continue
+        key = title.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        price = ""
+        pm = PRICE_RE.search(offer)
+        if pm:
+            try:
+                price = f"${float(pm.group(1).replace(',', '')):.2f}"
+            except ValueError:
+                price = ""
+        it = make_item(title, retailer, "retailshout.com",
+                       kind="deal", price=price, url="",
+                       list_date=start, valid_to=end)
+        if offer:
+            it["note"] = offer
+        items.append(it)
+    return items
+
+
+def parse_lrwc_rss(raw: str):
+    """Living Rich With Coupons RSS (verified 2026-11-22: 45 entries).
+    Keeps only Walgreens/CVS/Target/Rite Aid posts — the coupon-blog deal
+    posts. Steps come from the entry summary where it reads like steps;
+    most entries are prose and get []."""
+    parsed = feedparser.parse(raw)
+    items = []
+    for entry in parsed.entries[:60]:
+        title = clean(getattr(entry, "title", "") or "")
+        link = getattr(entry, "link", "") or ""
+        summary = clean(TAG_STRIP.sub("", html.unescape(getattr(entry, "summary", "") or "")))
+        if not title or not link:
+            continue
+        low = f" {title} {summary} ".lower()
+        retailer = ""
+        for phrase, sid in TITLE_STORE_HINTS.items():
+            if phrase in low:
+                retailer = sid
+                break
+        if retailer not in ("walgreens", "cvs", "target", "rite-aid"):
+            continue
+        cur, orig = _title_price_was(title)
+        thumb = _summary_image(entry)
+        media = getattr(entry, "media_thumbnail", None) or []
+        if not thumb and media:
+            thumb = clean_image_url((media[0] or {}).get("url", ""))
+        items.append(make_item(title, retailer, "livingrichwithcoupons.com",
+                               kind="deal", price=cur, was=orig,
+                               url=link, image=thumb,
+                               list_date=_entry_date(entry),
+                               is_stack=True,
+                               steps=_steps_from_text(summary)))
+    return items
+
+
+def parse_weekly_bargains_flyer(html_text: str, page_url: str, retailer: str):
+    """Weekly Bargains flyer pages (Hobby Lobby Black Friday ad verified
+    2026-11-22): static HTML. The h2 'Valid from November 18, 2026 to
+    November 30, 2026' gives list_date/valid_to; the deal items are <li>
+    lines 'White Layered Wood Pumpkin – now $1.62 (save $4.87)' — was =
+    now + save. Normal deals (is_stack=False), Deals tab. The flyer
+    images on later pages are image-only and are not parsed."""
+    tree = HTMLParser(html_text)
+    start = end = ""
+    for h in tree.css("h2"):
+        m = re.search(r"Valid from\s+([A-Za-z]+ \d{1,2}, \d{4})\s+to\s+([A-Za-z]+ \d{1,2}, \d{4})",
+                      clean(h.text()))
+        if m:
+            start = parse_list_date(m.group(1))
+            end = parse_list_date(m.group(2))
+            break
+    pat = re.compile(r"^(.+?)\s*[–—-]\s*now\s*\$([\d,]+\.\d{2})\s*\(save\s*\$([\d,]+\.\d{2})\)")
+    items = []
+    seen = set()
+    for el in tree.css("li"):
+        txt = clean(el.text(separator=" "))
+        mm = pat.match(txt)
+        if not mm:
+            continue
+        name = mm.group(1).strip()
+        if not name or name.lower() in seen:
+            continue
+        seen.add(name.lower())
+        try:
+            now = float(mm.group(2).replace(",", ""))
+            save = float(mm.group(3).replace(",", ""))
+        except ValueError:
+            continue
+        items.append(make_item(name, retailer, "weekly-bargains.com",
+                               kind="deal", price=f"${now:.2f}",
+                               was=f"${now + save:.2f}",
+                               url=page_url, list_date=start, valid_to=end))
+    return items
+
+
+def discover_swd_urls(sitemap_xml: str) -> list:
+    """Saving With Dana discovery: all dated penny-list pages from the
+    sitemap, newest-first. The run tries them in order and uses the first
+    that yields items — the current week's page is sometimes an empty
+    shell until the list is posted (Nov 22, 2026: the 2026-11-22 page
+    had no table at all), so the previous week is the honest fallback.
+    Every URL comes from the sitemap; none is ever guessed."""
+    found = re.findall(
+        r"https://savingwithdana\.com/penny-list/(\d{4}-\d{2}-\d{2})\.html",
+        sitemap_xml or "")
+    return [f"https://savingwithdana.com/penny-list/{d}.html"
+            for d in sorted(set(found), reverse=True)]
+
+
+def discover_swd_url(sitemap_xml: str) -> str:
+    """Saving With Dana discovery: the site's sitemap lists the dated
+    penny-list pages (/penny-list/YYYY-MM-DD.html). Return the LATEST
+    one, or '' when the sitemap yields none — the run then skips the
+    source instead of fetching a guessed date."""
+    urls = discover_swd_urls(sitemap_xml)
+    return urls[0] if urls else ""
+
+
+def discover_ss_walgreens_url(homepage_html: str) -> str:
+    """Southern Savers discovery: the homepage links the current
+    Walgreens ad post (/walgreens-ad-coupons-MM-DD-MM-DD/). Return the
+    one with the latest start date, or '' when the homepage yields
+    none — the run then skips the source instead of guessing a slug."""
+    found = re.findall(
+        r"https://www\.southernsavers\.com/walgreens-ad-coupons-(\d{1,2})-(\d{1,2})-(\d{1,2})-(\d{1,2})/",
+        homepage_html or "")
+    if not found:
+        return ""
+    best = max(found, key=lambda g: (int(g[0]), int(g[1])))
+    return (f"https://www.southernsavers.com/walgreens-ad-coupons-"
+            f"{best[0]}-{best[1]}-{best[2]}-{best[3]}/")
+
+
+def parse_saving_with_dana(html_text: str, page_url: str):
+    """Saving With Dana DG penny list (verified 2026-11-23): clean
+    <table> rows — name | 'UPC 194383090021' | 'Thu, Nov 5' (the
+    Pennied date). 306 unique UPCs on the Nov 1 page. list_date is the
+    row's Pennied date (month+day, run year), falling back to the page
+    date from the URL."""
+    tree = HTMLParser(html_text)
+    page_date = ""
+    m = re.search(r"/penny-list/(\d{4}-\d{2}-\d{2})\.html", page_url or "")
+    if m:
+        page_date = m.group(1)
+    items = []
+    seen = set()
+    for row in tree.css("table tr"):
+        cells = [clean(c.text()) for c in row.css("td, th")]
+        if len(cells) < 2:
+            continue
+        text = " | ".join(cells)
+        um = re.search(r"\b(\d{12})\b", text)
+        if not um:
+            continue
+        upc = um.group(1)
+        if upc in seen:
+            continue
+        seen.add(upc)
+        # Columns are [photo | name + UPC div | Pennied date] — the
+        # name cell merges 'NameUPC <digits>' with no space.
+        name = cells[1]
+        name = re.sub(r"\s*UPC\s*\d{12}\s*", "", name).strip(" -|")
+        row_date = parse_list_date(cells[-1])
+        img = ""
+        img_el = row.css_first("img")
+        if img_el is not None:
+            img = clean_image_url((img_el.attributes or {}).get("src", ""),
+                                  page_url)
+        items.append(make_item(name, "dollar-general", "savingwithdana.com",
+                               kind="penny", upc=upc, price="$0.01",
+                               url=page_url, image=img,
+                               list_date=row_date or page_date))
+    return items
+
+
+def parse_crazy4couponing(html_text: str, page_url: str):
+    """Crazy4Couponing DG penny list (verified 2026-11-23): <li> items
+    'Name, size<span class="upc">UPC: 070132099111</span>' under dated
+    section headings ('Dollar General Penny List Tuesday November 24,
+    2026'). The current Nov 24 section is categories-only; the UPCs
+    live in the archived dated sections — each item takes its section's
+    date as list_date. 209 UPC matches on the page."""
+    tree = HTMLParser(html_text)
+    items = []
+    seen = set()
+    current_date = ""
+    for el in tree.css("h2, h3, li"):
+        tag = (el.tag or "").lower()
+        if tag in ("h2", "h3"):
+            d = parse_list_date(clean(el.text()))
+            if d:
+                current_date = d
+            continue
+        span = el.css_first("span.upc")
+        if span is None:
+            continue
+        um = re.search(r"(\d{12})", span.text() or "")
+        if not um:
+            continue
+        upc = um.group(1)
+        if upc in seen:
+            continue
+        seen.add(upc)
+        name = clean(el.text())
+        name = re.sub(r"\s*UPC:\s*\d{12}\s*", "", name).strip(" -,")
+        if not name:
+            continue
+        items.append(make_item(name, "dollar-general", "crazy4couponing.com",
+                               kind="penny", upc=upc, price="$0.01",
+                               url=page_url, list_date=current_date))
+    return items
+
+
+def parse_southern_savers_page(html_text: str, page_url: str):
+    """Southern Savers Walgreens ad post (verified 2026-11-23): each
+    <li> holds several deals. A deal is a 'Product, $price' line
+    followed by coupon/reward lines and a '(buy (2), makes it $20.99
+    ea.)' span — the makes-it amount is the final per-item price, the
+    product line's $ is the was price, the coupon/reward lines are the
+    steps (never invented). H1 'Walgreens Ad & Coupons: 11/22-11/28'
+    gives list_date / valid_to. Stacks (is_stack=True)."""
+    tree = HTMLParser(html_text)
+    start = end = ""
+    h1 = tree.css_first("h1")
+    if h1 is not None:
+        m = re.search(r"(\d{1,2})/(\d{1,2})-(\d{1,2})/(\d{1,2})",
+                      clean(h1.text()))
+        if m:
+            y = datetime.now(timezone.utc).year
+            try:
+                start = datetime(y, int(m.group(1)), int(m.group(2))).date().isoformat()
+                end = datetime(y, int(m.group(3)), int(m.group(4))).date().isoformat()
+            except ValueError:
+                start = end = ""
+    # A product line is 'Name, $price' or 'Name, 2 for $45' (greedy
+    # name — 'Depend Guards, Depend Underwear or Poise Pads, 2 for $45'
+    # is one product). Coupon lines are excluded: they also end in a $
+    # amount ('…in Pepsi Products, 12-pack cans, 3 for $14.99') but
+    # carry WYB/WC/rebate wording.
+    prod_re = re.compile(r"^(.+),\s*(?:\d+\s+for\s+)?\$([\d,]+(?:\.\d{2})?)$")
+    coupon_re = re.compile(
+        r"coupon|reward|rebate|WYB|WC\b|eCoupon|get \$|\boff\b", re.I)
+    makes_re = re.compile(
+        r"\(buy\s*\((\d+)\)[^)]*?makes it\s+(?:\$([\d,]+\.\d{2})|FREE)", re.I)
+    items = []
+    for li in tree.css("li"):
+        # Split the li on <br> tags, not on text nodes: the coupon
+        # lines contain <abbr>WYB</abbr> and long rebate spans, and
+        # text() splits those into fragments ('$5 WC' / 'WYB' / '$30
+        # or more…'). <br>-split segments stay whole.
+        raw = li.html or ""
+        segments = []
+        for seg in re.split(r"<br\s*/?>", raw, flags=re.I):
+            txt = clean(TAG_STRIP.sub("", html.unescape(seg)))
+            if txt:
+                segments.append(txt)
+        pending_name = pending_was = ""
+        pending_steps = []
+        for line in segments:
+            mm = makes_re.search(line)
+            if mm:
+                if not pending_name:
+                    # Fallback: the product lives inside the coupon
+                    # line ('$5 WC WYB $30 or more in Pepsi Products,
+                    # 12-pack cans, 3 for $14.99').
+                    for cand in reversed(pending_steps):
+                        fm = re.search(
+                            r"\bin\s+(.+?)(?:,?\s*\d+\s+for\s+\$([\d,]+\.\d{2}))",
+                            cand)
+                        if fm:
+                            pending_name = fm.group(1).strip()
+                            try:
+                                pending_was = f"${float(fm.group(2).replace(',', '')):.2f}"
+                            except ValueError:
+                                pending_was = ""
+                            break
+                if not pending_name:
+                    continue
+                qty = mm.group(1)
+                final = (f"${float(mm.group(2).replace(',', '')):.2f}"
+                         if mm.group(2) else "$0.00")
+                steps = [s for s in pending_steps if s][:4]
+                steps.append(f"Buy {qty}, makes it {final} each.")
+                items.append(make_item(pending_name, "walgreens",
+                                       "southernsavers.com", kind="deal",
+                                       price=final, was=pending_was,
+                                       valid_to=end, url=page_url,
+                                       list_date=start, is_stack=True,
+                                       steps=steps[:6]))
+                pending_name = pending_was = ""
+                pending_steps = []
+                continue
+            pm = prod_re.match(line)
+            if pm and not coupon_re.search(line):
+                pending_name = pm.group(1).strip()
+                try:
+                    pending_was = f"${float(pm.group(2).replace(',', '')):.2f}"
+                except ValueError:
+                    pending_was = ""
+                continue
+            # Coupon / reward / rebate lines accumulate from the start
+            # of the deal block (they precede the product line) and
+            # become steps at the makes-it line.
+            if coupon_re.search(line):
+                pending_steps.append(line[:180])
+    return items
+
+
+def parse_glitchndealz_penny(html_text: str, page_url: str):
+    """GlitchNDealz DG penny page (verified 2026-11-23): dated tables
+    (Product | Package | UPC) under dated headings ('November 17 Dollar
+    General penny checklist', 'Previous report: November 3, 2026').
+    Each item takes its table's heading date as list_date. 39 UPCs."""
+    tree = HTMLParser(html_text)
+    items = []
+    seen = set()
+    current_date = ""
+    for el in tree.css("h2, h3, table"):
+        tag = (el.tag or "").lower()
+        if tag in ("h2", "h3"):
+            d = parse_list_date(clean(el.text()))
+            if d:
+                current_date = d
+            continue
+        for row in el.css("tr"):
+            cells = [clean(c.text()) for c in row.css("td, th")]
+            if len(cells) < 3:
+                continue
+            um = re.search(r"\b(\d{12})\b", cells[2])
+            if not um:
+                continue
+            upc = um.group(1)
+            if upc in seen:
+                continue
+            seen.add(upc)
+            name = f"{cells[0]} {cells[1]}".strip()
+            items.append(make_item(name, "dollar-general",
+                                   "glitchndealz.com", kind="penny",
+                                   upc=upc, price="$0.01", url=page_url,
+                                   list_date=current_date))
+    return items
+
+
+def parse_dealnews(raw: str):
+    """DealNews RSS (todays-edition + editors-choice, verified
+    2026-11-23): feedparser maps dealnews:retailer / :category /
+    :expires and media:content, but there is NO dealnews:price element
+    in the XML — the price lives in the title ('... for $200 + free
+    shipping'), so _extract_price does the work after stripping the
+    'free shipping w/ $99' threshold (a shipping minimum, not a price).
+    valid_to is today — these are daily deals, like the Slickdeals
+    frontpage (the dealnews:expires values run months out and are not
+    the deal's real end)."""
+    parsed = feedparser.parse(raw)
+    today = today_str()
+    items = []
+    for entry in parsed.entries[:50]:
+        title = clean(getattr(entry, "title", "") or "")
+        if not title:
+            continue
+        summary = clean(TAG_STRIP.sub("", html.unescape(getattr(entry, "summary", "") or "")))
+        link = (getattr(entry, "link", "") or "").split("?")[0]
+        retailer = _retailer_for(
+            f"{getattr(entry, 'dealnews_retailer', '') or ''} {title}", summary)
+        # Shipping thresholds are not prices: 'free shipping w/ $99',
+        # 'Shipping is free with orders of $99 or more'.
+        scrubbed = re.sub(
+            r"free shipping\s+(?:w/|with)\s*\$[\d,]+(?:\.\d{2})?"
+            r"|orders of\s*\$[\d,]+(?:\.\d{2})?"
+            r"|\$[\d,]+(?:\.\d{2})?\s+or more",
+            "", f"{title} {summary}", flags=re.I)
+        cur, orig = _extract_price(scrubbed, "")
+        thumb = ""
+        media = getattr(entry, "media_content", None) or []
+        if media:
+            thumb = clean_image_url((media[0] or {}).get("url", ""))
+        if not thumb:
+            thumb = _summary_image(entry)
+        items.append(make_item(title, retailer, "dealnews.com",
+                               kind="deal", upc="", price=cur, was=orig,
+                               valid_to=today, url=link, image=thumb,
+                               list_date=_entry_date(entry),
+                               is_stack=looks_like_stack(title, summary, retailer),
+                               steps=_steps_from_text(summary)))
+    return items
+
+
+DEAL_FEED_SKIP = re.compile(
+    r"giveaway|giv(?:e|ing) away|sweepstakes|enter to win|settlement|claims? due|recall",
+    re.I)
+
+
+def _deal_price(title: str, summary: str):
+    """Price for a deal-blog post: the title's price hook first
+    (_title_price_was handles 'Reg $X' and '$47 Worth … Only $1.38'),
+    falling back to the first $ amount in the summary."""
+    price, was = _title_price_was(title)
+    if price:
+        return price, was
+    return _extract_price(title, summary)
+
+
+def parse_deal_feed(raw: str, source_name: str):
+    """Generic deal-blog RSS (Southern Savers, GlitchNDealz,
+    Passionate Penny Pincher, Fabulessly Frugal, Hip2Save feeds —
+    verified 2026-11-23): post-level deals, not penny lists. Store
+    from the entry's categories, then title hints, then _retailer_for.
+    Price from the title/summary; a post with no price, no %-off, no
+    FREE and no stack signal is skipped (a claims/giveaway post is not
+    a deal). Steps from the summary text."""
+    parsed = feedparser.parse(raw)
+    today = today_str()
+    items = []
+    seen_links = set()
+    for entry in parsed.entries[:60]:
+        title = clean(getattr(entry, "title", "") or "")
+        link = (getattr(entry, "link", "") or "").split("?")[0]
+        if not title or not link or link in seen_links:
+            continue
+        if DEAL_FEED_SKIP.search(title):
+            continue
+        seen_links.add(link)
+        summary = clean(TAG_STRIP.sub("", html.unescape(getattr(entry, "summary", "") or "")))
+        content = ""
+        for c in (getattr(entry, "content", None) or [])[:1]:
+            content = clean(TAG_STRIP.sub("", html.unescape(getattr(c, "value", "") or "")))
+        combined = " ".join([title, summary, content])
+        cats = [t.term.lower().strip() for t in getattr(entry, "tags", []) if getattr(t, "term", None)]
+        store_id = None
+        for c in cats:
+            if c in CATEGORY_STORE:
+                store_id = CATEGORY_STORE[c]
+                break
+        if not store_id:
+            low = f" {combined.lower()} "
+            for phrase, sid in TITLE_STORE_HINTS.items():
+                if phrase in low:
+                    store_id = sid
+                    break
+        if not store_id:
+            store_id = _retailer_for(title, summary)
+        price, was = _deal_price(title, summary or content)
+        is_stack = looks_like_stack(title, summary or content, store_id)
+        if not price and not is_stack and "%" not in title \
+                and "free" not in title.lower():
+            continue
+        if not price and re.search(r"\bfree\b", title, re.I):
+            price = "$0.00"
+        items.append(make_item(title, store_id, source_name,
+                               kind="deal", upc="", price=price, was=was,
+                               valid_to=today, url=link,
+                               image=_summary_image(entry),
+                               list_date=_entry_date(entry),
+                               is_stack=is_stack,
+                               steps=_steps_from_text(summary or content)))
+    return items
+
+
+def parse_hip2save_api(raw: str, search_store: str):
+    """Hip2Save WordPress REST API (verified 2026-11-23):
+    /wp-json/wp/v2/deals?search=<store>&per_page=5 returns JSON posts
+    with title/date/full HTML body. One feed item per post (the post
+    IS the deal); price from the title first, then the body; steps
+    from the body text. The search store is the retailer fallback —
+    a 'Michaels' search also matches 'Michael Kors', so the title
+    still gets the final say via _retailer_for."""
+    try:
+        posts = json.loads(raw)
+    except Exception:
+        return []
+    if not isinstance(posts, list):
+        return []
+    today = today_str()
+    items = []
+    for post in posts[:10]:
+        title = clean(TAG_STRIP.sub("", html.unescape(
+            ((post.get("title") or {}).get("rendered") or ""))))
+        link = (post.get("link") or "").split("?")[0]
+        if not title or not link:
+            continue
+        date = (post.get("date") or "")[:10]
+        body_html = (post.get("content") or {}).get("rendered") or ""
+        body = clean(TAG_STRIP.sub("", html.unescape(body_html)))
+        price, was = _deal_price(title, body)
+        store_id = _retailer_for(title, body)
+        if store_id == "online":
+            store_id = search_store
+        is_stack = looks_like_stack(title, body, store_id)
+        if not price and not is_stack and "%" not in title \
+                and "free" not in title.lower():
+            continue
+        if not price and re.search(r"\bfree\b", title, re.I):
+            price = "$0.00"
+        img = ""
+        m = re.search(r'<img[^>]+src="([^"]+)"', body_html)
+        if m:
+            img = clean_image_url(m.group(1))
+        items.append(make_item(title, store_id, "hip2save.com",
+                               kind="deal", upc="", price=price, was=was,
+                               valid_to=today, url=link, image=img,
+                               list_date=date, is_stack=is_stack,
+                               steps=_steps_from_text(body)))
+    return items
+
+
+def parse_clearancefinds_lowes(html_text: str, page_url: str):
+    """ClearanceFinds Lowe's penny list (verified 2026-11-23): monthly
+    page, <article> cards with div.sku 'ITEM #11804', h2 name,
+    span.price '4¢', and a 'Seen Oct 27–Nov 20, 2026' range. The
+    7-digit Lowe's item number is stored as sku — it is NOT a UPC and
+    never goes in the upc field ('UPC verification needed' is printed
+    on every card). list_date is the END of the seen range (freshest
+    sighting). 121 unique item numbers on the page."""
+    tree = HTMLParser(html_text)
+    items = []
+    seen = set()
+    for art in tree.css("article"):
+        sku_el = art.css_first("div.sku")
+        if sku_el is None:
+            continue
+        sm = re.search(r"ITEM #(\d+)", sku_el.text() or "")
+        if not sm:
+            continue
+        item_no = sm.group(1)
+        if item_no in seen:
+            continue
+        seen.add(item_no)
+        head = art.css_first("h2")
+        name = clean(head.text()) if head is not None else ""
+        if not name:
+            continue
+        price = ""
+        pel = art.css_first("span.price")
+        if pel is not None:
+            cm = re.search(r"(\d+)\s*¢", pel.text() or "")
+            if cm:
+                price = f"${int(cm.group(1)) / 100:.2f}"
+        meta = art.css_first("p.meta")
+        list_date = ""
+        if meta is not None:
+            rm = re.search(r"Seen\s+.+?[–-]\s*([A-Za-z]+\s+\d{1,2},?\s*\d{4})",
+                          clean(meta.text(separator=" ")))
+            if rm:
+                list_date = parse_list_date(rm.group(1))
+        img = nearest_image(art, page_url)
+        it = make_item(name, "lowes", "clearancefinds.com",
+                       kind="deal", upc="", price=price, was="",
+                       url=page_url, image=img, list_date=list_date)
+        it["sku"] = item_no
+        items.append(it)
+    return items
+
+
+def parse_aminahstore(html_text: str, page_url: str):
+    """Aminahstore Home Depot penny list (verified 2026-11-23): <li>
+    items 'Name; SKU 215-583.' under 'Reported penny items for
+    November 15, 2026'. Mixed SKU formats — 6-digit legacy ('215-583')
+    and 12-digit internet ('1009-074-829') — both go in the sku field,
+    never UPC. 15 list items on the live page (the scout's 47 was not
+    reproducible — only 16 SKU mentions exist in the page at all).
+    One further item is named in prose ('(SKU 1003-951-328)') and is
+    taken with an unknown date."""
+    tree = HTMLParser(html_text)
+    items = []
+    seen = set()
+    current_date = ""
+    for el in tree.css("h2, h3, li"):
+        tag = (el.tag or "").lower()
+        if tag in ("h2", "h3"):
+            d = parse_list_date(clean(el.text()))
+            current_date = d  # '' clears it: later sections are undated
+            continue
+        m = re.search(r";\s*SKU\s+([\d-]{5,})\s*\.?\s*$",
+                      clean(el.text()))
+        if not m:
+            continue
+        sku = m.group(1)
+        if sku in seen:
+            continue
+        seen.add(sku)
+        name = clean(el.text())
+        name = re.sub(r";\s*SKU\s+[\d-]{5,}\s*\.?\s*$", "", name).strip()
+        if not name:
+            continue
+        it = make_item(name, "home-depot", "aminahstore.com",
+                       kind="penny", upc="", price="$0.01",
+                       url=page_url, list_date=current_date)
+        it["sku"] = sku
+        items.append(it)
+    # Prose mentions: 'Name (SKU 1003-951-328)' outside the list.
+    for p in tree.css("p"):
+        text = clean(p.text(separator=" "))
+        for m in re.finditer(r"(.{10,120}?)\s*\(SKU\s+([\d-]{5,})\)", text):
+            sku = m.group(2)
+            if sku in seen:
+                continue
+            seen.add(sku)
+            name = m.group(1).strip(" -,;:")
+            name = name.split(".")[-1].strip()
+            if not name:
+                continue
+            it = make_item(name, "home-depot", "aminahstore.com",
+                           kind="penny", upc="", price="$0.01",
+                           url=page_url, list_date="")
+            it["sku"] = sku
+            items.append(it)
+    return items
+
+
+def parse_weeklyadhunters(html_text: str, page_url: str):
+    """weeklyadhunters Dollar General weekly ad (verified 2026-11-23):
+    'Price List (273 items)' as <ul class='omni-pt-list'> rows —
+    <span class='omni-pt-name'> + <span class='omni-pt-price'> ('2 for
+    $3', '$2.00', 'Buy 1 Get 1 Free'). Ad prices, not pennies. The
+    H1 'Dollar General Weekly Ad (Nov 22 – 28, 2026)' gives list_date
+    / valid_to. Dixie / Vanity Fair rows are SKIPPED — the row is
+    garbled (name says $2.95, listed price shows $9.95) and the real
+    Dixie deal is emitted separately from the reel (see main()).
+    A no-$ offer ('Buy 1 Get 1 Free') is kept in the name so the offer
+    is not lost."""
+    tree = HTMLParser(html_text)
+    start = end = ""
+    h1 = tree.css_first("h1")
+    if h1 is not None:
+        m = re.search(r"([A-Za-z]+)\s+(\d{1,2})\s*[–-]\s*(\d{1,2}),\s*(\d{4})",
+                      clean(h1.text()))
+        if m:
+            try:
+                month = _MONTHS[m.group(1).lower().rstrip(".")]
+                y = int(m.group(4))
+                start = datetime(y, month, int(m.group(2))).date().isoformat()
+                end = datetime(y, month, int(m.group(3))).date().isoformat()
+            except (KeyError, ValueError):
+                start = end = ""
+    items = []
+    for li in tree.css("ul.omni-pt-list li"):
+        name_el = li.css_first("span.omni-pt-name")
+        price_el = li.css_first("span.omni-pt-price")
+        if name_el is None or price_el is None:
+            continue
+        name = clean(name_el.text())
+        offer = clean(price_el.text())
+        if not name or not offer:
+            continue
+        if "dixie" in name.lower() or "vanity fair" in name.lower():
+            continue
+        pm = PRICE_RE.search(offer)
+        price = ""
+        if pm:
+            try:
+                price = f"${float(pm.group(1).replace(',', '')):.2f}"
+            except ValueError:
+                price = ""
+        if not price:
+            name = f"{name} — {offer}"
+        items.append(make_item(name, "dollar-general",
+                               "weeklyadhunters.com", kind="deal",
+                               price=price, was="", valid_to=end,
+                               url=page_url, list_date=start))
+    return items
+
+
+def parse_kart_deals(html_text: str, page_url: str):
+    """Kart.deals JCPenney live clearance (verified 2026-11-23): static
+    <article class='deal-card'> cards — h3 title, the price part's
+    first $ is the sale price, the line-through span is the was price,
+    image from sc-images.jcpenney.com. 'Last updated: Nov 22, 10:22 PM
+    ET' is the list_date. The page shows the first 30 of 540 live
+    deals (infinite list); only JCPenney is wired — other
+    /store/<domain> URLs were not fetched or verified."""
+    tree = HTMLParser(html_text)
+    list_date = parse_list_date(
+        (re.search(r"Last updated:\s*([A-Za-z]+\s+\d{1,2})",
+                   clean(tree.text(separator=" "))) or [None, ""])[1])
+    items = []
+    seen = set()
+    for card in tree.css("article.deal-card"):
+        title_el = card.css_first("h3")
+        if title_el is None:
+            continue
+        title = clean(title_el.text())
+        if not title or title.lower() in seen:
+            continue
+        seen.add(title.lower())
+        link_el = card.css_first("a[href*='/deals/']")
+        url = urljoin(page_url, (link_el.attributes or {}).get("href", "")) \
+            if link_el is not None else page_url
+        price = was = ""
+        pel = card.css_first("[data-card-part='price']")
+        if pel is not None:
+            amounts = PRICE_RE.findall(pel.text() or "")
+            if amounts:
+                try:
+                    price = f"${float(amounts[0].replace(',', '')):.2f}"
+                except ValueError:
+                    price = ""
+            wel = pel.css_first("[class*='line-through']")
+            if wel is not None:
+                wm = PRICE_RE.search(wel.text() or "")
+                if wm:
+                    try:
+                        was = f"${float(wm.group(1).replace(',', '')):.2f}"
+                    except ValueError:
+                        was = ""
+        img = ""
+        img_el = card.css_first("img")
+        if img_el is not None:
+            img = clean_image_url((img_el.attributes or {}).get("src", ""),
+                                  page_url)
+        items.append(make_item(title, "jcp", "kart.deals",
+                               kind="deal", upc="", price=price, was=was,
+                               valid_to="", url=url, image=img,
+                               list_date=list_date))
+    return items
+
+
+def parse_bradsdeals(html_text: str, page_url: str):
+    """Brad's Deals homepage (verified 2026-11-23): .post-tile-vertical
+    deal tiles — headline link + details text + posted-time. No RSS
+    exists (all feed URLs 404), so the homepage tiles are the source.
+    Price from the title/details; retailer from the title; giveaway /
+    settlement tiles skipped."""
+    tree = HTMLParser(html_text)
+    items = []
+    seen = set()
+    for tile in tree.css(".post-tile-vertical"):
+        link_el = tile.css_first(".post-tile-vertical__headline-link")
+        title_el = tile.css_first(".post-tile-vertical__headline-text")
+        if link_el is None or title_el is None:
+            continue
+        title = clean(title_el.text())
+        link = urljoin(page_url, (link_el.attributes or {}).get("href", ""))
+        if not title or not link or link in seen:
+            continue
+        if DEAL_FEED_SKIP.search(title):
+            continue
+        seen.add(link)
+        det_el = tile.css_first(".post-tile-vertical__details-content")
+        details = clean(det_el.text()) if det_el is not None else ""
+        time_el = tile.css_first(".post-tile-vertical__posted-time")
+        list_date = _parse_relative_time(
+            clean(time_el.text()) if time_el is not None else "")
+        price, was = _deal_price(title, details)
+        store_id = _retailer_for(title, details)
+        is_stack = looks_like_stack(title, details, store_id)
+        if not price and not is_stack and "%" not in title \
+                and "free" not in title.lower():
+            continue
+        if not price and re.search(r"\bfree\b", title, re.I):
+            price = "$0.00"
+        img = ""
+        img_el = tile.css_first("img")
+        if img_el is not None:
+            img = clean_image_url((img_el.attributes or {}).get("src", ""),
+                                  page_url)
+        items.append(make_item(title, store_id, "bradsdeals.com",
+                               kind="deal", upc="", price=price, was=was,
+                               valid_to=today_str(), url=link, image=img,
+                               list_date=list_date, is_stack=is_stack,
+                               steps=_steps_from_text(details)))
+    return items
+
+
+def parse_tt_rss(raw: str):
+    """TotallyTarget RSS (verified 2026-11-22: 10 entries). Keeps the
+    weekly-ad preview and clearance-find posts — the Target deal content.
+    Steps stay [] (the scenario is inside the linked post)."""
+    parsed = feedparser.parse(raw)
+    items = []
+    for entry in parsed.entries[:20]:
+        title = clean(getattr(entry, "title", "") or "")
+        link = getattr(entry, "link", "") or ""
+        if not title or not link:
+            continue
+        low = title.lower()
+        if "weekly ad preview" not in low and "clearance finds" not in low:
+            continue
+        cur, orig = _extract_price(title, "")
+        items.append(make_item(title, "target", "totallytarget.com",
+                               kind="deal", price=cur, was=orig,
+                               url=link, image=_summary_image(entry),
+                               list_date=_entry_date(entry),
+                               is_stack=True))
     return items
 
 
@@ -934,11 +2191,110 @@ SOURCES = [
      "https://pennypinchinmom.com/feed/", "fetch"),
     ("kcl-hd", "Krazy Coupon Lady — Home Depot penny items",
      "https://thekrazycouponlady.com/tips/store-hacks/home-depot-penny-items", "link-only"),
+    ("kcl-walgreens", "Krazy Coupon Lady — Walgreens stacks",
+     "https://thekrazycouponlady.com/coupons-for/walgreens", "fetch"),
+    ("kcl-cvs", "Krazy Coupon Lady — CVS stacks",
+     "https://thekrazycouponlady.com/coupons-for/cvs", "fetch"),
+    ("kcl-target", "Krazy Coupon Lady — Target stacks",
+     "https://thekrazycouponlady.com/coupons-for/target", "fetch"),
+    ("freebie-guy-walgreens", "Freebie Guy — Walgreens deals",
+     "https://thefreebieguy.com/walgreens-deals/", "fetch"),
+    ("retailshout-walgreens-ad", "RetailShout — Walgreens weekly ad",
+     "https://retailshout.com/walgreens-weekly-ad/", "fetch"),
+    ("retailshout-cvs-ad", "RetailShout — CVS weekly ad",
+     "https://retailshout.com/cvs-weekly-ad/", "link-only"),
+    ("lrwc-rss", "Living Rich With Coupons — RSS",
+     "https://www.livingrichwithcoupons.com/feed", "fetch"),
+    ("totallytarget-rss", "TotallyTarget — RSS",
+     "https://www.totallytarget.com/feed/", "fetch"),
+    ("slickdeals-search-walgreens", "Slickdeals — Walgreens search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=walgreens&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("slickdeals-search-cvs", "Slickdeals — CVS search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=cvs&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("weekly-bargains-hl", "Weekly Bargains — Hobby Lobby Black Friday ad",
+     "https://weekly-bargains.com/us/hobby-lobby/hobby-lobby-home-fall-decor-2026-11-18-4458192/", "fetch"),
+    ("katalozi365-hl", "Katalozi365 — Hobby Lobby weekly leaflet",
+     "https://katalozi365.com/us/hobby-lobby/current-hobby-lobby-leaflet-valid-from-sunday-11-15-2026-to-saturday-11-21-2026-4441183/", "link-only"),
+    ("milled-hl", "Milled — Hobby Lobby email (75% fall decor)",
+     "https://milled.com/hobby-lobby/sale-alert-75-off-fall-decor-floral-and-crafts-k5Mfgh5TdmwAFgvS", "link-only"),
+    ("slickdeals-search-hobby-lobby", "Slickdeals — Hobby Lobby search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=hobby+lobby&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("slickdeals-search-target", "Slickdeals — Target search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=target&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("slickdeals-search-dollar-general", "Slickdeals — Dollar General search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=dollar+general&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("slickdeals-search-home-depot", "Slickdeals — Home Depot search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=home+depot&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("slickdeals-search-clearance", "Slickdeals — clearance search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=clearance&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("slickdeals-search-walgreens-free", "Slickdeals — Walgreens free search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=walgreens+free&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("saving-with-dana-dg", "Saving With Dana — DG penny list",
+     "https://savingwithdana.com/sitemap.xml", "fetch"),
+    ("crazy4couponing-dg", "Crazy4Couponing — DG penny list",
+     "https://crazy4couponing.com/dollar-general-penny-list", "fetch"),
+    ("southern-savers-walgreens", "Southern Savers — Walgreens ad & coupons",
+     "https://www.southernsavers.com/", "fetch"),
+    ("southern-savers-feed", "Southern Savers — RSS",
+     "https://www.southernsavers.com/feed/", "fetch"),
+    ("glitchndealz-feed", "GlitchNDealz — RSS",
+     "https://glitchndealz.com/feed/", "fetch"),
+    ("glitchndealz-penny", "GlitchNDealz — DG penny list",
+     "https://glitchndealz.com/penny-list-for-dollar-general", "fetch"),
+    ("dealnews-today", "DealNews — today's edition RSS",
+     "https://s1.dlnws.com/dealnews/rss/todays-edition.xml", "fetch"),
+    ("dealnews-editors", "DealNews — editors' choice RSS",
+     "https://www.dealnews.com/rss/editors-choice", "fetch"),
+    ("hip2save-feed", "Hip2Save — RSS",
+     "https://hip2save.com/feed/", "fetch"),
+    ("hip2save-api-walgreens", "Hip2Save — Walgreens deals (WP API)",
+     "https://hip2save.com/wp-json/wp/v2/deals?search=walgreens&per_page=5", "fetch"),
+    ("hip2save-api-cvs", "Hip2Save — CVS deals (WP API)",
+     "https://hip2save.com/wp-json/wp/v2/deals?search=cvs&per_page=5", "fetch"),
+    ("hip2save-api-target", "Hip2Save — Target deals (WP API)",
+     "https://hip2save.com/wp-json/wp/v2/deals?search=target&per_page=5", "fetch"),
+    ("hip2save-api-dollar-general", "Hip2Save — Dollar General deals (WP API)",
+     "https://hip2save.com/wp-json/wp/v2/deals?search=dollar-general&per_page=5", "fetch"),
+    ("hip2save-api-hobby-lobby", "Hip2Save — Hobby Lobby deals (WP API)",
+     "https://hip2save.com/wp-json/wp/v2/deals?search=hobby-lobby&per_page=5", "fetch"),
+    ("hip2save-api-home-depot", "Hip2Save — Home Depot deals (WP API)",
+     "https://hip2save.com/wp-json/wp/v2/deals?search=home-depot&per_page=5", "fetch"),
+    ("kcl-michaels", "Krazy Coupon Lady — Michaels stacks",
+     "https://www.thekrazycouponlady.com/coupons-for/michaels", "fetch"),
+    ("kcl-kohls", "Krazy Coupon Lady — Kohl's stacks",
+     "https://www.thekrazycouponlady.com/coupons-for/kohls", "fetch"),
+    ("kcl-jcpenney", "Krazy Coupon Lady — JCPenney stacks",
+     "https://www.thekrazycouponlady.com/coupons-for/jcpenney", "fetch"),
+    ("clearancefinds-lowes", "ClearanceFinds — Lowe's penny list",
+     "https://clearancefinds.com/alerts/lowes-penny-list-november-2026/", "fetch"),
+    ("aminahstore-hd", "Aminahstore — Home Depot penny list",
+     "https://aminahstore.com/article/111", "fetch"),
+    ("weeklyadhunters-dg", "weeklyadhunters — Dollar General weekly ad",
+     "https://weeklyadhunters.com/dollar-general-weekly-ad/", "fetch"),
+    ("kart-jcpenney", "Kart.deals — JCPenney live clearance",
+     "https://kart.deals/store/jcpenney-com?sort=price-asc&filters=open", "fetch"),
+    ("freebie-guy-target", "Freebie Guy — Target deals",
+     "https://thefreebieguy.com/target-deals/", "fetch"),
+    ("freebie-guy-cvs", "Freebie Guy — CVS deals",
+     "https://thefreebieguy.com/cvs-deals/", "link-only"),
+    ("passionate-penny-pincher-feed", "Passionate Penny Pincher — RSS",
+     "https://passionatepennypincher.com/feed/", "fetch"),
+    ("fabulessly-frugal-feed", "Fabulessly Frugal — deals RSS",
+     "https://fabulesslyfrugal.com/deals/feed/", "fetch"),
+    ("bradsdeals-home", "Brad's Deals — homepage deals",
+     "https://www.bradsdeals.com/", "fetch"),
+    ("pennypuss", "Penny Puss — DG penny list",
+     "https://pennypuss.com/", "link-only"),
 ]
 
 LINK_ONLY_NOTES = {
     "savingk-walmart": "Guide page only — no parseable deal database exists; open the page to read it.",
     "kcl-hd": "Page loads but the list is not in the static HTML (JS-rendered) — open it in a browser.",
+    "retailshout-cvs-ad": "This week's page is a gift guide, not a priced deal list — open it manually.",
+    "katalozi365-hl": "Leaflet is image-based — the page text gives only the category discounts (75% fall decor, 50% tableware), no per-item prices.",
+    "milled-hl": "Hobby Lobby's own email, mirrored — the parser couldn't fetch the page (connection reset twice, 2026-11-22); open it manually.",
+    "freebie-guy-cvs": "Only 1 CVS-titled deal on the page — not a real CVS list; open it manually.",
+    "pennypuss": "Homepage yields no current list link (only a 2023 index) and the Oct 27 list page carries only 6 UPCs in static HTML, not the 27 claimed — the rest are not in the page text.",
 }
 
 
@@ -947,12 +2303,82 @@ def run_source(client: httpx.Client, key: str, name: str, url: str, kind: str):
     if kind == "link-only":
         return [], {"name": name, "url": url, "status": "link-only",
                     "item_count": 0, "note": LINK_ONLY_NOTES.get(key, "")}
+    if key == "dealnews-editors":
+        # DealNews stalls the editors feed on a client that already
+        # fetched the today's-edition feed (reproduced Nov 23, 2026:
+        # same client ReadTimeout twice even after a 10s sleep; a fresh
+        # client answers in <1s, 4/4). Fetch it on its own fresh client.
+        with httpx.Client(
+            headers={"User-Agent": USER_AGENT,
+                     "Accept-Language": "en-US,en;q=0.9"},
+            timeout=60.0,
+        ) as fresh:
+            body, err = safe_get(fresh, url)
+        if body is None:
+            status = "blocked" if err and "blocked" in err else "failed"
+            return [], {"name": name, "url": url, "status": status,
+                        "item_count": 0, "note": err or "fetch failed"}
+        items = parse_dealnews(body)
+        return items, {"name": name, "url": url, "status": "ok",
+                       "item_count": len(items)}
     try:
         body, err = safe_get(client, url)
         if body is None:
             status = "blocked" if err and "blocked" in err else "failed"
             return [], {"name": name, "url": url, "status": status,
                         "item_count": 0, "note": err or "fetch failed"}
+        if key == "saving-with-dana-dg":
+            # The SOURCES url is the sitemap (discovery doc). The current
+            # week's dated page comes from the sitemap — never guessed.
+            # The latest page is sometimes an empty shell until the list
+            # is posted, so try sitemap URLs newest-first (max 2) and use
+            # the first that yields items.
+            page_urls = discover_swd_urls(body)
+            if not page_urls:
+                return [], {"name": name, "url": url, "status": "failed",
+                            "item_count": 0,
+                            "note": "discovery failed — sitemap lists no "
+                            "penny-list page; skipped rather than guessing"}
+            last_err, tried = "", []
+            for page_url in page_urls[:2]:
+                page_body, err2 = safe_get(client, page_url)
+                if page_body is None:
+                    last_err = err2 or "fetch failed"
+                    tried.append(page_url)
+                    continue
+                items = parse_saving_with_dana(page_body, page_url)
+                if items:
+                    note = ""
+                    if page_url != page_urls[0]:
+                        note = (f"latest page {page_urls[0]} is empty "
+                                "(list not posted yet); fell back to "
+                                f"{page_url}")
+                    return items, {"name": name, "url": page_url,
+                                   "status": "ok",
+                                   "item_count": len(items), "note": note}
+                tried.append(page_url)
+            return [], {"name": name, "url": page_urls[0], "status": "failed",
+                        "item_count": 0,
+                        "note": ("no sitemap penny-list page yielded items "
+                                 f"(tried {', '.join(tried)}); "
+                                 f"{last_err}")}
+        if key == "southern-savers-walgreens":
+            # The SOURCES url is the homepage (discovery doc). The
+            # current Walgreens ad post comes from the homepage links —
+            # never a guessed date slug.
+            page_url = discover_ss_walgreens_url(body)
+            if not page_url:
+                return [], {"name": name, "url": url, "status": "failed",
+                            "item_count": 0,
+                            "note": "discovery failed — homepage links no "
+                            "Walgreens ad post; skipped rather than guessing"}
+            page_body, err2 = safe_get(client, page_url)
+            if page_body is None:
+                return [], {"name": name, "url": page_url, "status": "failed",
+                            "item_count": 0, "note": err2 or "fetch failed"}
+            items = parse_southern_savers_page(page_body, page_url)
+            return items, {"name": name, "url": page_url, "status": "ok",
+                           "item_count": len(items)}
         if key == "freebie-guy-dg":
             items = extract_fg_dg(body, url)
         elif key == "retailshout-dg":
@@ -976,6 +2402,87 @@ def run_source(client: httpx.Client, key: str, name: str, url: str, kind: str):
             items = parse_slickdeals(body)
         elif key == "pennyrecon-hd":
             items = parse_pennyrecon(body)
+        elif key == "kcl-walgreens":
+            items = parse_kcl_store(body, url, "walgreens")
+        elif key == "kcl-cvs":
+            items = parse_kcl_store(body, url, "cvs")
+        elif key == "kcl-target":
+            items = parse_kcl_store(body, url, "target")
+        elif key == "freebie-guy-walgreens":
+            items = parse_fg_walgreens(body, url)
+        elif key == "retailshout-walgreens-ad":
+            items = parse_retailshout_ad(body, "walgreens")
+        elif key == "lrwc-rss":
+            items = parse_lrwc_rss(body)
+        elif key == "totallytarget-rss":
+            items = parse_tt_rss(body)
+        elif key == "slickdeals-search-walgreens":
+            items = parse_slickdeals(body, force_retailer="walgreens")
+        elif key == "slickdeals-search-cvs":
+            items = parse_slickdeals(body, force_retailer="cvs")
+        elif key == "weekly-bargains-hl":
+            items = parse_weekly_bargains_flyer(body, url, "hobby-lobby")
+        elif key == "slickdeals-search-hobby-lobby":
+            # Relevance-ranked search returns old threads too — keep only
+            # fresh ones whose title names Hobby Lobby, routed to Deals.
+            items = parse_slickdeals(body, force_retailer="hobby-lobby",
+                                     require_title="hobby lobby",
+                                     max_age_days=7, no_stack=True)
+        elif key == "slickdeals-search-target":
+            items = parse_slickdeals(body, force_retailer="target",
+                                     max_age_days=14, no_stack=True)
+        elif key == "slickdeals-search-dollar-general":
+            # Noisy: the first hit is a '1 Million Dollar' sweepstakes —
+            # keep only threads that name Dollar General in title or
+            # summary, routed to Deals.
+            items = parse_slickdeals(body, force_retailer="dollar-general",
+                                     require_text="dollar general",
+                                     max_age_days=14, no_stack=True)
+        elif key == "slickdeals-search-home-depot":
+            items = parse_slickdeals(body, force_retailer="home-depot",
+                                     max_age_days=14, no_stack=True)
+        elif key == "slickdeals-search-clearance":
+            items = parse_slickdeals(body, max_age_days=14, no_stack=True)
+        elif key == "slickdeals-search-walgreens-free":
+            items = parse_slickdeals(body, force_retailer="walgreens",
+                                     max_age_days=14, force_stack=True)
+        elif key == "crazy4couponing-dg":
+            items = parse_crazy4couponing(body, url)
+        elif key == "southern-savers-feed":
+            items = parse_deal_feed(body, "southernsavers.com")
+        elif key == "glitchndealz-feed":
+            items = parse_deal_feed(body, "glitchndealz.com")
+        elif key == "glitchndealz-penny":
+            items = parse_glitchndealz_penny(body, url)
+        elif key in ("dealnews-today", "dealnews-editors"):
+            items = parse_dealnews(body)
+        elif key == "hip2save-feed":
+            items = parse_deal_feed(body, "hip2save.com")
+        elif key.startswith("hip2save-api-"):
+            store = key[len("hip2save-api-"):]
+            items = parse_hip2save_api(body, store)
+        elif key == "kcl-michaels":
+            items = parse_kcl_store(body, url, "michaels")
+        elif key == "kcl-kohls":
+            items = parse_kcl_store(body, url, "kohls")
+        elif key == "kcl-jcpenney":
+            items = parse_kcl_store(body, url, "jcp")
+        elif key == "clearancefinds-lowes":
+            items = parse_clearancefinds_lowes(body, url)
+        elif key == "aminahstore-hd":
+            items = parse_aminahstore(body, url)
+        elif key == "weeklyadhunters-dg":
+            items = parse_weeklyadhunters(body, url)
+        elif key == "kart-jcpenney":
+            items = parse_kart_deals(body, url)
+        elif key == "freebie-guy-target":
+            items = parse_fg_deals(body, url, "target")
+        elif key == "passionate-penny-pincher-feed":
+            items = parse_deal_feed(body, "passionatepennypincher.com")
+        elif key == "fabulessly-frugal-feed":
+            items = parse_deal_feed(body, "fabulesslyfrugal.com")
+        elif key == "bradsdeals-home":
+            items = parse_bradsdeals(body, url)
         elif key in ("freebie-guy-rss", "pennypinchinmom-rss"):
             src = "thefreebieguy.com" if key == "freebie-guy-rss" else "pennypinchinmom.com"
             items, _err = parse_rss(body, src)
@@ -1010,6 +2517,34 @@ def main() -> int:
             all_items.extend(items)
             print(f"{key:22} {status['status']:9} {status['item_count']:4} items"
                   + (f" — {status['note']}" if status.get("note") else ""))
+
+        # The Dixie deal (Joseph's reel, Nov 22, 2026 — Stacey Workman):
+        # 4 Dixie plates/bowls for $8.50 before tax, valid Nov 22–28.
+        # Emitted ONLY when the weeklyadhunters DG ad parsed OK — the ad
+        # corroborates the sale (it lists 'Dixie or Vanity Fair Products
+        # - $2.95' and 'Ultra Plates'), but its price-list row is
+        # garbled (name $2.95, listed price $9.95) and it carries neither
+        # the 2-for-$5 / 2-for-$7 structure nor the digitals. The price
+        # here is the reel's $8.50 final, never the garbled row. The
+        # steps are the reel's mechanics as Joseph shared them — not
+        # invented. One Deals-tab item (not a stack).
+        wah = next((s for s in statuses
+                    if s["name"].startswith("weeklyadhunters")
+                    and s["status"] == "ok"), None)
+        if wah is not None:
+            all_items.append(make_item(
+                "4 Dixie Plates/Bowls — $8.50 (was $12.00) at Dollar General",
+                "dollar-general", "weeklyadhunters.com", kind="deal",
+                price="$8.50", was="$12.00", valid_to="2026-11-28",
+                url=wah["url"], list_date="2026-11-22",
+                steps=[
+                    "Buy 2 regular Dixie plates/bowls (32-count, floral) — on sale 2 for $5, mix & match.",
+                    "Buy 2 Dixie Ultra plates/bowls (20-count plates / 26-count bowls, blue swirl) — on sale 2 for $7, mix & match.",
+                    "Clip the $0.50 manufacturer digital coupon for Dixie in the DG app.",
+                    "Clip the $3.00 DG store coupon (spend $12 on Dixie or Vanity Fair) in the DG app.",
+                    "Total at the register: $12.00 − $3.50 in coupons = $8.50 before tax.",
+                    "Digital coupons vary by account — clip them in the DG app first and confirm before you shop. Valid Nov 22–28, 2026.",
+                ]))
 
         # Dedupe: by UPC first (normalized — see normalize_upc), else
         # name+retailer. FIRST source wins, always: a later copy never
@@ -1049,6 +2584,12 @@ def main() -> int:
                 kept["source_count"] = len(kept["sources"])
             if it.get("image") and not kept.get("image"):
                 kept["image"] = it["image"]
+            if it.get("sku") and not kept.get("sku"):
+                kept["sku"] = it["sku"]
+            if it.get("is_stack") and not kept.get("is_stack"):
+                kept["is_stack"] = True
+            if it.get("steps") and not kept.get("steps"):
+                kept["steps"] = it["steps"]
             if it["first_seen"] < kept["first_seen"]:
                 kept["first_seen"] = it["first_seen"]
             if it.get("list_date") and (not kept.get("list_date")
@@ -1059,16 +2600,14 @@ def main() -> int:
         # Preserve first_seen from the previous feed (per UPC, else
         # name+retailer): without this every re-run re-stamps old items
         # with today's date and "Most recent" can never tell a new item
-        # from an old one. Items with no list_date yet fall back to
-        # first_seen (RSS/Slickdeals items carry no list date).
+        # from an old one. Items with no determinable list date keep
+        # list_date '' (unknown) — never the run date, never first_seen.
         prev_seen = load_first_seen_map()
         for it in deduped:
             key = (("upc", it["upc"]) if it.get("upc")
                    else ("name", (it["name"].lower(), it["retailer"])))
             if key in prev_seen:
                 it["first_seen"] = prev_seen[key]
-            if not it.get("list_date"):
-                it["list_date"] = it["first_seen"]
 
         # Shared decorative images (page header photos) are not product
         # photos — drop them before enrichment.

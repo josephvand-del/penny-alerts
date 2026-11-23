@@ -56,6 +56,17 @@ var STORE_NAMES = {
   'aldi': 'ALDI',
   'cvs': 'CVS',
   'walgreens': 'Walgreens',
+  'hobby-lobby': 'Hobby Lobby',
+  'michaels': 'Michaels',
+  'belk': 'Belk',
+  'lululemon': 'lululemon',
+  'nike': 'Nike',
+  'sephora': 'Sephora',
+  'publix': 'Publix',
+  'under-armour': 'Under Armour',
+  'bjs': "BJ's",
+  'macys': "Macy's",
+  'rite-aid': 'Rite Aid',
   'family-dollar': 'Family Dollar',
   'tj-maxx': 'T.J.Maxx',
   'kroger': 'Kroger',
@@ -82,7 +93,40 @@ var SOURCE_LINKS = [
   { name: 'RetailShout — latest Dollar General penny items', url: 'https://retailshout.com/latest-dollar-general-penny-items-near-you/', note: 'DG penny items with SKU, UPC and penny date.' },
   { name: 'SavingK — Walmart hidden clearance', url: 'https://savingk.com/walmart-hidden-clearance-how-to-find-these-secret-deals/', note: 'How Walmart hidden clearance works + the clearance database.' },
   { name: 'PennyRecon — Home Depot penny lists', url: 'https://www.pennyrecon.com/', note: 'Community Home Depot penny lists by store.' },
-  { name: 'Penny Hunter — daily briefing (raw JSON this app reads)', url: 'https://rocketshon.github.io/penny-finder-backend/briefings/latest.json', note: 'The public briefing file. Open it to see exactly what the app sees.' }
+  { name: 'Penny Hunter — daily briefing (raw JSON this app reads)', url: 'https://rocketshon.github.io/penny-finder-backend/briefings/latest.json', note: 'The public briefing file. Open it to see exactly what the app sees.' },
+  { name: 'Krazy Coupon Lady — Walgreens stacks', url: 'https://thekrazycouponlady.com/coupons-for/walgreens', note: 'Walgreens coupon stacks with final prices and reward lines — the Bundles tab reads these.' },
+  { name: 'Krazy Coupon Lady — CVS stacks', url: 'https://thekrazycouponlady.com/coupons-for/cvs', note: 'CVS ExtraBucks stacks, same format as Walgreens.' },
+  { name: 'Krazy Coupon Lady — Target stacks', url: 'https://thekrazycouponlady.com/coupons-for/target', note: 'Target stacks (Circle Card, Ibotta and Fetch rebates).' },
+  { name: 'Freebie Guy — Walgreens deals', url: 'https://thefreebieguy.com/walgreens-deals/', note: 'Walgreens deal posts with full scenarios on the linked pages.' },
+  { name: 'RetailShout — Walgreens weekly ad', url: 'https://retailshout.com/walgreens-weekly-ad/', note: 'This week’s Walgreens ad prices — plain sale items, on the Deals tab.' },
+  { name: 'Living Rich With Coupons', url: 'https://www.livingrichwithcoupons.com/', note: 'Coupon-blog deal posts (Walgreens/CVS/Target) via its RSS feed.' },
+  { name: 'TotallyTarget', url: 'https://www.totallytarget.com/', note: 'Target weekly-ad previews and clearance finds via its RSS feed.' },
+  { name: 'Slickdeals — Walgreens search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=walgreens&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals Walgreens threads — the stack ones carry their scenario steps.' },
+  { name: 'Slickdeals — CVS search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=cvs&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals CVS threads, same treatment.' },
+  { name: 'Slickdeals — Target search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=target&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals Target threads (the catch-net — no standing Target DPCI list page exists).' },
+  { name: 'Slickdeals — Dollar General search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=dollar+general&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals DG threads, filtered to posts that actually name Dollar General.' },
+  { name: 'Slickdeals — Home Depot search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=home+depot&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals Home Depot threads.' },
+  { name: 'Slickdeals — clearance search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=clearance&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals clearance threads across stores.' },
+  { name: 'Slickdeals — Walgreens free search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=walgreens+free&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals free-at-Walgreens threads — Bundles-tab material.' },
+  { name: 'Slickdeals — Hobby Lobby search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=hobby+lobby&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals Hobby Lobby threads, fresh ones only (≤7 days).' },
+  { name: 'Saving With Dana — DG penny list', url: 'https://savingwithdana.com/penny-list/2026-11-22.html', note: 'DG penny list in a clean table (name + UPC + Pennied date). The parser finds the current week from the site sitemap — never a guessed date.' },
+  { name: 'Crazy4Couponing — DG penny list', url: 'https://crazy4couponing.com/dollar-general-penny-list', note: 'DG penny list by dated sections (current section is categories-only; UPCs live in the archived sections, each dated).' },
+  { name: 'GlitchNDealz — DG penny list', url: 'https://glitchndealz.com/penny-list-for-dollar-general', note: 'DG penny list in dated tables (Nov 17 / Nov 3 / Oct 27 / Oct 20). Also a deals RSS feed.' },
+  { name: 'Southern Savers — Walgreens ad & coupons', url: 'https://www.southernsavers.com/walgreens-ad-coupons-11-22-11-28/', note: 'The best Walgreens stack-math source: per-deal "makes it" final prices with coupon/reward steps. The parser finds the current week from the homepage — never a guessed slug. Also an RSS feed.' },
+  { name: 'DealNews — today’s edition', url: 'https://www.dealnews.com/', note: 'Daily deals RSS (price in the title, retailer + expiry + photo in the feed).' },
+  { name: 'Hip2Save', url: 'https://hip2save.com/', note: 'Deal posts via its RSS feed and store-filtered WordPress API (Walgreens/CVS/Target/DG/Hobby Lobby/Home Depot).' },
+  { name: 'Krazy Coupon Lady — Michaels stacks', url: 'https://www.thekrazycouponlady.com/coupons-for/michaels', note: 'Michaels coupon deals, same card format as Walgreens.' },
+  { name: 'Krazy Coupon Lady — Kohl’s stacks', url: 'https://www.thekrazycouponlady.com/coupons-for/kohls', note: 'Kohl’s coupon deals, same card format.' },
+  { name: 'Krazy Coupon Lady — JCPenney stacks', url: 'https://www.thekrazycouponlady.com/coupons-for/jcpenney', note: 'JCPenney coupon deals, same card format.' },
+  { name: 'ClearanceFinds — Lowe’s penny list', url: 'https://clearancefinds.com/alerts/lowes-penny-list-november-2026/', note: 'Lowe’s penny list by 7-digit item number (NOT a UPC — shown as SKU) with observed 1¢–6¢ prices and seen-date ranges. First Lowe’s source.' },
+  { name: 'Aminahstore — Home Depot penny list', url: 'https://aminahstore.com/article/111', note: 'Home Depot penny list by SKU (12-digit internet and 6-digit legacy formats — shown as SKU, never UPC).' },
+  { name: 'weeklyadhunters — Dollar General weekly ad', url: 'https://weeklyadhunters.com/dollar-general-weekly-ad/', note: 'DG weekly-ad price list (273 items, Nov 22–28). Ad prices, not pennies. Source of the Dixie 4-for-$8.50 reel deal — the ad lists Dixie but its price row is garbled, so the reel’s $8.50 is the item’s price.' },
+  { name: 'Kart.deals — JCPenney live clearance', url: 'https://kart.deals/store/jcpenney-com?sort=price-asc&filters=open', note: 'Live per-store clearance tracker (JCPenney verified — 540 live deals, first 30 on the page). Other stores not wired — their URLs were not verified.' },
+  { name: 'Freebie Guy — Target deals', url: 'https://thefreebieguy.com/target-deals/', note: 'Target deal posts, same card format as the Walgreens page.' },
+  { name: 'Passionate Penny Pincher', url: 'https://passionatepennypincher.com/', note: 'Deal posts via its RSS feed (article pages are bot-walled — link-only for the articles themselves).' },
+  { name: 'Fabulessly Frugal', url: 'https://fabulesslyfrugal.com/deals/', note: 'Deal posts via its deals RSS feed.' },
+  { name: 'Brad’s Deals', url: 'https://www.bradsdeals.com/', note: 'Deal posts from the homepage tiles (no RSS exists).' },
+  { name: 'Weekly Bargains — Hobby Lobby Black Friday ad', url: 'https://weekly-bargains.com/us/hobby-lobby/hobby-lobby-home-fall-decor-2026-11-18-4458192/', note: 'Hobby Lobby fall decor at 75% (Nov 18–30) with per-item prices. The 90%-off-on-Nov-23 claim is a disputed creator prediction — the app shows the verified 75%, never the prediction as fact.' }
 ];
 
 /* ---------------- storage (localStorage with in-memory fallback) ---------------- */
@@ -258,12 +302,20 @@ function normalizeWeekly(data) {
       originalPrice: it.was || '',
       saleStory: 'WEEKLY FEED',
       dept: classifyDept(it.name, it.department || 'General'),
-      confirmedOn: it.first_seen || '',
-      listDate: it.list_date || it.first_seen || '',
+      /* listDate is the date of the list section the item came from —
+       * '' (unknown) stays '' here: it must NOT fall back to first_seen
+       * (the parser run date), or undated items would sort as newest
+       * and show under Future. Same for confirmedOn. */
+      confirmedOn: it.list_date || '',
+      listDate: it.list_date || '',
       validTo: it.valid_to || '',
       url: it.url || '',
       sku: it.sku || '',
-      image: it.image || ''
+      image: it.image || '',
+      /* Coupon stack (Bundles tab) + how-to steps from the source's own
+       * text ([] = the source gave no usable steps). */
+      stack: !!it.is_stack,
+      steps: Array.isArray(it.steps) ? it.steps : []
     });
   });
   return { meta: meta, deals: deals };
@@ -329,14 +381,40 @@ function visibleDeals() {
   var f = state.filters;
   var filtered = state.deals.filter(function (d) {
     if (state.ignored[d.id]) return false;
+    if (d.stack) return false; /* stacks live on the Bundles tab (v13) */
     if (f.pennyOnly && d.kind !== 'penny') return false;
     if (!f.showExpired && isExpired(d, state.today)) return false;
-    if (f.futureOnly && !(dealDate(d) && dealDate(d) > state.today)) return false;
+    /* Future is symmetric with Show expired (v13 fix): OFF hides any
+     * deal whose list date is after today; ON shows ONLY those. An
+     * undated deal (listDate '') is never future and shows by default. */
+    var dd = dealDate(d);
+    if (f.futureOnly) { if (!(dd && dd > state.today)) return false; }
+    else if (dd && dd > state.today) return false;
     if (f.retailer && d.storeId !== f.retailer) return false;
     if (f.dept && d.dept !== f.dept) return false;
     return true;
   });
   return sortDeals(filtered);
+}
+/* Bundles tab (v13): ONLY stack items, newest first by list date,
+ * undated last, ties by name. No filter UI on this tab: expired and
+ * future-dated stacks hide by default, the same as the Deals tab's
+ * defaults. */
+function visibleStacks() {
+  var list = state.deals.filter(function (d) {
+    if (!d.stack) return false;
+    if (state.ignored[d.id]) return false;
+    if (isExpired(d, state.today)) return false;
+    var dd = dealDate(d);
+    if (dd && dd > state.today) return false;
+    return true;
+  });
+  list.sort(function (a, b) {
+    var da = dealDate(a), db = dealDate(b);
+    if (db !== da) return db < da ? -1 : 1;
+    return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
+  });
+  return list;
 }
 /* Seller links (v9) — ONE link per card. For the four app-mapped
  * stores the link is labelled 'Open in {Store} app'. On Android it is an
@@ -378,7 +456,7 @@ function visibleDeals() {
  * utm, or redirector parameters in any link. Labels say "app" /
  * "search", never "buy" — a search link is not a verified price or a
  * confirmed listing. */
-var APP_VERSION = 'v12';
+var APP_VERSION = 'v13';
 var SELLER_SEARCH = {
   'wm-ct': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
   'walmart': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
@@ -557,7 +635,7 @@ function dealCard(d) {
    * an Oct 27 Freebie Guy item reads "penny list 2026-10-27", not the
    * date the parser happened to run. */
   var listDate = d.listDate || d.confirmedOn;
-  var conf = listDate ? '<span class="meta">penny list ' + esc(listDate) + '</span>' : '';
+  var conf = listDate ? '<span class="meta">' + (d.stack ? 'stack posted ' : 'penny list ') + esc(listDate) + '</span>' : '';
   var upc = d.upc ? '<span class="meta">UPC ' + esc(d.upc) + '</span>' : '<span class="meta">no UPC in this listing</span>';
   var badge = isNew(d.id) ? '<span class="badge-new">NEW</span>' : '';
   var penny = d.kind === 'penny' ? '<span class="badge-penny">PENNY</span>' : '';
@@ -570,6 +648,7 @@ function dealCard(d) {
     (d.note ? '<p class="note">' + esc(d.note) + '</p>' : '') +
     '<div class="deal-actions">' +
       '<button type="button" class="btn" data-action="watch" data-id="' + esc(d.id) + '">' + (isW ? '✓ Watching' : '＋ Watch') + '</button>' +
+      '<button type="button" class="btn" data-action="instructions" data-id="' + esc(d.id) + '">Instructions</button>' +
       '<button type="button" class="btn quiet" data-action="ignore" data-id="' + esc(d.id) + '">Don’t show again</button>' +
       sellerLinksHtml(d) +
     '</div></div></div></article>';
@@ -590,6 +669,25 @@ function renderDeals() {
   }
   el.innerHTML = list.slice(0, 400).map(dealCard).join('') +
     (list.length > 400 ? '<p class="hint">Showing the first 400 of ' + list.length + ' matches — narrow the search to see more.</p>' : '');
+}
+/* Bundles tab (v13): stacks only, newest first (visibleStacks). The
+ * badge counts visible stacks; the empty states explain themselves. */
+function renderBundles() {
+  var el = $('bundleList');
+  if (!el) return;
+  var list = visibleStacks();
+  var bc = $('bundleCount');
+  if (bc) bc.textContent = list.length ? '(' + list.length + ')' : '';
+  if (!state.deals.length) {
+    el.innerHTML = '<p class="empty">No deals loaded yet. ' + (state.loadError ? esc(state.loadError) : 'Try again in a moment.') + '</p>';
+    return;
+  }
+  if (!list.length) {
+    el.innerHTML = '<p class="empty">No bundle stacks right now. New stacks appear here when the morning feed finds one.</p>';
+    return;
+  }
+  el.innerHTML = list.slice(0, 400).map(dealCard).join('') +
+    (list.length > 400 ? '<p class="hint">Showing the first 400 of ' + list.length + ' stacks — the rest are older.</p>' : '');
 }
 /* Store filter options (v9): only stores that have deals in the given
  * feed, with a deal count after each name. Returns [{value, label}]
@@ -682,6 +780,7 @@ function watchCard(d) {
       cb('register', 'Register rang the deal price') +
       '<p class="hint">If the register rings full price or locks up, the deal isn’t real at this store. A manager can refuse a penny sale.</p></div>' +
     '<div class="deal-actions">' + sellerLinksHtml(d) +
+      '<button type="button" class="btn" data-action="instructions" data-id="' + esc(d.id) + '">Instructions</button>' +
       '<button type="button" class="btn quiet" data-action="unwatch" data-id="' + esc(d.id) + '">Stop watching</button></div>' +
     '</div></div></article>';
 }
@@ -881,12 +980,92 @@ function togglePush() {
   return enablePush();
 }
 
+/* ---------------- instructions modal (v13) ----------------
+ * Every deal card gets an "Instructions" button. The modal puts
+ * everything needed to get the deal in one place: price/was, store,
+ * UPC or SKU with a Copy button, list date + sources, and the how-to
+ * steps — the source's own step text when the feed has it (KCL coupon
+ * lines, Slickdeals thread scenarios), otherwise the generic checklist
+ * built from what the feed knows. Steps are never invented: an empty
+ * steps array means the source gave no usable steps. Closes via the
+ * Close button, the backdrop, Esc, or the phone Back button (a history
+ * entry is pushed on open so Back pops the modal instead of leaving
+ * the app — the same pattern as the bulk-finder 3D viewer). */
+var instrOpen = false;
+function instructionsHtml(d) {
+  var price = d.price
+    ? '<p><strong>Price:</strong> ' + esc(d.price) +
+      (d.originalPrice ? ' <span class="was">was ' + esc(d.originalPrice) + '</span>' : '') + '</p>'
+    : (d.originalPrice ? '<p><strong>Was:</strong> ' + esc(d.originalPrice) + '</p>' : '');
+  var store = '<p><strong>Store:</strong> ' + esc(prettyStore(d.storeId)) + '</p>';
+  var code = '';
+  if (d.upc) {
+    code = '<p><strong>UPC:</strong> ' + esc(d.upc) +
+      ' <button type="button" class="btn small" data-action="copy" data-name="' + esc(d.upc) + '">Copy</button></p>';
+  } else if (d.sku) {
+    code = '<p><strong>SKU:</strong> ' + esc(d.sku) +
+      ' <button type="button" class="btn small" data-action="copy" data-name="' + esc(d.sku) + '">Copy</button></p>';
+  }
+  var listDate = d.listDate || d.confirmedOn;
+  var srcs = (d.sources && d.sources.length) ? d.sources : [d.source || 'briefing'];
+  var meta = '<p class="meta">' + (listDate ? (d.stack ? 'Stack posted ' : 'Penny list ') + esc(listDate) + ' · ' : '') +
+    'via ' + esc(srcs.join(', ')) + '</p>';
+  var steps = Array.isArray(d.steps) ? d.steps : [];
+  var body;
+  if (steps.length) {
+    body = '<h3>How to get it</h3><ol>' +
+      steps.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ol>';
+  } else {
+    var generic = [
+      'Clip any digital coupons for this item in the store app first.',
+      'Check the store app for stock at your store.',
+      'Scan in store — the register price is the truth, not the list.',
+      'Keep the receipt.'
+    ];
+    if (d.stack) {
+      generic.push('Digital coupons and rewards vary by account — confirm in your store app before you shop.');
+    }
+    body = '<h3>How to get it</h3><ol>' +
+      generic.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ol>';
+  }
+  var link = d.url
+    ? '<p><a href="' + esc(d.url) + '" target="_blank" rel="noopener">Full details on ' + esc(d.source || 'the source') + ' ↗</a></p>'
+    : '';
+  return price + store + code + meta + body + link;
+}
+function openInstructions(id) {
+  var d = findDeal(id);
+  if (!d) return false;
+  var m = $('instrModal');
+  var title = $('instrTitle');
+  var body = $('instrBody');
+  if (!m || !title || !body) return false;
+  title.textContent = d.name;
+  body.innerHTML = instructionsHtml(d);
+  m.hidden = false;
+  instrOpen = true;
+  try {
+    if (typeof history !== 'undefined' && history.pushState) history.pushState({ paInstr: true }, '');
+  } catch (e) { /* history is best-effort */ }
+  return true;
+}
+function closeInstructions() {
+  var m = $('instrModal');
+  if (m) m.hidden = true;
+  instrOpen = false;
+  return true;
+}
+
 /* ---------------- actions ---------------- */
 function findDeal(id) {
   var d = state.deals.filter(function (x) { return x.id === id; })[0];
   return d || state.watch[id] || null;
 }
 function handleAction(action, id) {
+  if (action === 'instructions') {
+    openInstructions(id);
+    return; /* no re-render — the modal sits above the list */
+  }
   if (action === 'watch') {
     var d = findDeal(id);
     if (d) { state.watch[id] = d; }
@@ -901,6 +1080,7 @@ function handleAction(action, id) {
   }
   saveState();
   renderDeals();
+  renderBundles();
   renderWatchlist();
 }
 function handleCheck(id, key, checked) {
@@ -970,7 +1150,7 @@ function loadBriefing() {
   return Promise.all([weeklyP, briefingP]).then(function () {
     mergeFeeds();
     var fresh = markSeenAndNotify(state.deals.map(function (d) { return d.id; }));
-    renderBriefingBar(); renderFilters(); renderDeals(); renderWatchlist(); renderWeeklySources();
+    renderBriefingBar(); renderFilters(); renderDeals(); renderBundles(); renderWatchlist(); renderWeeklySources();
     return fresh;
   });
 }
@@ -985,6 +1165,7 @@ function switchTab(name) {
     p.hidden = (p.id !== 'tab-' + name);
   });
   if (name === 'watchlist') renderWatchlist();
+  if (name === 'bundles') renderBundles();
 }
 function init() {
   loadState();
@@ -1006,6 +1187,29 @@ function init() {
     if (b.getAttribute('data-action') === 'copy') { copyDealName(b.getAttribute('data-name') || '', b); return; }
     handleAction(b.getAttribute('data-action'), b.getAttribute('data-id'));
   });
+  var bl = $('bundleList');
+  if (bl) bl.addEventListener('click', function (ev) {
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-action]') : null;
+    if (!b) return;
+    if (b.getAttribute('data-action') === 'copy') { copyDealName(b.getAttribute('data-name') || '', b); return; }
+    handleAction(b.getAttribute('data-action'), b.getAttribute('data-id'));
+  });
+  /* Instructions modal: backdrop/X close it, its Copy button copies the
+   * UPC/SKU; Esc and the phone Back button close it too. */
+  var im = $('instrModal');
+  if (im) im.addEventListener('click', function (ev) {
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-action]') : null;
+    if (!b) return;
+    var a = b.getAttribute('data-action');
+    if (a === 'copy') { copyDealName(b.getAttribute('data-name') || '', b); return; }
+    if (a === 'close-instructions') { closeInstructions(); return; }
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev && ev.key === 'Escape' && instrOpen) closeInstructions();
+  });
+  if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('popstate', function () { if (instrOpen) closeInstructions(); });
+  }
   var wl = $('watchList');
   if (wl) {
     wl.addEventListener('click', function (ev) {
@@ -1082,9 +1286,16 @@ if (typeof window !== 'undefined') {
     APP_VERSION: APP_VERSION,
     thumbHtml: thumbHtml,
     dealCard: dealCard,
+    watchCard: watchCard,
     sourceCountHtml: sourceCountHtml,
     sortDeals: sortDeals,
     dealDate: dealDate,
+    visibleStacks: visibleStacks,
+    renderBundles: renderBundles,
+    instructionsHtml: instructionsHtml,
+    _openInstructions: openInstructions,
+    _closeInstructions: closeInstructions,
+    _instrOpen: function () { return instrOpen; },
     SOURCE_LINKS: SOURCE_LINKS,
     _state: state,
     _visibleDeals: visibleDeals,

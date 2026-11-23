@@ -195,3 +195,21 @@ main { padding: 12px 12px 40px; max-width: 860px; margin: 0 auto; }
   text-align: center;
   border-top: 1px solid #e2e2e2;
 }
+
+/* Instructions modal (v13) — full-screen overlay, card on top.
+ * The backdrop covers the screen and closes on tap; the card scrolls
+ * if the steps run long. */
+.modal[hidden] { display: none; }
+.modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
+.modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.55); }
+.modal-card { position: relative; width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; background: #fff; border-radius: 14px 14px 0 0; padding: 16px; box-shadow: 0 -4px 24px rgba(0,0,0,.3); }
+.modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.modal-head h2 { font-size: 18px; margin: 0; }
+.modal-body p { margin: 8px 0; font-size: 14px; }
+.modal-body ol { padding-left: 22px; }
+.modal-body ol li { margin-bottom: 8px; font-size: 14px; }
+.modal-body h3 { font-size: 15px; margin: 14px 0 6px; }
+@media (min-width: 640px) {
+  .modal { align-items: center; }
+  .modal-card { border-radius: 14px; }
+}

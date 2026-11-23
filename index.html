@@ -25,6 +25,7 @@
 
 <nav class="tabs" role="tablist" aria-label="Sections">
   <button type="button" class="tab active" data-tab="deals" role="tab">Deals <span id="dealCount" class="count"></span></button>
+  <button type="button" class="tab" data-tab="bundles" role="tab">Bundles <span id="bundleCount" class="count"></span></button>
   <button type="button" class="tab" data-tab="watchlist" role="tab">Watchlist <span id="watchCount" class="count"></span></button>
   <button type="button" class="tab" data-tab="lists" role="tab">Lists &amp; Sources</button>
 </nav>
@@ -48,6 +49,11 @@
     </div>
     <p class="hint">Leads, not confirmations. A deal here means “go check it” — the register is the final truth.</p>
     <div id="dealList" class="deal-list"></div>
+  </section>
+
+  <section id="tab-bundles" class="tab-panel" hidden>
+    <p class="hint">Coupon stacks: buy the bundle, clip the digitals, earn the rewards — final price is the out-of-pocket after rewards. Digital coupons vary by account: clip them in the store app first and confirm before you shop.</p>
+    <div id="bundleList" class="deal-list"></div>
   </section>
 
   <section id="tab-watchlist" class="tab-panel" hidden>
@@ -84,8 +90,19 @@
 
 <footer class="app-footer">
   <p>Free forever. Data: Penny Hunter’s public briefing + the community penny lists linked above. Not affiliated with Walmart, Target, Dollar General, Home Depot or Penny Hunter.</p>
-  <p id="appVersion" class="version">Penny Alerts v12</p>
+  <p id="appVersion" class="version">Penny Alerts v13</p>
 </footer>
+
+<!-- Instructions modal (v13): one deal's how-to, opened from any card's
+     "Instructions" button. Filled by app.js; closes via the ✕ button,
+     the backdrop, Esc, or the phone Back button. -->
+<div id="instrModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="instrTitle">
+  <div class="modal-backdrop" data-action="close-instructions"></div>
+  <div class="modal-card">
+    <div class="modal-head"><h2 id="instrTitle"></h2><button type="button" class="btn small" data-action="close-instructions" aria-label="Close">✕</button></div>
+    <div id="instrBody" class="modal-body"></div>
+  </div>
+</div>
 
 <script src="app.js"></script>
 </body>

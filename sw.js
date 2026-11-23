@@ -4,7 +4,7 @@
  * penny lists go stale fast. v3 adds background push: the 'push' event
  * shows the sender's summary notification, and tapping it opens the app.
  * v4: new cache name for the thumbnail layout change. */
-var CACHE = 'penny-alerts-v12';
+var CACHE = 'penny-alerts-v13';
 var SHELL = ['index.html', 'styles.css', 'app.js', 'manifest.json', 'icon.svg'];
 var BRIEFING = 'rocketshon.github.io/penny-finder-backend/briefings/latest.json';
 var WEEKLY = 'feed/weekly.json';

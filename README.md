@@ -20,9 +20,27 @@ phone's home screen (it's a PWA).
   in that mode each card shows "✓ N sources" under its picture). The
   **Future** checkbox shows only deals whose list date is after today —
   right now that is PennyPinchinMom's Nov 24 list (105 items).
+- **Bundles tab — coupon stacks (v13)**: a second tab next to Deals,
+  for coupon-stack / bundle deals — buy the bundle, clip the digitals,
+  earn the rewards, pay the out-of-pocket price after rewards (e.g.
+  "$2.00 (was $14.98)"). Bundles come from the free coupon blogs and
+  deal forums below (Walgreens, CVS, Target); Facebook reels can't be
+  watched automatically (no API, login wall, video), but the same stacks
+  appear in text on those sites. Digital coupons and rewards vary by
+  account — clip them in the store app first and confirm before you
+  shop. Stacks never appear on the Deals tab.
+- **Instructions — every card (v13)**: an "Instructions" button on
+  every deal card (Deals, Bundles, and watchlist) opens a panel with
+  everything needed to get the deal: price / was, retailer, UPC or SKU
+  with a Copy button, the list date and sources, and — where the source
+  genuinely provides them — the step-by-step (clip coupon, apply code,
+  expected total). Where no source gives steps, the panel shows a short
+  generic checklist instead; steps are never invented. Closes with the
+  X, a tap outside, Esc, or the phone Back button.
 - **Watchlist** (saved on your phone): tap Watch on any deal. Each watched
   item gets an in-store checklist — scan in the store's app, find it on the
-  shelf, confirm the register price.
+  shelf, confirm the register price. Watchlist cards carry the same
+  Instructions button as deal cards.
 - **Mark-off / ignore list**: "Don't show again" hides an item everywhere,
   with a way to un-mark it.
 - **One-tap app links**: each card has one link — "Open in {Store} app"
@@ -81,7 +99,7 @@ this priority order:
 6. **UPCitemdb** — only if a paid key is set (see below).
 
 Coverage is partial by design — measured on the 2026-11-23 regenerated
-feed (660 items): **373/660 (56%) have a photo**. Per source:
+feed (2,244 items): **1,268/2,244 (56%) have a photo**. Per source:
 PennyRecon 166/166, RetailShout 38/38, Slickdeals 25/25,
 Freebie Guy 104/135, Krazy Coupon Lady 20/88, FreeStuffFinder 15/103,
 PennyPinchinMom 5/105. The gaps are structural, not bugs: the DG
@@ -239,9 +257,17 @@ PENNY badge, not the department.
 **Sort (v12):** "Most recent" (default) orders by the item's list date,
 newest first; "Most verified" orders by how many independent lists
 carried the item, then by list date. In Most verified mode each card
-shows "✓ N sources" under its picture. **Future (v12):** the checkbox
+shows "✓ N sources" under its picture. **Future (v13 fix):** the checkbox
 next to "Show expired" shows only deals whose list date is after today
-— currently PennyPinchinMom's Nov 24 list.
+— currently PennyPinchinMom's Nov 24 list. Before v13 it only narrowed
+when checked and let future-dated deals through when unchecked; now it
+is symmetric with "Show expired": Future OFF hides any deal dated after
+today, Future ON shows only those. Undated deals (no list date) are
+never future and show by default.
+
+**Bundles tab (v13):** shows only coupon stacks (`is_stack`), newest
+first, undated last; its badge counts the visible stacks. The Deals tab
+excludes stacks entirely.
 
 The app subscribes this phone with the Web Push API (VAPID public key in
 `app.js` — public, safe to commit) and stores the subscription in
@@ -279,20 +305,75 @@ MIT): the UPC-line regex for the penny-list pages, the category/signal
 logic for RSS, and the retailer map + price extraction for Slickdeals.
 
 Verified live 2026-11-22, re-verified and corrected 2026-11-23
-(counts from the regenerated run — 660 items total, 469 unique UPCs):
+(counts from the regenerated run — 2,244 items total, 51 ok sources, 7 link-only, 0 failed):
+
+### Penny lists (Dollar General $0.01)
 
 | Source | What happens |
 | --- | --- |
 | Freebie Guy — DG penny list (master list) | Parsed — 135 items, all from previous weeks' lists (see audit below) |
 | RetailShout — DG penny items | Parsed — 50 items (structured cards); 38 survive dedupe |
 | Krazy Coupon Lady — DG penny list | Parsed — 105 items; 88 survive dedupe |
-| PennyPinchinMom — DG penny list | Parsed — 105 items (table), all dated Nov 24, 2026 |
+| PennyPinchinMom — DG penny list | Parsed — 113 items (table), all dated Nov 24, 2026 |
 | FreeStuffFinder — DG penny list | Parsed — 266 items; 103 survive dedupe |
-| Slickdeals — frontpage RSS | Parsed — 25 online deals (expire within hours) |
+| Saving With Dana — DG penny list | Parsed — sitemap discovery, newest week first; the current week's page is sometimes an empty shell until the list is posted (Nov 22: the 2026-11-22 page had no table), so the run falls back to the previous week's sitemap page rather than guessing a date |
+| Crazy4Couponing — DG penny list | Parsed — 209 items, dated sections (current Nov 24 section is categories-only; UPCs live in archived sections) |
+| GlitchNDealz — DG penny list | Parsed — 39 items in dated tables (Nov 17 / Nov 3 / Oct 27 / Oct 20) |
+| Penny Puss — DG penny list | Link-only — the homepage yields no current list link (only a 2023 index) and the Oct 27 list page carries only 6 UPCs in static HTML, not the 27 claimed — the rest are not in the page text |
+
+### Home Depot / Lowe's penny lists
+
+| Source | What happens |
+| --- | --- |
 | PennyRecon — Home Depot penny items | Parsed — 166 of 304 live on site (name + HD SKU + retail; no UPC is exposed in the list HTML; only items with detail pages are parseable) |
-| Freebie Guy RSS / PennyPinchinMom RSS | Parsed — post-level signals only (0 items; the list pages carry the real UPCs) |
-| SavingK — Walmart hidden clearance | Link-only — the page is a guide, no parseable deal database exists |
+| Aminahstore — Home Depot penny list | Parsed — 16 items with HD SKUs (mixed formats: 12-digit internet SKUs like 1009-074-829 and 6-digit legacy SKUs like 215-583, stored as `sku`, never as UPC). The scout report claimed 47 SKUs; only 16 are on the live page |
+| ClearanceFinds — Lowe's penny list | Parsed — 121 items keyed by Lowe's item number (2–7 digits, stored as `sku`, never as UPC — no UPCs exist on the page; observed prices 1¢–6¢) |
 | Krazy Coupon Lady — Home Depot penny items | Link-only — the page loads but the list is not in the static HTML (JS-rendered) |
+
+### Coupon stacks / bundles (Bundles tab)
+
+| Source | What happens |
+| --- | --- |
+| Krazy Coupon Lady — Walgreens / CVS / Target deals | Parsed — 11 deal cards each (title + final price + was price + coupon/reward lines as steps) |
+| Krazy Coupon Lady — Michaels / Kohl's / JCPenney deals | Parsed — 11 / 14 / 14 deal cards, same structure |
+| Freebie Guy — Walgreens deals | Parsed — 18 article cards, titles carry final price |
+| Freebie Guy — Target deals | Parsed — 18 article cards (some titles are "$X.xx" placeholders — those get no price) |
+| Freebie Guy — CVS deals | Link-only — only 1 CVS-titled deal on the page, not a real CVS list |
+| RetailShout — Walgreens weekly ad | Parsed — 70 sale items (ad prices, not pennies; list Nov 22–28) |
+| RetailShout — CVS weekly ad | Link-only — this week's page is a gift guide, not a priced deal list |
+| Living Rich With Coupons — RSS | Parsed — 20 items (weekly Walgreens/CVS posts; the homepage itself is not the source) |
+| Southern Savers — Walgreens ad page | Parsed — 22 stack deals (discovered from the homepage, never a guessed date slug; "makes it" math + Register Rewards lines) |
+| Southern Savers — RSS | Parsed — 19 items |
+| TotallyTarget — RSS | Parsed — 6 items (weekly ad previews + clearance finds) |
+| Hip2Save — feed | Parsed — 51 items (store from category tags) |
+| Hip2Save — WordPress API | Parsed — 5 items each for walgreens, cvs, target, dollar-general, hobby-lobby, home-depot (search matches are filtered by slug/title — `Michaels` also matches "Michael Kors") |
+| Passionate Penny Pincher — feed | Parsed — 51 items (article pages are 403 BigScoots verification — link-only, never fetched) |
+| Fabulessly Frugal — deals feed | Parsed — 56 items |
+
+### Deal forums / aggregators (Deals tab)
+
+| Source | What happens |
+| --- | --- |
+| Slickdeals — frontpage RSS | Parsed — 25 online deals (expire within hours) |
+| Slickdeals — search RSS (target, dollar-general, home-depot, clearance, walgreens, cvs, walgreens+free, hobby-lobby) | Parsed — 25 each, newest first; `dollar general` is downstream-filtered to titles/summaries containing the phrase "dollar general" (the raw search's first hit is a "1 Million Dollar" sweepstakes); hobby-lobby is freshness-filtered to ≤7 days (0 fresh this run); walgreens+free routes to Bundles, the rest to Deals |
+| DealNews — today's edition RSS | Parsed — 50 items (price from titles/summaries; the feed carries no `<dealnews:price>` element despite the scout report) |
+| DealNews — editors' choice RSS | Parsed — 40 items (fetched on a fresh client: DealNews stalls this feed on a client that already fetched today's edition — reproduced Nov 23, 2026; a retry alone did not fix it) |
+| GlitchNDealz — RSS | Parsed — 42 items (store + exact price in titles) |
+| Brad's Deals — homepage | Parsed — 24 deal tiles (no RSS exists; search page useless) |
+| weeklyadhunters — DG weekly ad | Parsed — 272 items (273 listed; the Dixie/Vanity Fair row is skipped — its price is garbled, $2.95 name vs $9.95 price — and the curated Dixie deal below covers it) |
+| Kart.deals — JCPenney | Parsed — 25 items (first 30 of 540 live; prices from the static card HTML, JSON-LD carries name+url only) |
+| Weekly Bargains — Hobby Lobby flyer | Parsed — 8 items (Nov 18–30, 75% fall decor; e.g. White Layered Wood Pumpkin $1.62, was $6.49) |
+| Katalozi365 — Hobby Lobby leaflet | Link-only — leaflet is image-based; page text gives only the category discounts (75% fall decor, 50% tableware), no per-item prices |
+| Milled — Hobby Lobby email (75% fall decor) | Link-only — the parser couldn't fetch the page (connection reset twice, 2026-11-22); open it manually |
+| SavingK — Walmart hidden clearance | Link-only — the page is a guide, no parseable deal database exists |
+
+### Gaps — no source verified for these (do not invent one)
+
+- **No CVS or Walgreens $0.01 penny list exists** anywhere verified — the drugstore "pennies" are stack math, not penny lists.
+- **No standing Target DPCI list page** — the Slickdeals `target` search RSS is the catch-net.
+- **No parseable Rite Aid weekly-deal blog verified.**
+- **No Walmart aggregated penny/UPC list** — Walmart has no trackable penny program.
+- Ceiling unchanged: these are deal posts, not live price checks — the register scan is still the truth.
 
 The Freebie Guy Home Depot link was dropped in v12 — the page is a
 404, and a dead link is worse than no link.
@@ -337,10 +418,46 @@ at once:
   "Low likelihood". The source line now says "166 of 304" instead of
   silently showing a subset.
 
+### Hobby Lobby fall clearance (v13) — predicted vs verified
+
+A Facebook reel (Nov 21, 2026) claimed Hobby Lobby fall clearance goes
+to 90% off on Monday, November 23, "everything included". That 90% is a
+**creator prediction, disputed, not a fact**: Hobby Lobby's own weekly
+ad / email (Nov 15–21) has Fall Decor, Floral & Crafts at 75% off and
+Fall Tableware & Party at 50% off; a Nov 22 update from another creator
+citing a Hobby Lobby email says Nov 23 stays at 75% / 50%; employees in
+comments say 90% typically lands on Black Friday, not Nov 23. One other
+creator claims a manager source for 90% on Nov 23. The app therefore
+carries **no hand-written event item** — Hobby Lobby coverage comes only
+from general sources that find items on their own: the Weekly Bargains
+Black Friday flyer (Nov 18–30, 75% fall decor — 8 priced items, e.g.
+White Layered Wood Pumpkin $1.62, was $6.49) and the Slickdeals
+"hobby lobby" search (fresh threads only, ≤7 days — none yet). Rule:
+**a predicted discount is never shown as a price**; an item may only
+carry a percentage its own source actually states.
+
 The Penny Hunter briefing JSON (30+ sources incl. the KCL DG penny list,
 Freebie Guy, Slickdeals, Flipp weekly ads) is still read as a fallback —
 it is the only thing the app fetches automatically besides the weekly
 feed. Weekly DG penny lists are also linked out below, as before:
+
+### The Dixie deal (v13) — one curated item, not a hand-written list
+
+Joseph shared a reel (Stacey Workman, Nov 22, 2026): 4 Dixie
+plates/bowls for $8.50 before tax at Dollar General, Nov 22–28, 2026.
+The weeklyadhunters DG ad page lists "Dixie or Vanity Fair Products -
+$2.95" and "Ultra Plates", but its price row is garbled (name says
+$2.95, listed price shows $9.95) and it does not carry the 2-for-$5 /
+2-for-$7 structure or the digital coupons — those come from the reel.
+So the feed carries exactly one Dixie item, from the weeklyadhunters
+source, with the reel's mechanics as its steps: 2 regular Dixie
+(32-count, floral) 2-for-$5 + 2 Dixie Ultra (20-count plates / 26-count
+bowls, blue swirl) 2-for-$7, clip the $0.50 manufacturer digital and the
+$3.00 DG store coupon (spend $12 on Dixie or Vanity Fair), $12.00 −
+$3.50 = $8.50 before tax. The garbled $2.95/$9.95 row is never used as
+a price, and the weeklyadhunters Dixie/Vanity Fair rows are skipped by
+the parser so they cannot duplicate it. The coupons are DG-app digitals
+(account-specific) — clip first, confirm before shopping.
 
 - Weekly DG penny lists: [Freebie Guy master list](https://THEFREEBIEGUY.COM/DOLLAR-GENERAL-PENNY-SHOPPING-MASTER-LIST/)
   and [RetailShout](https://retailshout.com/latest-dollar-general-penny-items-near-you/)
@@ -373,7 +490,7 @@ previous good items; the Lists & Sources tab shows each source's status.
 ## Files
 
 `index.html`, `app.js`, `styles.css`, `manifest.json`, `sw.js`
-(service-worker cache `penny-alerts-v12`), `icon.svg`, `README.md`,
+(service-worker cache `penny-alerts-v13`), `icon.svg`, `README.md`,
 `scripts/parse-lists.py` + `scripts/send-push.py` +
 `scripts/test-parse-images.py` +
 `scripts/requirements.txt` (the weekly-feed parser and the push sender),
