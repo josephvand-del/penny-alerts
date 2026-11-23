@@ -151,21 +151,46 @@ function prettyStore(id) {
   if (STORE_NAMES[id]) return STORE_NAMES[id];
   return String(id).replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
 }
+/* Department classifier (v9) — splits the old "Penny" bucket into real
+ * sections from the item NAME (first keyword match wins). It is a
+ * best-guess from names: short keywords match on word boundaries
+ * (optional plural) so "car" does not fire on "carpet" and "hat" does
+ * not fire on "that". Rule order matters: 'food' beats 'dog' (dog food
+ * is Grocery), 'soap' is Health & Beauty, not Household, and 'battery'
+ * is Electronics, not Household. A fallback of 'Penny' / 'General' /
+ * empty becomes 'General'; any other fallback department is kept
+ * (so feed departments like 'Toys & Games' survive). Penny-ness stays
+ * visible via the $0.01 price and the PENNY badge, never via dept. */
+function classifyDept(name, fallbackDept) {
+  var text = String(name || '').toLowerCase();
+  function has() {
+    for (var i = 0; i < arguments.length; i++) {
+      var kw = arguments[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      /* Plurals: -y words take -ies ("battery" matches "batteries"),
+       * everything else takes an optional -s. */
+      var pat = /y$/.test(kw)
+        ? '\\b' + kw.slice(0, -1) + '(y|ies)\\b'
+        : '\\b' + kw + 's?\\b';
+      if (new RegExp(pat).test(text)) return true;
+    }
+    return false;
+  }
+  if (has('screw', 'drill', 'nail', 'hammer', 'wrench', 'saw', 'blade', 'tool', 'bolt', 'pliers', 'socket', 'hardware', 'anchor', 'tape measure')) return 'Tools';
+  if (has('cleaner', 'detergent', 'towel', 'trash bag', 'mop', 'broom', 'sponge', 'storage', 'candle', 'light bulb')) return 'Household';
+  if (has('candy', 'chocolate', 'chip', 'cookie', 'cracker', 'soda', 'coffee', 'snack', 'gum', 'popcorn', 'soup', 'pasta', 'food')) return 'Grocery';
+  if (has('shampoo', 'conditioner', 'toothpaste', 'deodorant', 'lotion', 'sunscreen', 'vitamin', 'makeup', 'lipstick', 'razor', 'shaving', 'body wash', 'soap')) return 'Health & Beauty';
+  if (has('diaper', 'baby', 'toy', 'doll', 'puzzle', 'stuffed', 'kids', 'game')) return 'Baby & Kids';
+  if (has('motor oil', 'car', 'tire', 'wiper', 'antifreeze', 'air freshener')) return 'Auto';
+  if (has('shirt', 'pants', 'socks', 'shoe', 'hat', 'gloves', 'jacket', 'underwear')) return 'Clothing';
+  if (has('cable', 'charger', 'headphone', 'speaker', 'battery', 'remote', 'earbud')) return 'Electronics';
+  if (has('dog', 'cat', 'pet', 'leash')) return 'Pet';
+  if (has('sparkler', 'firework', 'decoration', 'ornament', 'wreath', 'garden', 'plant', 'patio', 'christmas', 'halloween')) return 'Home & Seasonal';
+  var fb = fallbackDept || '';
+  if (fb === 'Penny' || fb === 'General' || fb === '') return 'General';
+  return fb;
+}
 function deriveDepartment(item) {
-  var text = ((item.name || '') + ' ' + (item.saleStory || '')).toLowerCase();
-  if (item.kind === 'penny') return 'Penny';
-  if (/pet|dog|cat|bird|fish tank|aquarium/.test(text)) return 'Pet';
-  if (/toy|lego|game|doll|playset|nerf/.test(text)) return 'Toys & Games';
-  if (/baby|infant|diaper|toddler|kids|children/.test(text)) return 'Baby & Kids';
-  if (/shoe|cloth|apparel|dress|shirt|pants|jacket|fashion|men's|women/.test(text)) return 'Clothing';
-  if (/food|snack|drink|coffee|grocery|candy|chip|juice|soda|water|popcorn/.test(text)) return 'Grocery';
-  if (/clean|detergent|soap|bleach|laundry|dish/.test(text)) return 'Household';
-  if (/beauty|shampoo|makeup|skincare|deodorant|vitamin|health/.test(text)) return 'Health & Beauty';
-  if (/tv|headphone|computer|laptop|monitor|phone|tablet|wifi|speaker|electronic|camera/.test(text)) return 'Electronics';
-  if (/tool|drill|saw|hammer|hardware|wrench/.test(text)) return 'Tools';
-  if (/furniture|decor|holiday|halloween|christmas|garden|patio|bedding|towel/.test(text)) return 'Home & Seasonal';
-  if (/car|auto|tire|motor oil/.test(text)) return 'Auto';
-  return 'General';
+  return classifyDept(item.name, item.dept || 'General');
 }
 function isExpired(deal, todayStr) {
   if (!deal.validTo) return false;
@@ -203,7 +228,7 @@ function normalizeBriefing(data) {
       price: '$0.01',
       originalPrice: '',
       saleStory: 'PENNY LIST',
-      dept: 'Penny',
+      dept: classifyDept(p.item, 'Penny'),
       confirmedOn: p.confirmed_on || '',
       validTo: '',
       image: ''
@@ -228,7 +253,7 @@ function normalizeBriefing(data) {
       validTo: it.valid_to || '',
       image: it.image_url || ''
     };
-    d.dept = deriveDepartment(d);
+    d.dept = classifyDept(it.name, 'General');
     deals.push(d);
   });
   return { meta: meta, deals: deals };
@@ -259,7 +284,7 @@ function normalizeWeekly(data) {
       price: it.price || '',
       originalPrice: it.was || '',
       saleStory: 'WEEKLY FEED',
-      dept: it.department || 'General',
+      dept: classifyDept(it.name, it.department || 'General'),
       confirmedOn: it.first_seen || '',
       validTo: it.valid_to || '',
       url: it.url || '',
@@ -315,7 +340,7 @@ function visibleDeals() {
     return true;
   });
 }
-/* Seller links (v8) — ONE link per card. For the four app-mapped
+/* Seller links (v9) — ONE link per card. For the four app-mapped
  * stores the link is labelled 'Open in {Store} app'. On Android it is an
  * intent: URL (scheme https, the store's Android package, and the Google
  * Shopping search for the item as browser_fallback_url), so a tap opens
@@ -334,21 +359,27 @@ function visibleDeals() {
  * 2026-11-22: Walmart (its own search form is action=/search with
  * input name=q), Target (live results page, UPC in body), Home Depot
  * (live results page), Dollar General (its own search box is
- * /product-search?q=<query>&productSearchedMode=manual — the old
- * /search?query= pattern is a branded 404). DG catalog limit: a UPC
- * search often returns 0 results for penny items (the UPC matches
- * nothing in DG's online catalog; name searches return near-matches
- * only) — that is expected for DG pennies, not a bug. No other
- * unverified retailer (no Lowe's, no Amazon). No affiliate, utm, or
- * redirector parameters in any link. Labels say "app" / "search",
- * never "buy" — a search link is not a verified price or a confirmed
- * listing. */
+ * /product-search?q=<query> — the old /search?query= pattern is a
+ * branded 404; the &productSearchedMode=manual suffix was dropped in
+ * v9 because the '&' inside the intent data URI broke the DG link, and
+ * the bare /product-search?q=<query> URL was verified to load a search
+ * page). DG catalog limit: a UPC search often returns 0 results for
+ * penny items (the UPC matches nothing in DG's online catalog; name
+ * searches return near-matches only) — that is expected for DG pennies,
+ * not a bug. Home Depot name queries have their '/' replaced with a
+ * space BEFORE encoding (v9): encodeURIComponent turns '/' into '%2F',
+ * but Android's Uri.getPath() decodes it back to '/' and the HD app
+ * then searched only the first path segment ("1-1" for "1-1/2 in. ...").
+ * No other unverified retailer (no Lowe's, no Amazon). No affiliate,
+ * utm, or redirector parameters in any link. Labels say "app" /
+ * "search", never "buy" — a search link is not a verified price or a
+ * confirmed listing. */
 var SELLER_SEARCH = {
   'wm-ct': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
   'walmart': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
   'target': { label: 'Target', host: 'www.target.com', path: '/s?searchTerm=', pkg: 'com.target.ui' },
   'home-depot': { label: 'Home Depot', host: 'www.homedepot.com', path: '/s/', pkg: 'com.thehomedepot' },
-  'dollar-general': { label: 'Dollar General', host: 'www.dollargeneral.com', path: '/product-search?q=', pkg: 'com.dollargeneral.android', suffix: '&productSearchedMode=manual' }
+  'dollar-general': { label: 'Dollar General', host: 'www.dollargeneral.com', path: '/product-search?q=', pkg: 'com.dollargeneral.android' }
 };
 function isAndroid() {
   return (typeof navigator !== 'undefined' && navigator && /Android/i.test(navigator.userAgent || ''));
@@ -363,17 +394,18 @@ function sellerLinks(deal) {
     if (deal.storeId === 'home-depot') {
       /* Name search only: the SKU search server-redirects to the product
        * page and blanks the in-app view; the name search stays on the
-       * results page. */
-      q = deal.name || '';
+       * results page. Slashes become spaces BEFORE encoding: a '%2F'
+       * in the /s/ path is decoded back to '/' by Android and the HD
+       * app then searches only the first segment ("1-1"). */
+      q = (deal.name || '').replace(/\//g, ' ');
     } else {
       q = deal.upc || deal.name || '';
     }
     if (q) {
-      var suffix = s.suffix || '';
-      var plain = 'https://' + s.host + s.path + encodeURIComponent(q) + suffix;
+      var plain = 'https://' + s.host + s.path + encodeURIComponent(q);
       var url = plain;
       if (isAndroid()) {
-        url = 'intent://' + s.host + s.path + encodeURIComponent(q) + suffix +
+        url = 'intent://' + s.host + s.path + encodeURIComponent(q) +
           '#Intent;scheme=https;package=' + s.pkg +
           ';S.browser_fallback_url=' + encodeURIComponent(googleShoppingUrl(deal)) + ';end';
       }
@@ -475,28 +507,47 @@ function renderDeals() {
   el.innerHTML = list.slice(0, 400).map(dealCard).join('') +
     (list.length > 400 ? '<p class="hint">Showing the first 400 of ' + list.length + ' matches — narrow the search to see more.</p>' : '');
 }
-/* Store filter options (v8): only stores that have deals in the loaded
- * feed. Returns [{value, label}] with 'All stores' first, then one entry
- * per distinct storeId present, sorted alphabetically by display name.
- * A storeId with no display name falls back to the title-cased raw id. */
+/* Store filter options (v9): only stores that have deals in the given
+ * feed, with a deal count after each name. Returns [{value, label}]
+ * with 'All stores' first (no count), then one entry per distinct
+ * storeId present, sorted by count DESC (ties alphabetical by display
+ * name). A storeId with no display name falls back to the title-cased
+ * raw id. */
 function storeFilterOptions(deals) {
-  var seen = {};
-  (deals || []).forEach(function (d) { if (d && d.storeId) seen[d.storeId] = true; });
-  var ids = Object.keys(seen).sort(function (a, b) {
+  var counts = {};
+  (deals || []).forEach(function (d) { if (d && d.storeId) counts[d.storeId] = (counts[d.storeId] || 0) + 1; });
+  var ids = Object.keys(counts).sort(function (a, b) {
+    if (counts[b] !== counts[a]) return counts[b] - counts[a];
     var la = prettyStore(a).toLowerCase(), lb = prettyStore(b).toLowerCase();
     return la < lb ? -1 : (la > lb ? 1 : 0);
   });
   var out = [{ value: '', label: 'All stores' }];
-  ids.forEach(function (id) { out.push({ value: id, label: prettyStore(id) }); });
+  ids.forEach(function (id) { out.push({ value: id, label: prettyStore(id) + ' (' + counts[id] + ')' }); });
+  return out;
+}
+/* Department filter options (v9): same shape as storeFilterOptions —
+ * distinct departments in the given deals, sorted by count DESC (ties
+ * alphabetical), labels "Name (N)", first entry 'All departments'. */
+function deptFilterOptions(deals) {
+  var counts = {};
+  (deals || []).forEach(function (d) { if (d && d.dept) counts[d.dept] = (counts[d.dept] || 0) + 1; });
+  var ids = Object.keys(counts).sort(function (a, b) {
+    if (counts[b] !== counts[a]) return counts[b] - counts[a];
+    var la = a.toLowerCase(), lb = b.toLowerCase();
+    return la < lb ? -1 : (la > lb ? 1 : 0);
+  });
+  var out = [{ value: '', label: 'All departments' }];
+  ids.forEach(function (id) { out.push({ value: id, label: id + ' (' + counts[id] + ')' }); });
   return out;
 }
 function renderFilters() {
   var rf = $('retailerFilter');
   if (rf) {
-    /* Rebuild from the deals actually loaded, every time the feeds finish
-     * loading — never a hardcoded full store list. */
+    /* Rebuild from the WEEKLY deals only, every time the feeds finish
+     * loading — the stale briefing's stores never appear. Never a
+     * hardcoded full store list. */
     var prev = rf.value;
-    var opts = storeFilterOptions(state.deals);
+    var opts = storeFilterOptions(state.weeklyDeals);
     rf.innerHTML = '';
     opts.forEach(function (o) {
       var el = (typeof document !== 'undefined') ? document.createElement('option') : null;
@@ -509,15 +560,22 @@ function renderFilters() {
     if (!stillThere) state.filters.retailer = '';
   }
   var df = $('deptFilter');
-  if (df && df.options.length <= 1) {
-    var depts = {};
-    state.deals.forEach(function (d) { depts[d.dept] = true; });
-    Object.keys(depts).sort().forEach(function (id) {
-      var o = (typeof document !== 'undefined') ? document.createElement('option') : null;
-      if (!o) return;
-      o.value = id; o.textContent = id;
-      df.appendChild(o);
+  if (df) {
+    /* Rebuild from the weekly deals on every load completion (not
+     * build-once): departments are classified at load time, so the
+     * list must follow the loaded feed. */
+    var prevD = df.value;
+    var dOpts = deptFilterOptions(state.weeklyDeals);
+    df.innerHTML = '';
+    dOpts.forEach(function (o) {
+      var oEl = (typeof document !== 'undefined') ? document.createElement('option') : null;
+      if (!oEl) return;
+      oEl.value = o.value; oEl.textContent = o.label;
+      df.appendChild(oEl);
     });
+    var stillThereD = dOpts.some(function (o) { return o.value === prevD; });
+    df.value = stillThereD ? prevD : '';
+    if (!stillThereD) state.filters.dept = '';
   }
 }
 function watchCard(d) {
@@ -935,10 +993,12 @@ if (typeof window !== 'undefined') {
     normalizeWeekly: normalizeWeekly,
     mergeFeeds: mergeFeeds,
     deriveDepartment: deriveDepartment,
+    classifyDept: classifyDept,
     isExpired: isExpired,
     daysSince: daysSince,
     prettyStore: prettyStore,
     storeFilterOptions: storeFilterOptions,
+    deptFilterOptions: deptFilterOptions,
     sellerLinks: sellerLinks,
     thumbHtml: thumbHtml,
     STORES: STORES,

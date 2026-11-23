@@ -169,9 +169,15 @@ no embedded page (retailers block framing, so the modal idea was dropped):
   Google search for the item when it is not (never to the store
   website). On other phones it is the plain store URL for the item
   (iOS Universal Links open the app there). Home Depot searches by
-  product name; Walmart, Target, and Dollar General by UPC, then name.
+  product name — a `/` in the name is replaced with a space before
+  encoding (v9): `%2F` in the `/s/` path made the HD app search only
+  the first path segment ("1-1" for "1-1/2 in. ..."). Walmart,
+  Target, and Dollar General by UPC, then name.
   Dollar General's search is
-  `dollargeneral.com/product-search?q=<query>&productSearchedMode=manual`.
+  `dollargeneral.com/product-search?q=<query>` (the
+  `&productSearchedMode=manual` suffix was dropped in v9 — the `&`
+  inside the Android intent URL broke the DG link, and the bare
+  search URL was verified to load a search page).
   DG catalog limit: a UPC search often returns 0 results for penny
   items (the UPC matches nothing in DG's online catalog; name searches
   return near-matches only) — expected for DG pennies, not a bug.
@@ -188,14 +194,28 @@ returned a live "Search Results for <name>" page (2026-11-22), and
 `/s/<SKU>` resolves to the exact product page on the web but blanks
 the in-app view after its server redirect, which is why Home Depot
 searches by name. **Dollar General** uses the search pattern from
-its own search box (`/product-search?q=<query>&productSearchedMode=manual`,
-verified 2026-11-22); the old `/search?query=` pattern is a branded
+its own search box (`/product-search?q=<query>`, verified 2026-11-22;
+the bare URL loads a search page — verified 2026-11-22 after the
+`&productSearchedMode=manual` suffix was dropped in v9); the old
+`/search?query=` pattern is a branded
 404 and is never used. Labels say "search",
 never "buy" — a search link is a starting point, not a verified price
 or a confirmed listing, and walmart.com search results in particular
 could not be read by any automated fetch (PerimeterX "Robot or
 human?" wall); a tap opens the page in your own browser, which is a
 different thing from our fetch.
+
+## Filters — stores and departments
+
+Both dropdowns are built from the **weekly feed only** — the stale
+briefing's stores never appear, so the store list is just the stores
+with current deals. Each entry shows a deal count after the name
+("Dollar General (492)"), most deals first, ties alphabetical.
+Departments come from a keyword classifier on the item name
+(`classifyDept` in `app.js`): it is a best-guess from names, so some
+items land in General, and a few will be misfiled. There is no
+"Penny" department — penny-ness shows via the $0.01 price and the
+PENNY badge, not the department.
 
 The app subscribes this phone with the Web Push API (VAPID public key in
 `app.js` — public, safe to commit) and stores the subscription in

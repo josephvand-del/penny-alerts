@@ -98,7 +98,8 @@ const PA = sandbox.window.PennyAlerts;
   const pennies = norm.deals.filter(function (d) { return d.kind === 'penny'; });
   check('penny count', pennies.length, 146);
   check('all penny items have UPC', pennies.every(function (d) { return d.upc && d.upc.length >= 10; }), true);
-  check('penny dept', pennies[0].dept, 'Penny');
+  check('no penny item keeps dept Penny', pennies.every(function (d) { return d.dept !== 'Penny'; }), true);
+  check('penny dept is classified from the name', pennies[0].dept, PA.classifyDept(pennies[0].name, 'Penny'));
   check('penny price', pennies[0].price, '$0.01');
   check('meta week', norm.meta.weekId, '2026-W40');
   check('meta generatedAt', norm.meta.generatedAt, '2026-10-03T14:36:45+00:00');
@@ -108,10 +109,19 @@ const PA = sandbox.window.PennyAlerts;
   check('no validTo is not expired', PA.isExpired({ validTo: '' }, '2026-11-22'), false);
   check('days since Oct 3 to Nov 22', PA.daysSince('2026-10-03', '2026-11-22'), 50);
 
-  /* 3. departments */
-  check('pet dept', PA.deriveDepartment({ kind: 'deal', name: 'Blue Buffalo Dog Food 24lb', saleStory: '' }), 'Pet');
-  check('toy dept', PA.deriveDepartment({ kind: 'deal', name: 'LEGO Classic Bricks', saleStory: '' }), 'Toys & Games');
-  check('grocery dept', PA.deriveDepartment({ kind: 'deal', name: 'Chex Mix Snack 15oz', saleStory: '' }), 'Grocery');
+  /* 3. departments (v9) — classifyDept splits the old "Penny" bucket
+   * into real sections from the name; no deal keeps dept 'Penny'. */
+  check('classifyDept: nail plate -> Tools', PA.classifyDept('1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)', 'Penny'), 'Tools');
+  check('classifyDept: sparkler -> Home & Seasonal', PA.classifyDept('#8 Gold Sparkler', 'Penny'), 'Home & Seasonal');
+  check('classifyDept: candy bar -> Grocery', PA.classifyDept('Abba-Zaba Candy Bar', 'Penny'), 'Grocery');
+  check('classifyDept: no keywords + Penny fallback -> General', PA.classifyDept('Capri Sun Summer Blast Passion Fruit Mango 10ct', 'Penny'), 'General');
+  check('classifyDept: non-Penny fallback is kept', PA.classifyDept('Some Random Thing', 'Clothing'), 'Clothing');
+  check('classifyDept: soap is Health & Beauty, not Household', PA.classifyDept('Softsoap Liquid Hand Soap 11oz', 'Penny'), 'Health & Beauty');
+  check('classifyDept: battery is Electronics, not Household', PA.classifyDept('AA Batteries 8-Pack', 'Penny'), 'Electronics');
+  check('classifyDept: dog treats -> Pet', PA.classifyDept('Blue Buffalo Dog Treats 24lb', 'Penny'), 'Pet');
+  check('classifyDept: dog food -> Grocery (food beats dog)', PA.classifyDept('Blue Buffalo Dog Food 24lb', 'Penny'), 'Grocery');
+  check('classifyDept: carpet is not Auto', PA.classifyDept('Indoor Carpet Runner 6ft', 'Penny'), 'General');
+  check('deriveDepartment delegates to classifyDept', PA.deriveDepartment({ kind: 'deal', name: 'Chex Mix Snack 15oz', saleStory: '' }), 'Grocery');
 
   /* 4. BrickSeek is gone (v7) — Joseph has no account there, so the
    * checker links and the checkLinks export were removed entirely. */
@@ -162,7 +172,10 @@ const PA = sandbox.window.PennyAlerts;
   check('stale bar mentions days old', els['staleBar'].textContent.indexOf(PA.daysSince('2026-10-03', PA._state.today) + ' days old') !== -1, true);
   check('stale bar mentions weekly feed', els['staleBar'].textContent.indexOf('weekly feed') !== -1, true);
   check('deal list rendered cards', (els['dealList'].innerHTML.match(/<article/g) || []).length > 0, true);
-  check('retailer filter populated', els['retailerFilter'].options.length > 5, true);
+  check('retailer filter populated from weekly deals only', els['retailerFilter'].options.map(function (o) { return o.value; }).join(','), ',amazon,dollar-general,home-depot');
+  check('retailer filter labels carry counts', els['retailerFilter'].options.map(function (o) { return o.textContent; }).join('|'), 'All stores|Amazon (1)|Dollar General (1)|Home Depot (1)');
+  check('dept filter populated from weekly deals only', els['deptFilter'].options.map(function (o) { return o.value; }).join(','), ',Electronics,General,Tools');
+  check('dept filter has no Penny option', els['deptFilter'].options.map(function (o) { return o.value; }).indexOf('Penny') === -1, true);
   check('notification fired for new deals', notifCalls.length >= 1, true);
   check('notification title mentions new deals', /new deal/.test(notifCalls[0].title), true);
 
@@ -217,7 +230,7 @@ const PA = sandbox.window.PennyAlerts;
   check('pushSupported false in stub env (no serviceWorker)', PA.pushSupported(), false);
   check('supabase URL is the shared bulk-finder project', PA.SUPABASE_URL, 'https://xwekulsnfarjibawqqih.supabase.co');
   const swText = fs.readFileSync('/home/hatch/workspace/penny-alerts/sw.js', 'utf8');
-  check('sw cache bumped to v8', swText.indexOf("penny-alerts-v8") !== -1, true);
+  check('sw cache bumped to v9', swText.indexOf("penny-alerts-v9") !== -1, true);
   check('sw has push handler', swText.indexOf("addEventListener('push'") !== -1, true);
   check('sw push shows a notification', swText.indexOf('showNotification') !== -1, true);
   check('sw has notificationclick handler', swText.indexOf("addEventListener('notificationclick'") !== -1, true);
@@ -296,10 +309,11 @@ const PA = sandbox.window.PennyAlerts;
   });
   check('real feed has some images', imgCount > 0, true);
 
-  /* 12. seller links (v8) — ONE link per card: an Android intent: URL
+  /* 12. seller links (v9) — ONE link per card: an Android intent: URL
    * (store app, Google fallback) on Android, the plain https retailer
    * URL elsewhere, Google Shopping only for unmapped stores. Home Depot
-   * searches by name; Dollar General is now app-mapped. No
+   * searches by name with '/' turned into a space before encoding;
+   * Dollar General's URL has no suffix. No
    * BrickSeek anywhere, no modal anywhere. */
   function intentUrl(host, pathQ, pkg, deal) {
     var g = 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(deal.upc || deal.name || '');
@@ -335,11 +349,19 @@ const PA = sandbox.window.PennyAlerts;
   check('seller links: intent fallback is the Google Shopping URL (WM)', fallbackOf(slWm[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   check('seller links: intent fallback is the Google Shopping URL (TG)', fallbackOf(slTg[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   const slDg = PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' });
-  check('seller links: DG intent URL with UPC', slDg[0].url, intentUrl('www.dollargeneral.com', '/product-search?q=012345678905&productSearchedMode=manual', 'com.dollargeneral.android', { upc: '012345678905', name: 'Test Item' }));
+  check('seller links: DG intent URL with UPC, no suffix', slDg[0].url, intentUrl('www.dollargeneral.com', '/product-search?q=012345678905', 'com.dollargeneral.android', { upc: '012345678905', name: 'Test Item' }));
   check('seller links: DG label is app-first', slDg[0].label, 'Open in Dollar General app');
   check('seller links: DG is exactly one link', slDg.length, 1);
   const slDgNoUpc = PA.sellerLinks({ storeId: 'dollar-general', upc: '', name: 'Blue Widget 12oz' });
-  check('seller links: DG without UPC searches by name', slDgNoUpc[0].url, intentUrl('www.dollargeneral.com', '/product-search?q=Blue%20Widget%2012oz&productSearchedMode=manual', 'com.dollargeneral.android', { upc: '', name: 'Blue Widget 12oz' }));
+  check('seller links: DG without UPC searches by name, no suffix', slDgNoUpc[0].url, intentUrl('www.dollargeneral.com', '/product-search?q=Blue%20Widget%2012oz', 'com.dollargeneral.android', { upc: '', name: 'Blue Widget 12oz' }));
+  check('seller links: no productSearchedMode anywhere', JSON.stringify([].concat(slWm, slWmNoUpc, slTg, slHdName, slHdSkuUpc, slHd, slDg, slDgNoUpc)).indexOf('productSearchedMode') === -1, true);
+  /* Home Depot slash fix: "1-1/2 in." must become "1-1 2 in." in the
+   * /s/ path — a %2F there is decoded back to '/' by Android and the
+   * HD app then searches only the first segment. */
+  const slHdSlash = PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' });
+  check('seller links: HD slash becomes space in the path', slHdSlash[0].url, intentUrl('www.homedepot.com', '/s/1-1%202%20in.%20x%205%20in.%20Nail%20Plate%20Bulk%20(100-Pack)', 'com.thehomedepot', { upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' }));
+  check('seller links: HD /s/ path has no %2F', slHdSlash[0].url.split('/s/')[1].split('#Intent')[0].indexOf('%2F') === -1, true);
+  check('seller links: HD /s/ path has no literal slash', slHdSlash[0].url.split('/s/')[1].split('#Intent')[0].indexOf('/') === -1, true);
   check('seller links: intent fallback is the Google Shopping URL (DG)', fallbackOf(slDg[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   check('seller links: unknown retailer gets only the Google link', PA.sellerLinks({ storeId: 'amazon', upc: '012345678905', name: 'X' }).length, 1);
   check('seller links: no buy language anywhere', JSON.stringify([].concat(slWm, slTg, slHd, slHdName, slDg)).toLowerCase().indexOf('buy') === -1, true);
@@ -350,11 +372,13 @@ const PA = sandbox.window.PennyAlerts;
   check('seller links: non-Android Walmart is plain https', PA.sellerLinks({ storeId: 'wm-ct', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.walmart.com/search?q=012345678905');
   check('seller links: non-Android HD is plain https by name', PA.sellerLinks({ storeId: 'home-depot', sku: '1012-308-531', upc: '', name: 'Test Screw' })[0].url, 'https://www.homedepot.com/s/Test%20Screw');
   check('seller links: non-Android Target is plain https', PA.sellerLinks({ storeId: 'target', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.target.com/s?searchTerm=012345678905');
-  check('seller links: non-Android DG is plain https', PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.dollargeneral.com/product-search?q=012345678905&productSearchedMode=manual');
+  check('seller links: non-Android DG is plain https, no suffix', PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.dollargeneral.com/product-search?q=012345678905');
+  check('seller links: non-Android HD slash becomes space', PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' })[0].url, 'https://www.homedepot.com/s/1-1%202%20in.%20x%205%20in.%20Nail%20Plate%20Bulk%20(100-Pack)');
+  check('seller links: non-Android HD plain URL has no %2F', PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' })[0].url.indexOf('%2F') === -1, true);
   sandbox.navigator.userAgent = '';
   const realHd = realWeekly.items.filter(function (it) { return it.retailer === 'home-depot'; })[0];
   const realHdNorm = realHd ? PA.normalizeWeekly({ items: [realHd] }).deals[0] : null;
-  check('real feed: HD link searches by product name', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url : '', realHdNorm ? 'https://www.homedepot.com/s/' + encodeURIComponent(realHdNorm.name) : '');
+  check('real feed: HD link searches by product name', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url : '', realHdNorm ? 'https://www.homedepot.com/s/' + encodeURIComponent(realHdNorm.name.replace(/\//g, ' ')) : '');
   check('real feed: HD link does not contain the SKU', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url.indexOf(realHdNorm.sku.replace(/-/g, '')) === -1 : false, true);
   check('rendered cards include Google Shopping links', dealHtml.indexOf('google.com/search?tbm=shop') !== -1, true);
   const appText = fs.readFileSync('/home/hatch/workspace/penny-alerts/app.js', 'utf8');
@@ -366,19 +390,36 @@ const PA = sandbox.window.PennyAlerts;
   check('no modal markup in index.html', htmlText.toLowerCase().indexOf('modal') === -1, true);
   check('no modal styles in styles.css', cssText.toLowerCase().indexOf('modal') === -1, true);
 
-  /* 13. store filter options (v8) — only stores with deals loaded. */
+  /* 13. store filter options (v9) — weekly deals only, counts, most first. */
   const sfoTwo = PA.storeFilterOptions([
     { storeId: 'home-depot' }, { storeId: 'dollar-general' }, { storeId: 'home-depot' }
   ]);
-  check('store filter: two stocked stores + All stores', JSON.stringify(sfoTwo), JSON.stringify([
+  check('store filter: counts sorted desc with Name (N) labels', JSON.stringify(sfoTwo), JSON.stringify([
     { value: '', label: 'All stores' },
-    { value: 'dollar-general', label: 'Dollar General' },
-    { value: 'home-depot', label: 'Home Depot' }
+    { value: 'home-depot', label: 'Home Depot (2)' },
+    { value: 'dollar-general', label: 'Dollar General (1)' }
   ]));
-  check('store filter: unknown id falls back to title-cased id', PA.storeFilterOptions([{ storeId: 'some-new-shop' }])[1].label, 'Some New Shop');
+  check('store filter: unknown id falls back to title-cased id', PA.storeFilterOptions([{ storeId: 'some-new-shop' }])[1].label, 'Some New Shop (1)');
   check('store filter: empty deals give only All stores', PA.storeFilterOptions([]).length, 1);
   check('store filter: null deals give only All stores', PA.storeFilterOptions(null).length, 1);
-  check('store filter: rendered select matches loaded deals', els['retailerFilter'].options.map(function (o) { return o.value; }).join(','), PA.storeFilterOptions(st.deals).map(function (o) { return o.value; }).join(','));
+  check('store filter: rendered select matches weekly deals', els['retailerFilter'].options.map(function (o) { return o.value; }).join(','), PA.storeFilterOptions(st.weeklyDeals).map(function (o) { return o.value; }).join(','));
+  check('store filter: rendered labels carry counts', els['retailerFilter'].options.map(function (o) { return o.textContent; }).join('|'), PA.storeFilterOptions(st.weeklyDeals).map(function (o) { return o.label; }).join('|'));
+
+  /* 14. department filter options (v9) — classified depts, counts, no Penny. */
+  const dfoFix = PA.deptFilterOptions([
+    { dept: 'Tools' }, { dept: 'Grocery' }, { dept: 'Tools' }, { dept: 'General' }
+  ]);
+  check('dept filter: counts sorted desc with Name (N) labels', JSON.stringify(dfoFix), JSON.stringify([
+    { value: '', label: 'All departments' },
+    { value: 'Tools', label: 'Tools (2)' },
+    { value: 'General', label: 'General (1)' },
+    { value: 'Grocery', label: 'Grocery (1)' }
+  ]));
+  check('dept filter: empty deals give only All departments', PA.deptFilterOptions([]).length, 1);
+  check('dept filter: null deals give only All departments', PA.deptFilterOptions(null).length, 1);
+  check('dept filter: rendered select has no Penny option', els['deptFilter'].options.map(function (o) { return o.value; }).indexOf('Penny') === -1, true);
+  check('dept filter: rendered select matches weekly deals', els['deptFilter'].options.map(function (o) { return o.value; }).join(','), PA.deptFilterOptions(st.weeklyDeals).map(function (o) { return o.value; }).join(','));
+  check('dept filter: All departments first', els['deptFilter'].options[0].value, '');
 
   console.log(failures === 0 ? 'ALL PASS' : failures + ' FAILURES');
   process.exit(failures === 0 ? 0 : 1);
