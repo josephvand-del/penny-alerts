@@ -23,7 +23,7 @@ phone's home screen (it's a PWA).
   nearest active are Commerce City and Denver), and 5 Home Depots — with
   addresses, phones, and per-store notes.
 - **One-tap app links**: each card has one link — "Open in {Store} app"
-  for Walmart, Target, and Home Depot. On Android it opens the store's
+  for Walmart, Target, Home Depot, and Dollar General. On Android it opens the store's
   app (falling back to a Google search for the item if the app isn't
   installed); on other phones it opens the store's own page for the
   item. Stores with no app link get a Google Shopping search instead.
@@ -37,10 +37,12 @@ phone's home screen (it's a PWA).
   tile — a small product glyph plus the department name — never a
   fabricated image. See "Deal photos — where they come from" below.
 - **Seller links**: every card has exactly one link. For Walmart, Target,
-  and Home Depot it is "Open in {Store} app" — on Android an intent URL
+  Home Depot, and Dollar General it is "Open in {Store} app" — on Android an intent URL
   that opens the store app (Google Shopping search for the item is the
   fallback if the app isn't installed); elsewhere the store's own page
-  for the item. Other stores get a Google Shopping search for the item
+  for the item. Home Depot searches by product name (a SKU search
+  server-redirects to the product page and blanks the in-app view).
+  Other stores get a Google Shopping search for the item
   (by UPC when known, else by name). Labels say "app" / "search", never
   "buy". Tapping one opens the store app or your browser; nothing is
   embedded.
@@ -159,16 +161,20 @@ exhausted quota can never fail the feed job.
 Every deal card carries exactly one link — a plain `<a>` tag, no popup,
 no embedded page (retailers block framing, so the modal idea was dropped):
 
-- **"Open in {Store} app"** (Walmart, Target, Home Depot): on Android
+- **"Open in {Store} app"** (Walmart, Target, Home Depot, Dollar General): on Android
   this is an `intent://` URL with the store's Android package
-  (`com.walmart.android`, `com.target.ui`, `com.thehomedepot`) and the
+  (`com.walmart.android`, `com.target.ui`, `com.thehomedepot`, `com.dollargeneral.android`) and the
   Google Shopping search for the item as `browser_fallback_url` — so a
   tap opens the store app when it is installed, and falls back to a
   Google search for the item when it is not (never to the store
   website). On other phones it is the plain store URL for the item
   (iOS Universal Links open the app there). Home Depot searches by
-  store SKU first (dashes stripped), then UPC, then name; Walmart and
-  Target by UPC, then name.
+  product name; Walmart, Target, and Dollar General by UPC, then name.
+  Dollar General's search is
+  `dollargeneral.com/product-search?q=<query>&productSearchedMode=manual`.
+  DG catalog limit: a UPC search often returns 0 results for penny
+  items (the UPC matches nothing in DG's online catalog; name searches
+  return near-matches only) — expected for DG pennies, not a bug.
 - **Google Shopping search** (every other store): `google.com/search?tbm=shop&q=<UPC>`
   when the item has a UPC, else `q=<item name, URL-encoded>`.
 
@@ -177,11 +183,14 @@ own homepage search form is `action=/search` with input `name=q`
 (the results page itself is behind a PerimeterX wall for automated
 fetches, so results were confirmed by the form, not by reading them);
 Target returned a live results page with the UPC in it; Home Depot
-returned a live "Search Results for <UPC>" page. **Dollar General
-is not included**: its search URL could not be confirmed
-(`dollargeneral.com/search?query=` → 403, then 404 in a browser
-fetch; the Magento-style `/catalogsearch/result/?q=` → 404), so no
-DG link is rendered rather than a guessed one. Labels say "search",
+returned a live "Search Results for <UPC>" page; Home Depot
+returned a live "Search Results for <name>" page (2026-11-22), and
+`/s/<SKU>` resolves to the exact product page on the web but blanks
+the in-app view after its server redirect, which is why Home Depot
+searches by name. **Dollar General** uses the search pattern from
+its own search box (`/product-search?q=<query>&productSearchedMode=manual`,
+verified 2026-11-22); the old `/search?query=` pattern is a branded
+404 and is never used. Labels say "search",
 never "buy" — a search link is a starting point, not a verified price
 or a confirmed listing, and walmart.com search results in particular
 could not be read by any automated fetch (PerimeterX "Robot or

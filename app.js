@@ -315,7 +315,7 @@ function visibleDeals() {
     return true;
   });
 }
-/* Seller links (v7) — ONE link per card. For the three app-mapped
+/* Seller links (v8) — ONE link per card. For the four app-mapped
  * stores the link is labelled 'Open in {Store} app'. On Android it is an
  * intent: URL (scheme https, the store's Android package, and the Google
  * Shopping search for the item as browser_fallback_url), so a tap opens
@@ -325,24 +325,30 @@ function visibleDeals() {
  * Universal Links open the app there). Stores with no app mapping get
  * the plain Google Shopping search only. Third-party checker links were
  * removed entirely in v7 (Joseph has no account with any of them).
- * Home Depot query priority: store SKU first (dashes stripped), then
- * UPC, then name (verified live 2026-11-22: homedepot.com/s/1012308531
- * and /s/1001685761 both resolve to the exact product page); Walmart
- * and Target — UPC, then name. Retailer patterns were verified live
+ * Home Depot searches by NAME (verified live 2026-11-22: /s/<name> loads
+ * a "Search Results for <name>" page and stays there; /s/<SKU> resolves
+ * to the exact product page on the web but the server redirect blanks
+ * the in-app view — Joseph's report; /p/<slug>/<SKU> 404s on a wrong
+ * slug, so no product URL can be built). Walmart, Target, and Dollar
+ * General — UPC, then name. Retailer patterns were verified live
  * 2026-11-22: Walmart (its own search form is action=/search with
  * input name=q), Target (live results page, UPC in body), Home Depot
- * (live results page). Dollar General is NOT included: its search URL
- * could not be confirmed (403 on /search?query=, 404 on the
- * Magento-style /catalogsearch/result/?q=), so no DG link is rendered —
- * nor any other unverified retailer (no Lowe's, no Amazon). No
- * affiliate, utm, or redirector parameters in any link. Labels say
- * "app" / "search", never "buy" — a search link is not a verified
- * price or a confirmed listing. */
+ * (live results page), Dollar General (its own search box is
+ * /product-search?q=<query>&productSearchedMode=manual — the old
+ * /search?query= pattern is a branded 404). DG catalog limit: a UPC
+ * search often returns 0 results for penny items (the UPC matches
+ * nothing in DG's online catalog; name searches return near-matches
+ * only) — that is expected for DG pennies, not a bug. No other
+ * unverified retailer (no Lowe's, no Amazon). No affiliate, utm, or
+ * redirector parameters in any link. Labels say "app" / "search",
+ * never "buy" — a search link is not a verified price or a confirmed
+ * listing. */
 var SELLER_SEARCH = {
   'wm-ct': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
   'walmart': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
   'target': { label: 'Target', host: 'www.target.com', path: '/s?searchTerm=', pkg: 'com.target.ui' },
-  'home-depot': { label: 'Home Depot', host: 'www.homedepot.com', path: '/s/', pkg: 'com.thehomedepot' }
+  'home-depot': { label: 'Home Depot', host: 'www.homedepot.com', path: '/s/', pkg: 'com.thehomedepot' },
+  'dollar-general': { label: 'Dollar General', host: 'www.dollargeneral.com', path: '/product-search?q=', pkg: 'com.dollargeneral.android', suffix: '&productSearchedMode=manual' }
 };
 function isAndroid() {
   return (typeof navigator !== 'undefined' && navigator && /Android/i.test(navigator.userAgent || ''));
@@ -355,15 +361,19 @@ function sellerLinks(deal) {
   if (s) {
     var q = '';
     if (deal.storeId === 'home-depot') {
-      q = (deal.sku || '').replace(/-/g, '') || deal.upc || deal.name || '';
+      /* Name search only: the SKU search server-redirects to the product
+       * page and blanks the in-app view; the name search stays on the
+       * results page. */
+      q = deal.name || '';
     } else {
       q = deal.upc || deal.name || '';
     }
     if (q) {
-      var plain = 'https://' + s.host + s.path + encodeURIComponent(q);
+      var suffix = s.suffix || '';
+      var plain = 'https://' + s.host + s.path + encodeURIComponent(q) + suffix;
       var url = plain;
       if (isAndroid()) {
-        url = 'intent://' + s.host + s.path + encodeURIComponent(q) +
+        url = 'intent://' + s.host + s.path + encodeURIComponent(q) + suffix +
           '#Intent;scheme=https;package=' + s.pkg +
           ';S.browser_fallback_url=' + encodeURIComponent(googleShoppingUrl(deal)) + ';end';
       }
@@ -465,17 +475,38 @@ function renderDeals() {
   el.innerHTML = list.slice(0, 400).map(dealCard).join('') +
     (list.length > 400 ? '<p class="hint">Showing the first 400 of ' + list.length + ' matches — narrow the search to see more.</p>' : '');
 }
+/* Store filter options (v8): only stores that have deals in the loaded
+ * feed. Returns [{value, label}] with 'All stores' first, then one entry
+ * per distinct storeId present, sorted alphabetically by display name.
+ * A storeId with no display name falls back to the title-cased raw id. */
+function storeFilterOptions(deals) {
+  var seen = {};
+  (deals || []).forEach(function (d) { if (d && d.storeId) seen[d.storeId] = true; });
+  var ids = Object.keys(seen).sort(function (a, b) {
+    var la = prettyStore(a).toLowerCase(), lb = prettyStore(b).toLowerCase();
+    return la < lb ? -1 : (la > lb ? 1 : 0);
+  });
+  var out = [{ value: '', label: 'All stores' }];
+  ids.forEach(function (id) { out.push({ value: id, label: prettyStore(id) }); });
+  return out;
+}
 function renderFilters() {
   var rf = $('retailerFilter');
-  if (rf && rf.options.length <= 1) {
-    var seen = {};
-    state.deals.forEach(function (d) { seen[d.storeId] = true; });
-    Object.keys(seen).sort().forEach(function (id) {
-      var o = (typeof document !== 'undefined') ? document.createElement('option') : null;
-      if (!o) return;
-      o.value = id; o.textContent = prettyStore(id);
-      rf.appendChild(o);
+  if (rf) {
+    /* Rebuild from the deals actually loaded, every time the feeds finish
+     * loading — never a hardcoded full store list. */
+    var prev = rf.value;
+    var opts = storeFilterOptions(state.deals);
+    rf.innerHTML = '';
+    opts.forEach(function (o) {
+      var el = (typeof document !== 'undefined') ? document.createElement('option') : null;
+      if (!el) return;
+      el.value = o.value; el.textContent = o.label;
+      rf.appendChild(el);
     });
+    var stillThere = opts.some(function (o) { return o.value === prev; });
+    rf.value = stillThere ? prev : '';
+    if (!stillThere) state.filters.retailer = '';
   }
   var df = $('deptFilter');
   if (df && df.options.length <= 1) {
@@ -907,6 +938,7 @@ if (typeof window !== 'undefined') {
     isExpired: isExpired,
     daysSince: daysSince,
     prettyStore: prettyStore,
+    storeFilterOptions: storeFilterOptions,
     sellerLinks: sellerLinks,
     thumbHtml: thumbHtml,
     STORES: STORES,

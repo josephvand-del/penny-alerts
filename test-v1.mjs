@@ -217,7 +217,7 @@ const PA = sandbox.window.PennyAlerts;
   check('pushSupported false in stub env (no serviceWorker)', PA.pushSupported(), false);
   check('supabase URL is the shared bulk-finder project', PA.SUPABASE_URL, 'https://xwekulsnfarjibawqqih.supabase.co');
   const swText = fs.readFileSync('/home/hatch/workspace/penny-alerts/sw.js', 'utf8');
-  check('sw cache bumped to v7', swText.indexOf("penny-alerts-v7") !== -1, true);
+  check('sw cache bumped to v8', swText.indexOf("penny-alerts-v8") !== -1, true);
   check('sw has push handler', swText.indexOf("addEventListener('push'") !== -1, true);
   check('sw push shows a notification', swText.indexOf('showNotification') !== -1, true);
   check('sw has notificationclick handler', swText.indexOf("addEventListener('notificationclick'") !== -1, true);
@@ -296,9 +296,10 @@ const PA = sandbox.window.PennyAlerts;
   });
   check('real feed has some images', imgCount > 0, true);
 
-  /* 12. seller links (v7) — ONE link per card: an Android intent: URL
+  /* 12. seller links (v8) — ONE link per card: an Android intent: URL
    * (store app, Google fallback) on Android, the plain https retailer
-   * URL elsewhere, Google Shopping only for unmapped stores. No
+   * URL elsewhere, Google Shopping only for unmapped stores. Home Depot
+   * searches by name; Dollar General is now app-mapped. No
    * BrickSeek anywhere, no modal anywhere. */
   function intentUrl(host, pathQ, pkg, deal) {
     var g = 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(deal.upc || deal.name || '');
@@ -311,16 +312,14 @@ const PA = sandbox.window.PennyAlerts;
   const ANDROID_UA = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36';
   const IPHONE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
   sandbox.navigator.userAgent = ANDROID_UA;
-  const slHdSku = PA.sellerLinks({ storeId: 'home-depot', sku: '1012-308-531', upc: '', name: 'Test Screw' });
-  check('seller links: HD SKU intent URL, dashes stripped', slHdSku[0].url, intentUrl('www.homedepot.com', '/s/1012308531', 'com.thehomedepot', { upc: '', name: 'Test Screw' }));
-  check('seller links: HD label is app-first', slHdSku[0].label, 'Open in Home Depot app');
-  check('seller links: HD is exactly one link', slHdSku.length, 1);
-  const slHdSkuWins = PA.sellerLinks({ storeId: 'home-depot', sku: '1001-685-761', upc: '012345678905', name: 'Test Screw' });
-  check('seller links: HD SKU beats UPC', slHdSkuWins[0].url, intentUrl('www.homedepot.com', '/s/1001685761', 'com.thehomedepot', { upc: '012345678905', name: 'Test Screw' }));
-  const slHdUpc = PA.sellerLinks({ storeId: 'home-depot', upc: '123456', name: 'Test Screw' });
-  check('seller links: HD UPC when no SKU', slHdUpc[0].url, intentUrl('www.homedepot.com', '/s/123456', 'com.thehomedepot', { upc: '123456', name: 'Test Screw' }));
+  const slHdName = PA.sellerLinks({ storeId: 'home-depot', sku: '1012-308-531', upc: '', name: 'Test Screw' });
+  check('seller links: HD searches by name, not SKU', slHdName[0].url, intentUrl('www.homedepot.com', '/s/Test%20Screw', 'com.thehomedepot', { upc: '', name: 'Test Screw' }));
+  check('seller links: HD label is app-first', slHdName[0].label, 'Open in Home Depot app');
+  check('seller links: HD is exactly one link', slHdName.length, 1);
+  const slHdSkuUpc = PA.sellerLinks({ storeId: 'home-depot', sku: '1001-685-761', upc: '012345678905', name: 'Test Screw' });
+  check('seller links: HD ignores SKU and UPC, uses name', slHdSkuUpc[0].url, intentUrl('www.homedepot.com', '/s/Test%20Screw', 'com.thehomedepot', { upc: '012345678905', name: 'Test Screw' }));
   const slHd = PA.sellerLinks({ storeId: 'home-depot', upc: '', name: 'Test Screw' });
-  check('seller links: HD without SKU/UPC searches by name', slHd[0].url, intentUrl('www.homedepot.com', '/s/Test%20Screw', 'com.thehomedepot', { upc: '', name: 'Test Screw' }));
+  check('seller links: HD name-only searches by name', slHd[0].url, intentUrl('www.homedepot.com', '/s/Test%20Screw', 'com.thehomedepot', { upc: '', name: 'Test Screw' }));
   const slWm = PA.sellerLinks({ storeId: 'wm-ct', upc: '012345678905', name: 'Test Item' });
   check('seller links: Walmart intent URL for wm-ct + UPC', slWm[0].url, intentUrl('www.walmart.com', '/search?q=012345678905', 'com.walmart.android', { upc: '012345678905', name: 'Test Item' }));
   check('seller links: Walmart label is app-first', slWm[0].label, 'Open in Walmart app');
@@ -332,28 +331,31 @@ const PA = sandbox.window.PennyAlerts;
   check('seller links: Target label is app-first', slTg[0].label, 'Open in Target app');
   const slTgNoUpc = PA.sellerLinks({ storeId: 'target', upc: '', name: 'Blue Widget 12oz' });
   check('seller links: Target without UPC searches by name', slTgNoUpc[0].url, intentUrl('www.target.com', '/s?searchTerm=Blue%20Widget%2012oz', 'com.target.ui', { upc: '', name: 'Blue Widget 12oz' }));
-  check('seller links: intent fallback is the Google Shopping URL (HD)', fallbackOf(slHdSkuWins[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
+  check('seller links: intent fallback is the Google Shopping URL (HD)', fallbackOf(slHdSkuUpc[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   check('seller links: intent fallback is the Google Shopping URL (WM)', fallbackOf(slWm[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   check('seller links: intent fallback is the Google Shopping URL (TG)', fallbackOf(slTg[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   const slDg = PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' });
-  check('seller links: DG gets only the Google link (no intent)', slDg.length, 1);
-  check('seller links: DG link is plain Google Shopping', slDg[0].url, 'https://www.google.com/search?tbm=shop&q=012345678905');
-  check('seller links: DG label is Google Shopping search', slDg[0].label, 'Google Shopping search');
+  check('seller links: DG intent URL with UPC', slDg[0].url, intentUrl('www.dollargeneral.com', '/product-search?q=012345678905&productSearchedMode=manual', 'com.dollargeneral.android', { upc: '012345678905', name: 'Test Item' }));
+  check('seller links: DG label is app-first', slDg[0].label, 'Open in Dollar General app');
+  check('seller links: DG is exactly one link', slDg.length, 1);
+  const slDgNoUpc = PA.sellerLinks({ storeId: 'dollar-general', upc: '', name: 'Blue Widget 12oz' });
+  check('seller links: DG without UPC searches by name', slDgNoUpc[0].url, intentUrl('www.dollargeneral.com', '/product-search?q=Blue%20Widget%2012oz&productSearchedMode=manual', 'com.dollargeneral.android', { upc: '', name: 'Blue Widget 12oz' }));
+  check('seller links: intent fallback is the Google Shopping URL (DG)', fallbackOf(slDg[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   check('seller links: unknown retailer gets only the Google link', PA.sellerLinks({ storeId: 'amazon', upc: '012345678905', name: 'X' }).length, 1);
-  check('seller links: no buy language anywhere', JSON.stringify([].concat(slWm, slTg, slHdUpc, slHdSku)).toLowerCase().indexOf('buy') === -1, true);
-  check('seller links: no utm params in any link', JSON.stringify([].concat(slWm, slWmNoUpc, slTg, slHdSku, slHdUpc, slHd, slDg)).indexOf('utm_') === -1, true);
-  check('seller links: Android links are intent: URLs', [].concat(slWm, slWmNoUpc, slTg, slHdSku, slHdUpc, slHd).every(function (l) { return l.url.indexOf('intent://') === 0; }), true);
+  check('seller links: no buy language anywhere', JSON.stringify([].concat(slWm, slTg, slHd, slHdName, slDg)).toLowerCase().indexOf('buy') === -1, true);
+  check('seller links: no utm params in any link', JSON.stringify([].concat(slWm, slWmNoUpc, slTg, slHdName, slHdSkuUpc, slHd, slDg, slDgNoUpc)).indexOf('utm_') === -1, true);
+  check('seller links: Android links are intent: URLs', [].concat(slWm, slWmNoUpc, slTg, slHdName, slHdSkuUpc, slHd, slDg, slDgNoUpc).every(function (l) { return l.url.indexOf('intent://') === 0; }), true);
   /* Non-Android: same deals return the plain https retailer URLs (v6 behavior). */
   sandbox.navigator.userAgent = IPHONE_UA;
   check('seller links: non-Android Walmart is plain https', PA.sellerLinks({ storeId: 'wm-ct', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.walmart.com/search?q=012345678905');
-  check('seller links: non-Android HD SKU is plain https', PA.sellerLinks({ storeId: 'home-depot', sku: '1012-308-531', upc: '', name: 'Test Screw' })[0].url, 'https://www.homedepot.com/s/1012308531');
+  check('seller links: non-Android HD is plain https by name', PA.sellerLinks({ storeId: 'home-depot', sku: '1012-308-531', upc: '', name: 'Test Screw' })[0].url, 'https://www.homedepot.com/s/Test%20Screw');
   check('seller links: non-Android Target is plain https', PA.sellerLinks({ storeId: 'target', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.target.com/s?searchTerm=012345678905');
-  check('seller links: non-Android DG is still Google only', PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.google.com/search?tbm=shop&q=012345678905');
+  check('seller links: non-Android DG is plain https', PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.dollargeneral.com/product-search?q=012345678905&productSearchedMode=manual');
   sandbox.navigator.userAgent = '';
   const realHd = realWeekly.items.filter(function (it) { return it.retailer === 'home-depot'; })[0];
   const realHdNorm = realHd ? PA.normalizeWeekly({ items: [realHd] }).deals[0] : null;
-  check('real feed: an HD deal carries a non-empty sku through normalizeWeekly', !!(realHdNorm && realHdNorm.sku), true);
-  check('real feed: HD sku link resolves to the product SKU', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url : '', realHdNorm ? 'https://www.homedepot.com/s/' + realHdNorm.sku.replace(/-/g, '') : '');
+  check('real feed: HD link searches by product name', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url : '', realHdNorm ? 'https://www.homedepot.com/s/' + encodeURIComponent(realHdNorm.name) : '');
+  check('real feed: HD link does not contain the SKU', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url.indexOf(realHdNorm.sku.replace(/-/g, '')) === -1 : false, true);
   check('rendered cards include Google Shopping links', dealHtml.indexOf('google.com/search?tbm=shop') !== -1, true);
   const appText = fs.readFileSync('/home/hatch/workspace/penny-alerts/app.js', 'utf8');
   const htmlText = fs.readFileSync('/home/hatch/workspace/penny-alerts/index.html', 'utf8');
@@ -363,6 +365,20 @@ const PA = sandbox.window.PennyAlerts;
   check('no Check on BrickSeek label anywhere in app.js', appText.indexOf('Check on BrickSeek') === -1, true);
   check('no modal markup in index.html', htmlText.toLowerCase().indexOf('modal') === -1, true);
   check('no modal styles in styles.css', cssText.toLowerCase().indexOf('modal') === -1, true);
+
+  /* 13. store filter options (v8) — only stores with deals loaded. */
+  const sfoTwo = PA.storeFilterOptions([
+    { storeId: 'home-depot' }, { storeId: 'dollar-general' }, { storeId: 'home-depot' }
+  ]);
+  check('store filter: two stocked stores + All stores', JSON.stringify(sfoTwo), JSON.stringify([
+    { value: '', label: 'All stores' },
+    { value: 'dollar-general', label: 'Dollar General' },
+    { value: 'home-depot', label: 'Home Depot' }
+  ]));
+  check('store filter: unknown id falls back to title-cased id', PA.storeFilterOptions([{ storeId: 'some-new-shop' }])[1].label, 'Some New Shop');
+  check('store filter: empty deals give only All stores', PA.storeFilterOptions([]).length, 1);
+  check('store filter: null deals give only All stores', PA.storeFilterOptions(null).length, 1);
+  check('store filter: rendered select matches loaded deals', els['retailerFilter'].options.map(function (o) { return o.value; }).join(','), PA.storeFilterOptions(st.deals).map(function (o) { return o.value; }).join(','));
 
   console.log(failures === 0 ? 'ALL PASS' : failures + ' FAILURES');
   process.exit(failures === 0 ? 0 : 1);
