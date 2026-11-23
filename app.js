@@ -147,7 +147,7 @@ var store = {
     memStore[key] = val;
   }
 };
-var LS = { watch: 'pa:watch', ignored: 'pa:ignored', seen: 'pa:seen', checks: 'pa:checks', push: 'pa:push' };
+var LS = { watch: 'pa:watch', ignored: 'pa:ignored', seen: 'pa:seen', checks: 'pa:checks', push: 'pa:push', dismissedBriefing: 'pa:dismissedBriefing', hiddenDepts: 'pa:hiddenDepts' };
 
 /* ---------------- pure helpers (tested) ---------------- */
 function esc(s) {
@@ -335,19 +335,26 @@ var state = {
   ignored: {},    // id -> true
   seen: {},       // id -> first-seen date (YYYY-MM-DD)
   checks: {},     // watch id -> {scanned, shelf, register}
-  filters: { retailer: '', dept: '', pennyOnly: false, showExpired: false, futureOnly: false, sort: 'recent' }
+  hiddenDepts: {}, // dept -> true (v14: hidden from both feed tabs, persists until un-hidden)
+  filters: { retailer: '', dept: '', pennyOnly: false, showExpired: false, futureOnly: false, sort: 'recent' },
+  /* Bundles tab controls (v14): same shape as the Deals filters, but
+   * for stacks only. Default sort is Most verified — stacks are about
+   * trust (a stack listed by several sources is the better lead). */
+  bundleFilters: { sort: 'verified', retailer: '', dept: '', futureOnly: false }
 };
 function loadState() {
   state.watch = store.get(LS.watch, {});
   state.ignored = store.get(LS.ignored, {});
   state.seen = store.get(LS.seen, {});
   state.checks = store.get(LS.checks, {});
+  state.hiddenDepts = store.get(LS.hiddenDepts, {});
 }
 function saveState() {
   store.set(LS.watch, state.watch);
   store.set(LS.ignored, state.ignored);
   store.set(LS.seen, state.seen);
   store.set(LS.checks, state.checks);
+  store.set(LS.hiddenDepts, state.hiddenDepts);
 }
 function isNew(id) {
   var d = daysSince(state.seen[id], state.today);
@@ -360,13 +367,40 @@ function isNew(id) {
 function dealDate(d) {
   return d.listDate || d.confirmedOn || '';
 }
-/* Sort a filtered deal list (v12). Most recent: list date DESC, ties by
- * name. Most verified: number of independent sources DESC, then list
- * date DESC, then name. Returns a new array; the input is untouched. */
-function sortDeals(list) {
+/* Dollar amount from a price string ('$14.98', '$1,299.99') or null. */
+function moneyOf(s) {
+  var m = /([\d,]+(?:\.\d{2})?)/.exec(String(s || ''));
+  if (!m) return null;
+  var v = parseFloat(m[1].replace(/,/g, ''));
+  return isNaN(v) ? null : v;
+}
+/* Dollar savings (was − price) or null when there is no usable was
+ * price, no price, or no saving at all. */
+function savingsOf(d) {
+  var p = moneyOf(d.price), w = moneyOf(d.originalPrice);
+  if (p === null || w === null || w <= p) return null;
+  return w - p;
+}
+/* Sort a filtered deal list (v12, extended v14). Most recent: list
+ * date DESC, ties by name. Most verified: number of independent
+ * sources DESC, then list date DESC, then name. Biggest deals: largest
+ * dollar savings (was − price) DESC; items with no usable saving sort
+ * last, tie-break Most recent. The mode defaults to the Deals tab's
+ * sort; the Bundles tab passes its own. Returns a new array; the
+ * input is untouched. */
+function sortDeals(list, mode) {
+  var m = mode || state.filters.sort;
   var copy = list.slice();
-  var verified = (state.filters.sort === 'verified');
+  var verified = (m === 'verified');
+  var biggest = (m === 'biggest');
   copy.sort(function (a, b) {
+    if (biggest) {
+      var sa = savingsOf(a), sb = savingsOf(b);
+      var ha = (sa !== null), hb = (sb !== null);
+      if (ha !== hb) return ha ? -1 : 1;
+      if (ha && hb && sb !== sa) return sb - sa;
+      /* Tie (or both no-saving): fall through to Most recent. */
+    }
     if (verified) {
       var ca = a.sourceCount || 1, cb = b.sourceCount || 1;
       if (cb !== ca) return cb - ca;
@@ -382,6 +416,7 @@ function visibleDeals() {
   var filtered = state.deals.filter(function (d) {
     if (state.ignored[d.id]) return false;
     if (d.stack) return false; /* stacks live on the Bundles tab (v13) */
+    if (state.hiddenDepts[d.dept]) return false; /* v14 dept hide */
     if (f.pennyOnly && d.kind !== 'penny') return false;
     if (!f.showExpired && isExpired(d, state.today)) return false;
     /* Future is symmetric with Show expired (v13 fix): OFF hides any
@@ -396,25 +431,28 @@ function visibleDeals() {
   });
   return sortDeals(filtered);
 }
-/* Bundles tab (v13): ONLY stack items, newest first by list date,
- * undated last, ties by name. No filter UI on this tab: expired and
- * future-dated stacks hide by default, the same as the Deals tab's
- * defaults. */
+/* Bundles tab (v13, controls added v14): ONLY stack items, filtered
+ * and sorted by the Bundles controls — sort (Most verified default),
+ * store (stacks' stores only), department, Future with the exact
+ * Deals-tab semantics (OFF hides future-dated stacks, ON shows ONLY
+ * future-dated ones, undated is never future). Expired stacks always
+ * hide. Hidden departments (v14) hide here too; watchlist items are
+ * never hidden, only the feed lists. */
 function visibleStacks() {
+  var f = state.bundleFilters;
   var list = state.deals.filter(function (d) {
     if (!d.stack) return false;
     if (state.ignored[d.id]) return false;
+    if (state.hiddenDepts[d.dept]) return false;
     if (isExpired(d, state.today)) return false;
     var dd = dealDate(d);
-    if (dd && dd > state.today) return false;
+    if (f.futureOnly) { if (!(dd && dd > state.today)) return false; }
+    else if (dd && dd > state.today) return false;
+    if (f.retailer && d.storeId !== f.retailer) return false;
+    if (f.dept && d.dept !== f.dept) return false;
     return true;
   });
-  list.sort(function (a, b) {
-    var da = dealDate(a), db = dealDate(b);
-    if (db !== da) return db < da ? -1 : 1;
-    return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
-  });
-  return list;
+  return sortDeals(list, f.sort);
 }
 /* Seller links (v9) — ONE link per card. For the four app-mapped
  * stores the link is labelled 'Open in {Store} app'. On Android it is an
@@ -456,7 +494,7 @@ function visibleStacks() {
  * utm, or redirector parameters in any link. Labels say "app" /
  * "search", never "buy" — a search link is not a verified price or a
  * confirmed listing. */
-var APP_VERSION = 'v13';
+var APP_VERSION = 'v14';
 var SELLER_SEARCH = {
   'wm-ct': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
   'walmart': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
@@ -470,6 +508,31 @@ var SELLER_SEARCH = {
 function isAndroid() {
   return (typeof navigator !== 'undefined' && navigator && /Android/i.test(navigator.userAgent || ''));
 }
+/* Store-search query cleanup (v14): Slickdeals titles often lead with
+ * a price + "FS" ("$29.97, FS, Gerber Suspension NXT ...") and end
+ * with the retailer name ("..., HomeDepot"). The price is already the
+ * card's price and "FS" is not part of the product name — passed
+ * through, the Home Depot app searched "29 97 FS Gerber ..." and
+ * found nothing useful (the "$" was stripped by the punctuation-free
+ * rule but its residue stayed). Strip the leading price + FS marker
+ * and a trailing retailer name before the punctuation-free strip, so
+ * the store search is a clean product-name search. The Google
+ * fallback keeps the raw name (it handles the price prefix fine). */
+var STORE_TAIL = {
+  'home-depot': /,?\s*home\s?depot\s*$/i,
+  'walmart': /,?\s*walmart\s*$/i,
+  'wm-ct': /,?\s*walmart\s*$/i,
+  'target': /,?\s*target\s*$/i,
+  'dollar-general': /,?\s*dollar\s?general\s*$/i
+};
+function cleanStoreQuery(name, storeId) {
+  var q = String(name || '');
+  q = q.replace(/^\s*\$[\d,]+(?:\.\d{2})?\s*,?\s*/, '');
+  q = q.replace(/^(FS|F\/S)\b[,\s]*/i, '');
+  var tail = STORE_TAIL[storeId];
+  if (tail) q = q.replace(tail, '');
+  return q.trim();
+}
 function googleShoppingUrl(deal) {
   return 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(deal.upc || deal.name || '');
 }
@@ -480,10 +543,12 @@ function sellerLinks(deal) {
     if (deal.storeId === 'home-depot') {
       /* Name search only: the SKU search server-redirects to the product
        * page and blanks the in-app view; the name search stays on the
-       * results page. */
-      q = deal.name || '';
+       * results page. The name is cleaned first (v14): a leading
+       * "$29.97, FS, " price prefix or a trailing retailer name would
+       * pollute the store's search. */
+      q = cleanStoreQuery(deal.name || '', deal.storeId);
     } else {
-      q = deal.upc || deal.name || '';
+      q = deal.upc || cleanStoreQuery(deal.name || '', deal.storeId);
     }
     /* Punctuation-free store queries (v11): the HD app choked on '/'
      * (v9) and on '#' (v10) even when encoded, and the screw still
@@ -741,23 +806,111 @@ function renderFilters() {
     rf.value = stillThere ? prev : '';
     if (!stillThere) state.filters.retailer = '';
   }
-  var df = $('deptFilter');
-  if (df) {
-    /* Rebuild from the weekly deals on every load completion (not
-     * build-once): departments are classified at load time, so the
-     * list must follow the loaded feed. */
-    var prevD = df.value;
-    var dOpts = deptFilterOptions(state.weeklyDeals);
-    df.innerHTML = '';
-    dOpts.forEach(function (o) {
+  var df = $('deptDdBtn');
+  if (df) renderDeptDropdown('deals');
+  var bdf = $('bundleDeptDdBtn');
+  if (bdf) renderDeptDropdown('bundles');
+  var bf = $('bundleStore');
+  if (bf) {
+    /* Bundles store dropdown (v14): only stores that have stacks in
+     * the loaded feed — the same rule as the Deals store dropdown. */
+    var prevB = bf.value;
+    var bOpts = storeFilterOptions(state.weeklyDeals.filter(function (d) { return d.stack; }));
+    bf.innerHTML = '';
+    bOpts.forEach(function (o) {
       var oEl = (typeof document !== 'undefined') ? document.createElement('option') : null;
       if (!oEl) return;
       oEl.value = o.value; oEl.textContent = o.label;
-      df.appendChild(oEl);
+      bf.appendChild(oEl);
     });
-    var stillThereD = dOpts.some(function (o) { return o.value === prevD; });
-    df.value = stillThereD ? prevD : '';
-    if (!stillThereD) state.filters.dept = '';
+    var stillThereB = bOpts.some(function (o) { return o.value === prevB; });
+    bf.value = stillThereB ? prevB : '';
+    if (!stillThereB) state.bundleFilters.retailer = '';
+  }
+}
+/* Department dropdown (v14) — a native <select> cannot carry a
+ * per-row hide toggle, so the department filter is a button + panel.
+ * Each row is the department name + count (tap it to filter) with an
+ * ✕ on the right: ✕ hides that department's deals from both feed tabs
+ * until it is tapped again. The name stays visible so the department
+ * can be found and un-hidden. Hidden departments persist in
+ * localStorage under 'pa:hiddenDepts' (version-independent) and never
+ * hide watchlist items — only the feed lists. The Deals dropdown is
+ * built from the weekly deals; the Bundles dropdown from the weekly
+ * stacks only (a department with no stacks has nothing to filter). */
+function deptDropdownHtml(deals, currentValue) {
+  var opts = deptFilterOptions(deals);
+  return opts.map(function (o) {
+    var hidden = o.value && !!state.hiddenDepts[o.value];
+    var sel = (o.value === currentValue) ? ' dept-row-sel' : '';
+    var hideBtn = o.value
+      ? '<button type="button" class="dept-hide' + (hidden ? ' hidden-on' : '') + '" data-action="dept-hide" data-dept="' + esc(o.value) + '" aria-label="' + (hidden ? 'Show ' : 'Hide ') + esc(o.value) + ' deals">✕</button>'
+      : '';
+    return '<div class="dept-row' + sel + (hidden ? ' dept-row-hidden' : '') + '">' +
+      '<button type="button" class="dept-name" data-action="dept-pick" data-dept="' + esc(o.value) + '">' + esc(o.label) + '</button>' + hideBtn + '</div>';
+  }).join('');
+}
+function renderDeptDropdown(scope) {
+  var btn, panel, deals, current;
+  if (scope === 'bundles') {
+    btn = $('bundleDeptDdBtn'); panel = $('bundleDeptDdPanel');
+    deals = state.weeklyDeals.filter(function (d) { return d.stack; });
+    current = state.bundleFilters.dept;
+  } else {
+    btn = $('deptDdBtn'); panel = $('deptDdPanel');
+    deals = state.weeklyDeals;
+    current = state.filters.dept;
+  }
+  var opts = deptFilterOptions(deals);
+  var stillThere = opts.some(function (o) { return o.value === current; });
+  if (!stillThere && current) {
+    if (scope === 'bundles') state.bundleFilters.dept = '';
+    else state.filters.dept = '';
+    current = '';
+  }
+  if (btn) {
+    var cur = null;
+    opts.forEach(function (o) { if (o.value === current) cur = o; });
+    btn.textContent = cur ? cur.label : 'All departments';
+  }
+  if (panel) panel.innerHTML = deptDropdownHtml(deals, current);
+}
+function setDeptFilter(scope, dept) {
+  if (scope === 'bundles') { state.bundleFilters.dept = dept; renderBundles(); }
+  else { state.filters.dept = dept; renderDeals(); }
+  renderDeptDropdown(scope);
+}
+function toggleHiddenDept(dept) {
+  if (!dept) return false;
+  if (state.hiddenDepts[dept]) delete state.hiddenDepts[dept];
+  else state.hiddenDepts[dept] = true;
+  saveState();
+  renderDeals();
+  renderBundles();
+  renderDeptDropdown('deals');
+  renderDeptDropdown('bundles');
+  return !!state.hiddenDepts[dept];
+}
+function isDeptHidden(dept) { return !!state.hiddenDepts[dept]; }
+/* Delegated clicks inside one department dropdown (v14). The panel
+ * stays open on a hide toggle (so several departments can be hidden
+ * in a row) and closes on a pick. */
+function deptDdClick(ev, scope) {
+  var b = ev.target && ev.target.closest ? ev.target.closest('[data-action]') : null;
+  if (!b) return;
+  var a = b.getAttribute('data-action');
+  var panel = scope === 'bundles' ? $('bundleDeptDdPanel') : $('deptDdPanel');
+  if (a === 'dept-toggle') {
+    if (panel) panel.hidden = !panel.hidden;
+    return;
+  }
+  if (a === 'dept-pick') {
+    setDeptFilter(scope, b.getAttribute('data-dept') || '');
+    if (panel) panel.hidden = true;
+    return;
+  }
+  if (a === 'dept-hide') {
+    toggleHiddenDept(b.getAttribute('data-dept') || '');
   }
 }
 function watchCard(d) {
@@ -839,15 +992,28 @@ function renderBriefingBar() {
   bar.textContent = 'Briefing: week ' + (m.weekId || '—') + ' (' + (m.weekOf || '—') + ') · generated ' + (gen || 'unknown') +
     ' · ' + state.deals.length + ' deals — ' + weeklyPart;
   if (stale) {
-    if (age !== null && age > 7) {
+    /* v14: the banner has an ✕ to dismiss it. The dismissal is stored
+     * in localStorage keyed to this briefing's generated date, so it
+     * stays gone across reloads and app updates — but a NEWER briefing
+     * (a different generated date) shows the banner again. */
+    var dismissed = store.get(LS.dismissedBriefing, '');
+    if (age !== null && age > 7 && dismissed !== (m.generatedAt || '')) {
       stale.hidden = false;
-      stale.textContent = '⚠ This briefing is ' + age + ' days old — Penny Hunter hasn’t published a newer one. Penny lists rotate weekly, so treat these as leads, not this week’s list.' +
-        (wgen ? ' The weekly feed above was updated ' + wgen + ' — use it first.' : ' Use the Lists & Sources tab for the current weekly lists.');
+      stale.innerHTML = '<span>⚠ This briefing is ' + age + ' days old — Penny Hunter hasn’t published a newer one. Penny lists rotate weekly, so treat these as leads, not this week’s list.' +
+        (wgen ? ' The weekly feed above was updated ' + wgen + ' — use it first.' : ' Use the Lists & Sources tab for the current weekly lists.') + '</span>' +
+        '<button type="button" class="stale-x" data-action="dismiss-stale" aria-label="Dismiss this notice">✕</button>';
     } else {
       stale.hidden = true;
-      stale.textContent = '';
+      stale.innerHTML = '';
     }
   }
+}
+/* Dismiss the stale-briefing banner (v14): remember this briefing's
+ * generated date, so the banner stays gone until a newer briefing
+ * arrives. */
+function dismissStaleBriefing() {
+  store.set(LS.dismissedBriefing, state.meta.generatedAt || '');
+  renderBriefingBar();
 }
 function renderWeeklySources() {
   var el = $('weeklySources');
@@ -867,21 +1033,29 @@ function renderWeeklySources() {
 }
 /* Push state lives in localStorage ('pa:push' = 'on' when subscribed) and
  * is confirmed against the browser's real subscription on load. */
+/* The button carries its state as a class (v14): .notif-on is the
+ * accent fill, .notif-off the muted outline — the harness asserts the
+ * class after each state change. */
 function setNotifUI(mode, text) {
   var btn = $('notifBtn');
   var st = $('notifState');
   if (!btn || !st) return;
+  btn.classList.remove('notif-on');
+  btn.classList.remove('notif-off');
   if (mode === 'on') {
     btn.textContent = '🔔 Alerts on — tap to turn off';
     btn.disabled = false;
+    btn.classList.add('notif-on');
     st.textContent = text || 'On. New deals push to this phone, even when the app is closed.';
   } else if (mode === 'off') {
     btn.textContent = '🔔 Enable alerts';
     btn.disabled = false;
+    btn.classList.add('notif-off');
     st.textContent = text || 'Tap “Enable alerts” — new deals will push to this phone.';
   } else {
     btn.textContent = '🔔 Enable alerts';
     btn.disabled = true;
+    btn.classList.add('notif-off');
     st.textContent = text;
   }
 }
@@ -903,18 +1077,73 @@ function renderNotif() {
   setNotifUI(store.get(LS.push, '') === 'on' ? 'on' : 'off');
   refreshPushState();
 }
+/* v14 — the stored flag ('pa:push') is the user's INTENT and is only
+ * ever cleared by a deliberate tap on "turn off" (disablePush) or a
+ * definitively denied permission. What reset it in v13: refreshPushState
+ * wrote the flag from whatever getSubscription() returned on load, so
+ * a single null result — the new service worker still installing after
+ * the v13 cache bump, the registration not ready yet — wiped the flag
+ * and flipped the button off, permanently: nothing ever re-subscribed.
+ * Now a null subscription with the flag on is treated as transient:
+ * if permission is already granted, re-subscribe automatically on load
+ * and restore the flag (no tap needed). A failed check never clears
+ * the flag or flips the button. The flag is version-independent: it is
+ * never tied to the service-worker cache name or APP_VERSION. */
 function refreshPushState() {
   if (!pushSupported()) return Promise.resolve(false);
   try {
     return navigator.serviceWorker.ready.then(function (reg) {
       return reg.pushManager.getSubscription();
     }).then(function (sub) {
-      var on = !!sub;
-      store.set(LS.push, on ? 'on' : '');
-      setNotifUI(on ? 'on' : 'off');
-      return on;
-    }).catch(function () { return false; });
+      var storedOn = store.get(LS.push, '') === 'on';
+      if (sub) {
+        /* Live subscription: the phone is covered. Re-save the
+         * endpoint (the save may have failed on the subscribe tap)
+         * and keep the flag on. */
+        store.set(LS.push, 'on');
+        setNotifUI('on');
+        saveSubscription(sub);
+        return true;
+      }
+      if (storedOn && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        /* Flag says on but no live subscription — the v13-update
+         * transient. Re-subscribe automatically, no tap needed. */
+        return resubscribePush();
+      }
+      /* Flag off and no subscription: genuinely off. Leave the flag
+       * alone (it is already '') and show off. */
+      setNotifUI('off');
+      return false;
+    }).catch(function () {
+      /* Transient failure (SW still installing, no network): NEVER
+       * clear the flag or flip the button — show the stored state. */
+      setNotifUI(store.get(LS.push, '') === 'on' ? 'on' : 'off');
+      return false;
+    });
   } catch (e) { return Promise.resolve(false); }
+}
+/* Re-subscribe after a transient loss (v14). The subscription is the
+ * coverage; the server save is best-effort here (refreshPushState
+ * re-saves on the next load if it fails now). The flag follows the
+ * subscribe, not the save — a failed save must not turn the user's
+ * alerts off. A failed re-subscribe keeps the stored flag and the
+ * button as-is; the next load retries. */
+function resubscribePush() {
+  if (!pushSupported()) return Promise.resolve(false);
+  return navigator.serviceWorker.ready.then(function (reg) {
+    return reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+  }).then(function (sub) {
+    saveSubscription(sub);
+    store.set(LS.push, 'on');
+    setNotifUI('on');
+    return true;
+  }).catch(function () {
+    setNotifUI(store.get(LS.push, '') === 'on' ? 'on' : 'off');
+    return false;
+  });
 }
 function saveSubscription(sub) {
   var body = buildSubscriptionBody(sub);
@@ -944,11 +1173,14 @@ function enablePush() {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
     }).then(function (sub) {
-      return saveSubscription(sub);
-    }).then(function (ok) {
-      store.set(LS.push, ok ? 'on' : '');
+      /* v14: the flag follows the subscribe, not the server save — a
+       * failed save used to leave the button off even though the
+       * browser was subscribed (and refreshPushState re-saves on the
+       * next load, so a failed save self-heals). */
+      store.set(LS.push, 'on');
+      saveSubscription(sub);
       renderNotif();
-      return ok;
+      return true;
     }).catch(function () {
       renderNotif();
       return false;
@@ -978,6 +1210,42 @@ function disablePush() {
 function togglePush() {
   if (store.get(LS.push, '') === 'on') return disablePush();
   return enablePush();
+}
+
+/* ---------------- in-app install button (v14) ----------------
+ * The download icon top-right appears ONLY once the browser fires
+ * beforeinstallprompt (i.e. it says the app is installable — the new
+ * 192/512 PNG manifest icons are what makes that fire). It stays
+ * hidden when the app is already installed (standalone display mode
+ * or navigator.standalone) or when the event never fires, so it is
+ * never a dead button. On tap, the stashed prompt is shown; on
+ * 'accepted' the appinstalled event hides the button, and on
+ * 'dismissed' it stays hidden too (Chrome will not re-fire the
+ * prompt soon). */
+var deferredInstallPrompt = null;
+function updateInstallBtn() {
+  var btn = $('installBtn');
+  if (!btn) return;
+  var installed = false;
+  try {
+    installed = (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+      (typeof navigator !== 'undefined' && !!navigator.standalone);
+  } catch (e) { installed = false; }
+  btn.hidden = installed || !deferredInstallPrompt;
+}
+function installApp() {
+  if (!deferredInstallPrompt) return Promise.resolve(false);
+  var ev = deferredInstallPrompt;
+  deferredInstallPrompt = null;
+  updateInstallBtn();
+  ev.prompt();
+  if (ev.userChoice && ev.userChoice.then) {
+    return ev.userChoice.then(function (choice) {
+      updateInstallBtn();
+      return !!(choice && choice.outcome === 'accepted');
+    });
+  }
+  return Promise.resolve(true);
 }
 
 /* ---------------- instructions modal (v13) ----------------
@@ -1101,11 +1369,26 @@ function markSeenAndNotify(newIds) {
   saveState();
   if (fresh.length && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
     try {
-      var n = new Notification('Penny Alerts: ' + fresh.length + ' new deal' + (fresh.length === 1 ? '' : 's') + ' found', {
-        body: 'Open the app to see them. Remember: a lead is not a confirmation — scan in store.',
-        tag: 'penny-alerts-new'
+      /* v14: the body names the top new deals with prices, not just
+       * the count — the same shape as the background push. Let the OS
+       * dismiss it; the 20s close is only a backstop on desktop. */
+      var top = [];
+      fresh.forEach(function (id) {
+        var d = findDeal(id);
+        if (d && top.length < 3) top.push(d);
       });
-      if (n && n.close) { setTimeout(function () { try { n.close(); } catch (e) {} }, 12000); }
+      var lines = top.map(function (d) {
+        return d.name + (d.price ? ' — ' + d.price : '');
+      });
+      var body = lines.join('\n');
+      if (fresh.length > 3) body += '\n+' + (fresh.length - 3) + ' more';
+      body += '\nOpen the app to see them.';
+      var n = new Notification('Penny Alerts: ' + fresh.length + ' new deal' + (fresh.length === 1 ? '' : 's') + ' found', {
+        body: body,
+        tag: 'penny-alerts-new',
+        icon: 'icon-192.png'
+      });
+      if (n && n.close) { setTimeout(function () { try { n.close(); } catch (e) {} }, 20000); }
     } catch (e) { /* notifications are best-effort */ }
   }
   return fresh.length;
@@ -1234,8 +1517,14 @@ function init() {
   if (ss) ss.addEventListener('change', function () { state.filters.sort = ss.value; renderDeals(); });
   var rf = $('retailerFilter');
   if (rf) rf.addEventListener('change', function () { state.filters.retailer = rf.value; renderDeals(); });
-  var df = $('deptFilter');
-  if (df) df.addEventListener('change', function () { state.filters.dept = df.value; renderDeals(); });
+  /* Department dropdowns (v14, custom button + panel — a native
+   * <select> cannot carry a per-row hide ✕). One delegated handler
+   * per dropdown: dept-toggle opens/closes the panel, dept-pick sets
+   * the filter and closes, dept-hide toggles the hidden department. */
+  var dd = $('deptDd');
+  if (dd) dd.addEventListener('click', function (ev) { deptDdClick(ev, 'deals'); });
+  var bdd = $('bundleDeptDd');
+  if (bdd) bdd.addEventListener('click', function (ev) { deptDdClick(ev, 'bundles'); });
   var po = $('pennyOnly');
   if (po) po.addEventListener('change', function () { state.filters.pennyOnly = po.checked; renderDeals(); });
   var se = $('showExpired');
@@ -1252,6 +1541,35 @@ function init() {
     }
     togglePush();
   });
+  /* Bundles tab controls (v14). */
+  var bs = $('bundleSort');
+  if (bs) bs.addEventListener('change', function () { state.bundleFilters.sort = bs.value; renderBundles(); });
+  var bst = $('bundleStore');
+  if (bst) bst.addEventListener('change', function () { state.bundleFilters.retailer = bst.value; renderBundles(); });
+  var bfu = $('bundleFuture');
+  if (bfu) bfu.addEventListener('change', function () { state.bundleFilters.futureOnly = bfu.checked; renderBundles(); });
+  /* Stale-briefing banner dismiss ✕ (v14). */
+  var sb = $('staleBar');
+  if (sb) sb.addEventListener('click', function (ev) {
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-action="dismiss-stale"]') : null;
+    if (b) dismissStaleBriefing();
+  });
+  /* In-app install button (v14): only ever shown once the browser
+   * says the app is installable. */
+  var ib = $('installBtn');
+  if (ib) ib.addEventListener('click', function () { installApp(); });
+  if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('beforeinstallprompt', function (ev) {
+      ev.preventDefault();
+      deferredInstallPrompt = ev;
+      updateInstallBtn();
+    });
+    window.addEventListener('appinstalled', function () {
+      deferredInstallPrompt = null;
+      updateInstallBtn();
+    });
+  }
+  updateInstallBtn();
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(function () { /* offline cache is best-effort */ });
   }
@@ -1282,7 +1600,28 @@ if (typeof window !== 'undefined') {
     storeFilterOptions: storeFilterOptions,
     deptFilterOptions: deptFilterOptions,
     sellerLinks: sellerLinks,
+    cleanStoreQuery: cleanStoreQuery,
+    moneyOf: moneyOf,
+    savingsOf: savingsOf,
     copyDealName: copyDealName,
+    _refreshPushState: refreshPushState,
+    _resubscribePush: resubscribePush,
+    _setNotifUI: setNotifUI,
+    _togglePush: togglePush,
+    _disablePush: disablePush,
+    _enablePush: enablePush,
+    _dismissStaleBriefing: dismissStaleBriefing,
+    _renderBriefingBar: renderBriefingBar,
+    _renderFilters: renderFilters,
+    _toggleHiddenDept: toggleHiddenDept,
+    _isDeptHidden: isDeptHidden,
+    _setDeptFilter: setDeptFilter,
+    _renderDeptDropdown: renderDeptDropdown,
+    _deptDropdownHtml: deptDropdownHtml,
+    _updateInstallBtn: updateInstallBtn,
+    _installApp: installApp,
+    _loadState: loadState,
+    _saveState: saveState,
     APP_VERSION: APP_VERSION,
     thumbHtml: thumbHtml,
     dealCard: dealCard,

@@ -91,17 +91,45 @@ def diff_feeds(new_feed: dict, old_feed: dict) -> list:
     return fresh
 
 
+RETAILER_LABELS = {
+    "home-depot": "Home Depot", "walmart": "Walmart", "wm-ct": "Walmart",
+    "target": "Target", "dollar-general": "Dollar General",
+    "walgreens": "Walgreens", "cvs": "CVS", "rite-aid": "Rite Aid",
+    "hobby-lobby": "Hobby Lobby", "jcp": "JCPenney", "kohls": "Kohl's",
+    "michaels": "Michaels", "lowes": "Lowe's", "amazon": "Amazon",
+    "king-soopers": "King Soopers", "online": "Online",
+}
+
+
+def _store_label(retailer: str) -> str:
+    if retailer in RETAILER_LABELS:
+        return RETAILER_LABELS[retailer]
+    return (retailer or "online").replace("-", " ").title()
+
+
 def build_payload(new_items: list) -> dict:
-    pennies = [it for it in new_items if it.get("price") == "$0.01"]
-    if pennies:
-        title = f"{len(pennies)} new penny deal{'s' if len(pennies) != 1 else ''}"
-    else:
-        title = f"{len(new_items)} new deal{'s' if len(new_items) != 1 else ''}"
-    top = [it.get("name", "")[:80] for it in new_items[:3] if it.get("name")]
-    body = " · ".join(top) if top else "Open Penny Alerts to see them."
-    if len(new_items) > 3:
-        body += f" · +{len(new_items) - 3} more"
-    body += " — scan in store; the register is the final truth."
+    """One summary push per run (v14): the title is the count, the body
+    names the top 3 new deals with prices — 'Name — $price (Store)'
+    lines — then '+N more' when there are more, then 'Open the app to
+    see them.' The register is still the final truth; the push is a
+    lead, not a confirmation."""
+    n = len(new_items)
+    title = f"Penny Alerts: {n} new deal{'s' if n != 1 else ''}"
+    lines = []
+    for it in new_items[:3]:
+        name = (it.get("name") or "")[:80]
+        if not name:
+            continue
+        price = (it.get("price") or "").strip()
+        store = _store_label(it.get("retailer") or "")
+        if price:
+            lines.append(f"{name} — {price} ({store})")
+        else:
+            lines.append(f"{name} ({store})")
+    body = "\n".join(lines)
+    if n > 3:
+        body += f"\n+{n - 3} more"
+    body += "\nOpen the app to see them."
     return {"title": title, "body": body, "url": APP_URL}
 
 

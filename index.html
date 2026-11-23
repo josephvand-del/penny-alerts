@@ -8,12 +8,16 @@
 <title>Penny Alerts — Aurora, CO</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="app-header">
-  <h1>🪙 Penny Alerts</h1>
+  <div class="header-row">
+    <h1>🪙 Penny Alerts</h1>
+    <button id="installBtn" type="button" class="install-btn" aria-label="Install app" title="Install app" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11M7 10l5 5 5-5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
   <p class="sub">Aurora, CO 80017 · free signals only · no paid APIs</p>
   <div id="briefingBar" class="briefing-bar">Loading the latest deal briefing…</div>
   <div id="staleBar" class="stale-bar" hidden></div>
@@ -40,9 +44,10 @@
       <select id="retailerFilter" aria-label="Filter by store">
         <option value="">All stores</option>
       </select>
-      <select id="deptFilter" aria-label="Filter by department">
-        <option value="">All departments</option>
-      </select>
+      <div class="dept-dd" id="deptDd" data-scope="deals">
+        <button type="button" class="dept-dd-btn" id="deptDdBtn" data-action="dept-toggle" aria-label="Filter by department">All departments</button>
+        <div class="dept-dd-panel" id="deptDdPanel" hidden></div>
+      </div>
       <label class="check"><input id="pennyOnly" type="checkbox"> Pennies only ($0.01)</label>
       <label class="check"><input id="showExpired" type="checkbox"> Show expired</label>
       <label class="check"><input id="futureOnly" type="checkbox"> Future</label>
@@ -52,6 +57,21 @@
   </section>
 
   <section id="tab-bundles" class="tab-panel" hidden>
+    <div class="filters">
+      <select id="bundleSort" aria-label="Sort bundles">
+        <option value="verified">Most verified</option>
+        <option value="recent">Most recent</option>
+        <option value="biggest">Biggest deals</option>
+      </select>
+      <select id="bundleStore" aria-label="Filter bundles by store">
+        <option value="">All stores</option>
+      </select>
+      <div class="dept-dd" id="bundleDeptDd" data-scope="bundles">
+        <button type="button" class="dept-dd-btn" id="bundleDeptDdBtn" data-action="dept-toggle" aria-label="Filter bundles by department">All departments</button>
+        <div class="dept-dd-panel" id="bundleDeptDdPanel" hidden></div>
+      </div>
+      <label class="check"><input id="bundleFuture" type="checkbox"> Future</label>
+    </div>
     <p class="hint">Coupon stacks: buy the bundle, clip the digitals, earn the rewards — final price is the out-of-pocket after rewards. Digital coupons vary by account: clip them in the store app first and confirm before you shop.</p>
     <div id="bundleList" class="deal-list"></div>
   </section>
@@ -90,7 +110,7 @@
 
 <footer class="app-footer">
   <p>Free forever. Data: Penny Hunter’s public briefing + the community penny lists linked above. Not affiliated with Walmart, Target, Dollar General, Home Depot or Penny Hunter.</p>
-  <p id="appVersion" class="version">Penny Alerts v13</p>
+  <p id="appVersion" class="version">Penny Alerts v14</p>
 </footer>
 
 <!-- Instructions modal (v13): one deal's how-to, opened from any card's

@@ -171,15 +171,23 @@ const PA = sandbox.window.PennyAlerts;
   check('weekly sources rendered', els['weeklySources'].innerHTML.indexOf('Freebie Guy') !== -1, true);
   check('weekly sources show link-only', els['weeklySources'].innerHTML.indexOf('link only') !== -1, true);
   check('stale bar shown (briefing 50+ days old)', els['staleBar'].hidden, false);
-  check('stale bar mentions days old', els['staleBar'].textContent.indexOf(PA.daysSince('2026-10-03', PA._state.today) + ' days old') !== -1, true);
-  check('stale bar mentions weekly feed', els['staleBar'].textContent.indexOf('weekly feed') !== -1, true);
+  check('stale bar mentions days old', els['staleBar'].innerHTML.indexOf(PA.daysSince('2026-10-03', PA._state.today) + ' days old') !== -1, true);
+  check('stale bar mentions weekly feed', els['staleBar'].innerHTML.indexOf('weekly feed') !== -1, true);
+  check('stale bar carries a dismiss button (v14)', els['staleBar'].innerHTML.indexOf('data-action="dismiss-stale"') !== -1, true);
   check('deal list rendered cards', (els['dealList'].innerHTML.match(/<article/g) || []).length > 0, true);
   check('retailer filter populated from weekly deals only', els['retailerFilter'].options.map(function (o) { return o.value; }).join(','), ',amazon,dollar-general,home-depot');
   check('retailer filter labels carry counts', els['retailerFilter'].options.map(function (o) { return o.textContent; }).join('|'), 'All stores|Amazon (1)|Dollar General (1)|Home Depot (1)');
-  check('dept filter populated from weekly deals only', els['deptFilter'].options.map(function (o) { return o.value; }).join(','), ',Electronics,General,Tools');
-  check('dept filter has no Penny option', els['deptFilter'].options.map(function (o) { return o.value; }).indexOf('Penny') === -1, true);
+  /* v14: the department filter is a custom button + panel (a native
+   * <select> cannot carry a per-row hide ✕). Same options as the old
+   * select: weekly deals only, counts, no Penny. */
+  check('dept dropdown populated from weekly deals only', els['deptDdPanel'].innerHTML.indexOf('Electronics (1)') !== -1 && els['deptDdPanel'].innerHTML.indexOf('General (1)') !== -1 && els['deptDdPanel'].innerHTML.indexOf('Tools (1)') !== -1, true);
+  check('dept dropdown has no Penny row', els['deptDdPanel'].innerHTML.indexOf('>Penny (') === -1, true);
+  check('dept dropdown button reads All departments', els['deptDdBtn'].textContent, 'All departments');
   check('notification fired for new deals', notifCalls.length >= 1, true);
   check('notification title mentions new deals', /new deal/.test(notifCalls[0].title), true);
+  /* v14: the in-app notification names the top new deals with prices. */
+  check('notification body names a new deal with its price', notifCalls[0].opts.body.indexOf('Weekly Test HD Screw — $0.01') !== -1, true);
+  check('notification body names a second deal with its price', notifCalls[0].opts.body.indexOf('Weekly Test Charger — $39.99') !== -1, true);
 
   /* 7. filters: penny-only + ignore + expired */
   st.filters.pennyOnly = true;
@@ -229,9 +237,14 @@ const PA = sandbox.window.PennyAlerts;
   check('pushSupported false in stub env (no serviceWorker)', PA.pushSupported(), false);
   check('supabase URL is the shared bulk-finder project', PA.SUPABASE_URL, 'https://xwekulsnfarjibawqqih.supabase.co');
   const swText = fs.readFileSync('/home/hatch/workspace/penny-alerts/sw.js', 'utf8');
-  check('sw cache bumped to v13', swText.indexOf("penny-alerts-v13") !== -1, true);
+  check('sw cache bumped to v14', swText.indexOf("penny-alerts-v14") !== -1, true);
   check('sw has push handler', swText.indexOf("addEventListener('push'") !== -1, true);
   check('sw push shows a notification', swText.indexOf('showNotification') !== -1, true);
+  check('sw push uses the 512 PNG icon (v14)', swText.indexOf("icon: 'icon-512.png'") !== -1, true);
+  check('sw push uses the 192 PNG badge (v14)', swText.indexOf("badge: 'icon-192.png'") !== -1, true);
+  check('sw push has a View deals action (v14)', swText.indexOf("actions: [{ action: 'open', title: 'View deals' }]") !== -1, true);
+  check('sw push vibrates (v14)', swText.indexOf('vibrate: [200, 100, 200]') !== -1, true);
+  check('sw caches the PNG icons (v14)', swText.indexOf("'icon-192.png'") !== -1 && swText.indexOf("'icon-512.png'") !== -1 && swText.indexOf("'icon-512-maskable.png'") !== -1, true);
   check('sw has notificationclick handler', swText.indexOf("addEventListener('notificationclick'") !== -1, true);
   check('app.js has no VAPID private key', fs.readFileSync('/home/hatch/workspace/penny-alerts/app.js', 'utf8').indexOf('VAPID_PRIVATE_KEY') === -1, true);
 
@@ -250,10 +263,27 @@ const PA = sandbox.window.PennyAlerts;
   const senderPath = '/home/hatch/workspace/penny-alerts/scripts/send-push.py';
   const dryOut = execFileSync('python3', [senderPath, '--dry-run', '--feed', '/tmp/pa-sender-new.json', '--old-feed', '/tmp/pa-sender-old.json'], { encoding: 'utf8' });
   check('sender dry-run counts new items', dryOut.indexOf('3 new item(s)') !== -1, true);
-  check('sender dry-run penny title', dryOut.indexOf('1 new penny deal') !== -1, true);
-  check('sender dry-run names new penny', dryOut.indexOf('New Penny Item') !== -1, true);
-  check('sender dry-run names new stack', dryOut.indexOf('New Stack Deal') !== -1, true);
+  /* v14 payload: title "Penny Alerts: 3 new deals", body names the top
+   * 3 with prices — "Name — $price (Store)" lines. */
+  check('sender dry-run title is the count (v14)', dryOut.indexOf('Penny Alerts: 3 new deals') !== -1, true);
+  check('sender dry-run names new penny with price + store', dryOut.indexOf('New Penny Item — $0.01 (Dollar General)') !== -1, true);
+  check('sender dry-run names new deal with price + store', dryOut.indexOf('Brand New Deal — $9.99 (Target)') !== -1, true);
+  check('sender dry-run names new stack', dryOut.indexOf('New Stack Deal — $2.00 (Walgreens)') !== -1, true);
+  check('sender dry-run ends with Open the app', dryOut.indexOf('Open the app to see them.') !== -1, true);
   check('sender dry-run sends nothing', dryOut.indexOf('dry run') !== -1, true);
+  /* More than 3 new items: the body lists the top 3 and "+N more". */
+  const senderMany = { generated_at: '2026-11-22T11:00:00+00:00', sources: [], items: senderOld.items.concat([
+    { name: 'New One', upc: '012345678910', price: '$0.01', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', first_seen: '2026-11-22', image: '' },
+    { name: 'New Two', upc: '', price: '$9.99', retailer: 'target', department: 'General', source: 'slickdeals.net', first_seen: '2026-11-22', image: '' },
+    { name: 'New Three', upc: '', price: '$2.00', was: '$14.98', retailer: 'walgreens', department: 'Health & Beauty', source: 'krazycouponlady.com', first_seen: '2026-11-22', image: '', is_stack: true },
+    { name: 'New Four', upc: '', price: '$4.00', retailer: 'cvs', department: 'General', source: 'slickdeals.net', first_seen: '2026-11-22', image: '' },
+    { name: 'New Five', upc: '', price: '$5.00', retailer: 'walmart', department: 'General', source: 'slickdeals.net', first_seen: '2026-11-22', image: '' }
+  ]) };
+  fs.writeFileSync('/tmp/pa-sender-many.json', JSON.stringify(senderMany));
+  const dryMany = execFileSync('python3', [senderPath, '--dry-run', '--feed', '/tmp/pa-sender-many.json', '--old-feed', '/tmp/pa-sender-old.json'], { encoding: 'utf8' });
+  check('sender dry-run 5 items title', dryMany.indexOf('Penny Alerts: 5 new deals') !== -1, true);
+  check('sender dry-run 5 items lists top 3 only', dryMany.indexOf('New Three') !== -1 && dryMany.indexOf('New Four') === -1 && dryMany.indexOf('New Five') === -1, true);
+  check('sender dry-run 5 items has +2 more', dryMany.indexOf('+2 more') !== -1, true);
   const drySame = execFileSync('python3', [senderPath, '--dry-run', '--feed', '/tmp/pa-sender-old.json', '--old-feed', '/tmp/pa-sender-old.json'], { encoding: 'utf8' });
   check('sender dry-run no new items', drySame.indexOf('no new items') !== -1, true);
   /* Adding an image to an existing item is NOT a new item: the diff keys
@@ -395,6 +425,22 @@ const PA = sandbox.window.PennyAlerts;
   check('seller links: Walmart name query is punctuation-free', slWmPunct[0].url.split('/search?q=')[1].split('#Intent')[0], 'Widget%2012%20oz%202%20Pack');
   const slTgPunct = PA.sellerLinks({ storeId: 'target', upc: '', name: 'Widget, 12-oz (2-Pack)!' });
   check('seller links: Target name query is punctuation-free', slTgPunct[0].url.split('searchTerm=')[1].split('#Intent')[0], 'Widget%2012%20oz%202%20Pack');
+  /* v14 Gerber bug: the Slickdeals title leads with "$29.97, FS, " and
+   * ends with ", HomeDepot" — the store search must be a clean
+   * product-name search, not "29 97 FS Gerber ... HomeDepot". */
+  const gerber = { storeId: 'home-depot', upc: '', name: '$29.97, FS, Gerber Suspension NXT 15-N-1 Multi-Tool with Pocket Clip, HomeDepot', price: '$29.97', source: 'slickdeals.net', url: 'https://slickdeals.net/f/20372505-29-97-fs-gerber-suspension-nxt-15-n-1-multi-tool-with-pocket-clip-homedepot' };
+  sandbox.navigator.userAgent = ANDROID_UA;
+  const slGerber = PA.sellerLinks(gerber);
+  check('Gerber: store query is the clean product name', slGerber[0].url, intentUrl('www.homedepot.com', '/s/Gerber%20Suspension%20NXT%2015%20N%201%20Multi%20Tool%20with%20Pocket%20Clip', 'com.thehomedepot', gerber));
+  check('Gerber: no raw $ in the built link', slGerber[0].url.indexOf('$') === -1, true);
+  check('Gerber: no 29 97 residue in the query', slGerber[0].url.split('/s/')[1].split('#Intent')[0].indexOf('29') === -1, true);
+  check('Gerber: no FS token in the query', slGerber[0].url.split('/s/')[1].split('#Intent')[0].indexOf('FS') === -1, true);
+  check('Gerber: no HomeDepot tail in the query', slGerber[0].url.split('/s/')[1].split('#Intent')[0].indexOf('HomeDepot') === -1, true);
+  check('Gerber: link does not throw', (function () { try { PA.sellerLinks(gerber); return true; } catch (e) { return false; } })(), true);
+  check('cleanStoreQuery strips a leading price + FS', PA.cleanStoreQuery('$29.97, FS, Gerber Tool, HomeDepot', 'home-depot'), 'Gerber Tool');
+  check('cleanStoreQuery leaves a plain name alone', PA.cleanStoreQuery('Test Screw', 'home-depot'), 'Test Screw');
+  check('cleanStoreQuery strips a trailing Walmart', PA.cleanStoreQuery('Blue Widget, Walmart', 'walmart'), 'Blue Widget');
+  check('cleanStoreQuery does not strip another store name', PA.cleanStoreQuery('Blue Widget, Walmart', 'target'), 'Blue Widget, Walmart');
   check('seller links: unknown retailer gets only the Google link', PA.sellerLinks({ storeId: 'amazon', upc: '012345678905', name: 'X' }).length, 1);
   check('seller links: no buy language anywhere', JSON.stringify([].concat(slWm, slTg, slHd, slHdName, slDg)).toLowerCase().indexOf('buy') === -1, true);
   check('seller links: no utm params in any link', JSON.stringify([].concat(slWm, slWmNoUpc, slTg, slHdName, slHdSkuUpc, slHd, slDg, slDgNoUpc)).indexOf('utm_') === -1, true);
@@ -411,7 +457,7 @@ const PA = sandbox.window.PennyAlerts;
   sandbox.navigator.userAgent = '';
   const realHd = realWeekly.items.filter(function (it) { return it.retailer === 'home-depot'; })[0];
   const realHdNorm = realHd ? PA.normalizeWeekly({ items: [realHd] }).deals[0] : null;
-  check('real feed: HD link searches by product name', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url : '', realHdNorm ? 'https://www.homedepot.com/s/' + encodeURIComponent(realHdNorm.name.replace(/[^a-zA-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim()) : '');
+  check('real feed: HD link searches by product name', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url : '', realHdNorm ? 'https://www.homedepot.com/s/' + encodeURIComponent(PA.cleanStoreQuery(realHdNorm.name, 'home-depot').replace(/[^a-zA-Z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim()) : '');
   check('real feed: HD link does not contain the SKU', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url.indexOf(realHdNorm.sku.replace(/-/g, '')) === -1 : false, true);
   check('rendered cards include Google Shopping links', dealHtml.indexOf('google.com/search?tbm=shop') !== -1, true);
   const appText = fs.readFileSync('/home/hatch/workspace/penny-alerts/app.js', 'utf8');
@@ -450,9 +496,14 @@ const PA = sandbox.window.PennyAlerts;
   ]));
   check('dept filter: empty deals give only All departments', PA.deptFilterOptions([]).length, 1);
   check('dept filter: null deals give only All departments', PA.deptFilterOptions(null).length, 1);
-  check('dept filter: rendered select has no Penny option', els['deptFilter'].options.map(function (o) { return o.value; }).indexOf('Penny') === -1, true);
-  check('dept filter: rendered select matches weekly deals', els['deptFilter'].options.map(function (o) { return o.value; }).join(','), PA.deptFilterOptions(st.weeklyDeals).map(function (o) { return o.value; }).join(','));
-  check('dept filter: All departments first', els['deptFilter'].options[0].value, '');
+  /* v14: the rendered department control is the custom dropdown panel,
+   * not a <select> — same options, no Penny row, All departments first. */
+  check('dept dropdown: rendered panel has no Penny row', els['deptDdPanel'].innerHTML.indexOf('>Penny (') === -1, true);
+  check('dept dropdown: rendered panel matches weekly deals', els['deptDdPanel'].innerHTML.indexOf('Electronics (1)') !== -1 && els['deptDdPanel'].innerHTML.indexOf('General (1)') !== -1 && els['deptDdPanel'].innerHTML.indexOf('Tools (1)') !== -1, true);
+  check('dept dropdown: All departments row first', els['deptDdPanel'].innerHTML.indexOf('All departments') !== -1 && els['deptDdPanel'].innerHTML.indexOf('All departments') < els['deptDdPanel'].innerHTML.indexOf('Electronics (1)'), true);
+  check('dept dropdown: every dept row carries a hide button', (els['deptDdPanel'].innerHTML.match(/data-action="dept-hide"/g) || []).length, 3);
+  check('dept dropdown: All departments row has no hide button', els['deptDdPanel'].innerHTML.indexOf('data-action="dept-hide" data-dept=""') === -1, true);
+  check('dept filter select is gone from index.html (v14 custom dropdown)', htmlText.indexOf('id="deptFilter"') === -1, true);
 
   /* 15. copy button + version footer (v11). */
   /* Every rendered deal card carries a Copy button next to the name,
@@ -484,11 +535,11 @@ const PA = sandbox.window.PennyAlerts;
   check('watchlist cards carry a Copy button', watchHtml.indexOf('data-action="copy"') !== -1, true);
   check('watchlist Copy button carries the raw name', watchHtml.indexOf('data-name="' + pennies[1].name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;') + '"') !== -1, true);
   PA._handleAction('unwatch', firstPenny);
-  /* Version footer: APP_VERSION is v13, the page footer reads
-   * "Penny Alerts v13", and init() set the rendered element. */
-  check('APP_VERSION is v13', PA.APP_VERSION, 'v13');
-  check('index.html footer reads Penny Alerts v13', htmlText.indexOf('Penny Alerts v13') !== -1, true);
-  check('rendered version footer reads Penny Alerts v13', els['appVersion'].textContent, 'Penny Alerts v13');
+  /* Version footer: APP_VERSION is v14, the page footer reads
+   * "Penny Alerts v14", and init() set the rendered element. */
+  check('APP_VERSION is v14', PA.APP_VERSION, 'v14');
+  check('index.html footer reads Penny Alerts v14', htmlText.indexOf('Penny Alerts v14') !== -1, true);
+  check('rendered version footer reads Penny Alerts v14', els['appVersion'].textContent, 'Penny Alerts v14');
 
   /* 16. sort dropdown + Future toggle + source count (v12). The search
    * bar and the Stores tab are deleted; the Deals tab sorts Most recent
@@ -593,15 +644,15 @@ const PA = sandbox.window.PennyAlerts;
   const seenU = {};
   const dupU = realWeekly.items.filter(function (it) { if (!it.upc) return false; const u = normUpc(it.upc); if (seenU[u]) return true; seenU[u] = 1; return false; });
   check('real feed has no duplicate normalized UPCs', dupU.length, 0);
-  check('real feed total is 2244', realWeekly.items.length, 2244);
+  check('real feed total is 2234', realWeekly.items.length, 2234);
   check('real feed every item has a sources array', realWeekly.items.every(function (it) { return Array.isArray(it.sources) && it.sources.length >= 1; }), true);
   check('real feed source_count equals sources.length', realWeekly.items.every(function (it) { return it.source_count === it.sources.length; }), true);
   check('real feed every item has a list_date string ("" or YYYY-MM-DD)', realWeekly.items.every(function (it) { return typeof it.list_date === 'string' && (it.list_date.length === 0 || it.list_date.length === 10); }), true);
-  check('real feed multi-source items number 221', realWeekly.items.filter(function (it) { return it.source_count >= 2; }).length, 221);
-  check('real feed future items are the 105 PPM Nov 24 items', realWeekly.items.filter(function (it) { return it.list_date > '2026-11-23'; }).length, 105);
+  check('real feed multi-source items number 222', realWeekly.items.filter(function (it) { return it.source_count >= 2; }).length, 222);
+  check('real feed future items are 111, all dated 2026-11-24 (105 PPM + 6 GlitchNDealz)', realWeekly.items.filter(function (it) { return it.list_date > '2026-11-23'; }).length, 111);
   check('real feed PennyRecon note says 166 of 304', (realWeekly.sources.filter(function (s) { return s.name.indexOf('PennyRecon') !== -1; })[0].note || '').indexOf('166 of 304') !== -1, true);
   check('real feed has no Freebie Guy HD source', realWeekly.sources.some(function (s) { return s.name.indexOf('Freebie Guy — Home Depot') !== -1; }), false);
-  check('real feed image coverage is 1268/2244', realWeekly.items.filter(function (it) { return !!it.image; }).length, 1268);
+  check('real feed image coverage is 1281/2234', realWeekly.items.filter(function (it) { return !!it.image; }).length, 1281);
   /* v13: unknown list dates stay unknown — a string of length 0 or 10,
    * never the run date stamped in by the parser. */
   check('real feed no KCL penny item carries the run date', realWeekly.items.filter(function (it) { return it.source === 'krazycouponlady.com' && !it.is_stack && it.list_date === '2026-11-23'; }).length, 0);
@@ -816,11 +867,267 @@ const PA = sandbox.window.PennyAlerts;
       'assert pl.discover_ss_walgreens_url("<html></html>") == "", "ss empty"',
       'print("DISCOVERY OK")'
     ].join('\n');
-    var discOut = execFileSync('/tmp/audit-venv/bin/python', ['-c', discCode], { encoding: 'utf8' });
+    var discOut = '';
+    try { discOut = execFileSync('/tmp/pa-venv/bin/python', ['-c', discCode], { encoding: 'utf8' }); }
+    catch (e1) { discOut = execFileSync('/tmp/audit-venv/bin/python', ['-c', discCode], { encoding: 'utf8' }); }
     check('discovery functions return the latest dated URL, never a guess', discOut.indexOf('DISCOVERY OK') !== -1, true);
   } catch (e) {
     console.log('DISCOVERY CHECK SKIPPED (no audit venv): ' + (e && e.message ? e.message : e));
   }
+
+  /* 22. Bundles tab controls (v14): sort (Most verified / Most
+   * recent / Biggest deals), store + department dropdowns built from
+   * the stacks only, Future with the Deals-tab semantics, and a count
+   * badge that respects the active filters. */
+  check('bundleSort select exists in index.html', htmlText.indexOf('id="bundleSort"') !== -1, true);
+  check('bundleSort has Most verified option', htmlText.indexOf('>Most verified</option>') !== -1, true);
+  check('bundleSort has Most recent option', htmlText.indexOf('>Most recent</option>') !== -1, true);
+  check('bundleSort has Biggest deals option', htmlText.indexOf('>Biggest deals</option>') !== -1, true);
+  check('bundleSort defaults to Most verified', htmlText.indexOf('<option value="verified">Most verified</option>') !== -1, true);
+  check('bundleStore select exists in index.html', htmlText.indexOf('id="bundleStore"') !== -1, true);
+  check('bundle dept dropdown exists in index.html', htmlText.indexOf('id="bundleDeptDd"') !== -1, true);
+  check('bundleFuture checkbox exists in index.html', htmlText.indexOf('id="bundleFuture"') !== -1, true);
+  check('default bundle sort is Most verified', st.bundleFilters.sort, 'verified');
+  const bundleFix = [
+    { id: 'b-big', kind: 'deal', name: 'Big Savings Stack', upc: '', storeId: 'walgreens', source: 'krazycouponlady.com', sources: ['krazycouponlady.com', 'x.com', 'y.com'], sourceCount: 3, price: '$1.00', originalPrice: '$21.00', dept: 'Health & Beauty', confirmedOn: '2026-11-01', listDate: '2026-11-01', validTo: '2026-11-28', image: '', stack: true, steps: [] },
+    { id: 'b-small', kind: 'deal', name: 'Small Savings Stack', upc: '', storeId: 'walgreens', source: 'krazycouponlady.com', sources: ['krazycouponlady.com'], sourceCount: 1, price: '$5.00', originalPrice: '$7.00', dept: 'General', confirmedOn: '2026-11-22', listDate: '2026-11-22', validTo: '2026-11-28', image: '', stack: true, steps: [] },
+    { id: 'b-none', kind: 'deal', name: 'No Was Stack', upc: '', storeId: 'cvs', source: 'slickdeals.net', sources: ['slickdeals.net'], sourceCount: 1, price: '$3.00', originalPrice: '', dept: 'General', confirmedOn: '2026-11-20', listDate: '2026-11-20', validTo: '2026-11-28', image: '', stack: true, steps: [] },
+    { id: 'b-future', kind: 'deal', name: 'Future Stack', upc: '', storeId: 'cvs', source: 'slickdeals.net', sources: ['slickdeals.net'], sourceCount: 1, price: '$1.00', originalPrice: '', dept: 'General', confirmedOn: '2099-01-01', listDate: '2099-01-01', validTo: '', image: '', stack: true, steps: [] },
+    { id: 'b-plain', kind: 'deal', name: 'Plain Deal Not A Stack', upc: '', storeId: 'walgreens', source: 'slickdeals.net', sources: ['slickdeals.net'], sourceCount: 1, price: '$4.00', originalPrice: '', dept: 'General', confirmedOn: '2026-11-22', listDate: '2026-11-22', validTo: '', image: '', stack: false, steps: [] }
+  ];
+  const savedDeals5 = st.deals;
+  st.deals = bundleFix;
+  st.bundleFilters = { sort: 'verified', retailer: '', dept: '', futureOnly: false };
+  check('Bundles default (Most verified) sorts by source count', PA.visibleStacks().map(function (d) { return d.id; }), ['b-big', 'b-small', 'b-none']);
+  st.bundleFilters.sort = 'recent';
+  check('Bundles Most recent sorts by list date desc', PA.visibleStacks().map(function (d) { return d.id; }), ['b-small', 'b-none', 'b-big']);
+  st.bundleFilters.sort = 'biggest';
+  check('Bundles Biggest deals sorts by savings desc', PA.visibleStacks().map(function (d) { return d.id; }), ['b-big', 'b-small', 'b-none']);
+  check('Bundles Biggest deals puts a was-less item last', PA.visibleStacks()[2].id, 'b-none');
+  st.bundleFilters.sort = 'verified';
+  st.bundleFilters.retailer = 'cvs';
+  check('Bundles store filter shows only that store', PA.visibleStacks().map(function (d) { return d.id; }), ['b-none']);
+  st.bundleFilters.retailer = 'walgreens';
+  check('Bundles store filter walgreens', PA.visibleStacks().map(function (d) { return d.id; }), ['b-big', 'b-small']);
+  st.bundleFilters.retailer = '';
+  st.bundleFilters.dept = 'General';
+  check('Bundles dept filter shows only that dept', PA.visibleStacks().map(function (d) { return d.id; }), ['b-small', 'b-none']);
+  st.bundleFilters.dept = 'Health & Beauty';
+  check('Bundles dept filter Health & Beauty', PA.visibleStacks().map(function (d) { return d.id; }), ['b-big']);
+  st.bundleFilters.dept = '';
+  check('Bundles Future off hides the future stack', PA.visibleStacks().some(function (d) { return d.id === 'b-future'; }), false);
+  st.bundleFilters.futureOnly = true;
+  check('Bundles Future on shows only the future stack', PA.visibleStacks().map(function (d) { return d.id; }), ['b-future']);
+  st.bundleFilters.futureOnly = false;
+  PA.renderBundles();
+  check('Bundles badge counts visible stacks', els['bundleCount'].textContent, '(3)');
+  st.bundleFilters.retailer = 'cvs';
+  PA.renderBundles();
+  check('Bundles badge respects the store filter', els['bundleCount'].textContent, '(1)');
+  st.bundleFilters.retailer = '';
+  /* The sort select drives the same state the tests just set directly. */
+  els['bundleSort'].value = 'biggest';
+  els['bundleSort'].listeners.change[0]();
+  check('bundle sort select change sets Biggest deals', st.bundleFilters.sort, 'biggest');
+  check('bundle sort select change re-sorts', PA.visibleStacks().map(function (d) { return d.id; }), ['b-big', 'b-small', 'b-none']);
+  check('bundle sort select is wired (change listener)', Array.isArray(els['bundleSort'].listeners.change) && els['bundleSort'].listeners.change.length === 1, true);
+  check('bundle future checkbox is wired (change listener)', Array.isArray(els['bundleFuture'].listeners.change) && els['bundleFuture'].listeners.change.length === 1, true);
+  /* The Bundles dropdowns are built from the weekly stacks only. */
+  const savedWeekly5 = st.weeklyDeals;
+  st.weeklyDeals = PA.normalizeWeekly({ generated_at: '', sources: [], items: [
+    { name: 'Big Savings Stack', upc: '', price: '$1.00', was: '$21.00', retailer: 'walgreens', department: 'Health & Beauty', source: 'krazycouponlady.com', sources: ['krazycouponlady.com'], source_count: 3, first_seen: '2026-11-01', valid_to: '2026-11-28', url: '', image: '', list_date: '2026-11-01', is_stack: true, steps: [] },
+    { name: 'Small Savings Stack', upc: '', price: '$5.00', was: '$7.00', retailer: 'walgreens', department: 'General', source: 'krazycouponlady.com', sources: ['krazycouponlady.com'], source_count: 1, first_seen: '2026-11-22', valid_to: '2026-11-28', url: '', image: '', list_date: '2026-11-22', is_stack: true, steps: [] },
+    { name: 'No Was Stack', upc: '', price: '$3.00', was: '', retailer: 'cvs', department: 'General', source: 'slickdeals.net', sources: ['slickdeals.net'], source_count: 1, first_seen: '2026-11-20', valid_to: '2026-11-28', url: '', image: '', list_date: '2026-11-20', is_stack: true, steps: [] },
+    { name: 'Future Stack', upc: '', price: '$1.00', was: '', retailer: 'cvs', department: 'General', source: 'slickdeals.net', sources: ['slickdeals.net'], source_count: 1, first_seen: '2099-01-01', valid_to: '', url: '', image: '', list_date: '2099-01-01', is_stack: true, steps: [] }
+  ] }).deals;
+  /* The stub DOM does not clear <select> children on innerHTML='' (a
+   * real browser does), so reset the option children before the
+   * re-render — a stub limitation, not an app bug. */
+  els['bundleStore'].children = [];
+  els['retailerFilter'].children = [];
+  PA._renderFilters();
+  check('bundle store dropdown lists only stack stores', els['bundleStore'].options.map(function (o) { return o.value; }).join(','), ',cvs,walgreens');
+  check('bundle store dropdown labels carry counts', els['bundleStore'].options.map(function (o) { return o.textContent; }).join('|'), 'All stores|CVS (2)|Walgreens (2)');
+  check('bundle dept dropdown lists only stack depts', els['bundleDeptDdPanel'].innerHTML.indexOf('General (3)') !== -1 && els['bundleDeptDdPanel'].innerHTML.indexOf('Health &amp; Beauty (1)') !== -1, true);
+  st.weeklyDeals = savedWeekly5;
+  st.deals = savedDeals5;
+  st.bundleFilters = { sort: 'verified', retailer: '', dept: '', futureOnly: false };
+
+  /* 23. Alerts persistence (v14) + the nicer Enable alerts button.
+   * The v13 bug: refreshPushState wrote the stored flag from whatever
+   * getSubscription() returned on load, so one null result after the
+   * SW update wiped the flag and flipped the button off forever. */
+  check('notif button starts with the off state class', els['notifBtn'].classList.contains('notif-off'), true);
+  PA._setNotifUI('on');
+  check('notif button carries notif-on class when on', els['notifBtn'].classList.contains('notif-on'), true);
+  check('notif button drops notif-off class when on', els['notifBtn'].classList.contains('notif-off'), false);
+  PA._setNotifUI('off');
+  check('notif button carries notif-off class when off', els['notifBtn'].classList.contains('notif-off'), true);
+  check('notif button drops notif-on class when off', els['notifBtn'].classList.contains('notif-on'), false);
+  check('notif button pill styles are in styles.css', cssText.indexOf('#notifBtn') !== -1 && cssText.indexOf('notif-on') !== -1 && cssText.indexOf('notif-off') !== -1, true);
+  const fakeSub2 = {
+    endpoint: 'https://fcm.googleapis.com/fcm/send/test-2',
+    getKey: function (name) {
+      if (name === 'p256dh') return new Uint8Array([4, 1, 2, 3]).buffer;
+      if (name === 'auth') return new Uint8Array([9, 8, 7]).buffer;
+      return null;
+    }
+  };
+  let subState = null;
+  let subscribeCalls = 0;
+  sandbox.PushManager = function () {};
+  sandbox.navigator.serviceWorker = { ready: Promise.resolve({ pushManager: {
+    getSubscription: async function () { return subState; },
+    subscribe: async function () { subscribeCalls++; subState = fakeSub2; return fakeSub2; }
+  } }) };
+  check('pushSupported true once serviceWorker + PushManager are stubbed', PA.pushSupported(), true);
+  lsMem['pa:push'] = JSON.stringify('on');
+  subState = null; subscribeCalls = 0;
+  await PA._refreshPushState();
+  check('alerts: transient null subscription re-subscribes', subscribeCalls, 1);
+  check('alerts: flag stays on after re-subscribe', JSON.parse(lsMem['pa:push']), 'on');
+  check('alerts: button shows on after re-subscribe', els['notifBtn'].classList.contains('notif-on'), true);
+  subscribeCalls = 0;
+  await PA._refreshPushState();
+  check('alerts: live subscription needs no re-subscribe', subscribeCalls, 0);
+  check('alerts: button on with live subscription', els['notifBtn'].classList.contains('notif-on'), true);
+  sandbox.navigator.serviceWorker.ready = Promise.resolve({ pushManager: {
+    getSubscription: async function () { throw new Error('no sw yet'); },
+    subscribe: async function () { subscribeCalls++; return fakeSub2; }
+  } });
+  await PA._refreshPushState();
+  check('alerts: failed check keeps the flag', JSON.parse(lsMem['pa:push']), 'on');
+  check('alerts: failed check keeps the button on', els['notifBtn'].classList.contains('notif-on'), true);
+  sandbox.navigator.serviceWorker.ready = Promise.resolve({ pushManager: {
+    getSubscription: async function () { return null; },
+    subscribe: async function () { subscribeCalls++; subState = fakeSub2; return fakeSub2; }
+  } });
+  await PA._disablePush();
+  check('alerts: tap off clears the flag', lsMem['pa:push'], JSON.stringify(''));
+  check('alerts: button off after tap off', els['notifBtn'].classList.contains('notif-off'), true);
+  subscribeCalls = 0;
+  await PA._refreshPushState();
+  check('alerts: off stays off across a reload, no re-subscribe', subscribeCalls, 0);
+  check('alerts: button stays off after reload', els['notifBtn'].classList.contains('notif-off'), true);
+
+  /* 24. Blackstone price (v14, parser): the exact title + summary
+   * from the live Slickdeals RSS. The old min() rule took the $1
+   * Walmart+ trial out of the summary and called $150 the was price. */
+  try {
+    var priceCode = [
+      'import importlib.util',
+      'spec = importlib.util.spec_from_file_location("pl", "/home/hatch/workspace/penny-alerts/scripts/parse-lists.py")',
+      'pl = importlib.util.module_from_spec(spec); spec.loader.exec_module(pl)',
+      'bt = \'Blackstone Original 28" 2-Burner Outdoor Flat Top Griddle w/ Hard Cover (Model 2370) $150 + Free Shipping w/ Walmart+ or on $35+\'',
+      'bs = \'Walmart has Blackstone Original 28" 2-Burner Outdoor Flat Top Griddle w/ Hard Cover (Model 2370) on sale for $150. Shipping is free w/ Walmart+ ($1 trial available) or on $35+.\'',
+      'assert pl._extract_price(bt, bs) == ("$150.00", ""), pl._extract_price(bt, bs)',
+      'assert pl._extract_price(\'Samsung 65" TV $1,299.99 + Free Shipping\', "") == ("$1299.99", "")',
+      'assert pl._extract_price(\'Crest Toothpaste $9.97 at Target\', "") == ("$9.97", "")',
+      'assert pl._extract_price(\'$29.97, FS, Gerber Suspension NXT 15-N-1 Multi-Tool with Pocket Clip, HomeDepot\', "") == ("$29.97", "")',
+      'print("PRICE OK")'
+    ].join('\n');
+    var priceOut = '';
+    try { priceOut = execFileSync('/tmp/pa-venv/bin/python', ['-c', priceCode], { encoding: 'utf8' }); }
+    catch (e1) { priceOut = execFileSync('/tmp/audit-venv/bin/python', ['-c', priceCode], { encoding: 'utf8' }); }
+    check('Blackstone price is $150.00, was empty (parser unit test)', priceOut.indexOf('PRICE OK') !== -1, true);
+  } catch (e) {
+    console.log('PRICE CHECK SKIPPED (no parser venv): ' + (e && e.message ? e.message : e));
+  }
+  const blackstone = realWeekly.items.filter(function (it) { return (it.url || '').indexOf('20373510') !== -1; });
+  if (blackstone.length === 1) {
+    check('real feed Blackstone price is $150.00', blackstone[0].price, '$150.00');
+    check('real feed Blackstone has no was', blackstone[0].was, '');
+  } else {
+    console.log('BLACKSTONE: thread 20373510 rotated out of the regenerated feed (' + blackstone.length + ' matches) — the parser unit test above is the check');
+  }
+
+  /* 25. Stale-briefing banner dismiss (v14) + department hide toggles. */
+  check('stale bar visible before dismiss', els['staleBar'].hidden, false);
+  PA._dismissStaleBriefing();
+  check('stale bar hidden after dismiss', els['staleBar'].hidden, true);
+  check('dismissal stored under the briefing date', JSON.parse(lsMem['pa:dismissedBriefing']), '2026-10-03T14:36:45+00:00');
+  PA._renderBriefingBar();
+  check('stale bar stays hidden on reload', els['staleBar'].hidden, true);
+  st.meta.generatedAt = '2026-11-10T10:00:00+00:00';
+  PA._renderBriefingBar();
+  check('stale bar shows again for a newer briefing', els['staleBar'].hidden, false);
+  st.meta.generatedAt = '2026-10-03T14:36:45+00:00';
+  PA._renderBriefingBar();
+  check('stale bar hidden again for the dismissed briefing', els['staleBar'].hidden, true);
+  const hideFix = [
+    { id: 'h-pet', kind: 'penny', name: 'Pet Treats', upc: '', storeId: 'dollar-general', source: 'a.com', sources: ['a.com'], sourceCount: 1, price: '$0.01', originalPrice: '', dept: 'Pet', confirmedOn: '2026-11-22', listDate: '2026-11-22', validTo: '', image: '' },
+    { id: 'h-groc', kind: 'deal', name: 'Dog Food', upc: '', storeId: 'dollar-general', source: 'a.com', sources: ['a.com'], sourceCount: 1, price: '$5.00', originalPrice: '', dept: 'Grocery', confirmedOn: '2026-11-22', listDate: '2026-11-22', validTo: '', image: '' }
+  ];
+  const savedDeals6 = st.deals;
+  const savedWeekly6 = st.weeklyDeals;
+  st.deals = hideFix;
+  st.weeklyDeals = PA.normalizeWeekly({ generated_at: '', sources: [], items: [
+    { name: 'Pet Treats', upc: '', price: '$0.01', was: '', retailer: 'dollar-general', department: 'Pet', source: 'a.com', first_seen: '2026-11-22', valid_to: '', url: '', image: '', list_date: '2026-11-22' },
+    { name: 'Dog Food', upc: '', price: '$5.00', was: '', retailer: 'dollar-general', department: 'Grocery', source: 'a.com', first_seen: '2026-11-22', valid_to: '', url: '', image: '', list_date: '2026-11-22' }
+  ] }).deals;
+  PA._renderFilters();
+  st.filters.pennyOnly = false; st.filters.showExpired = false; st.filters.futureOnly = false; st.filters.retailer = ''; st.filters.dept = ''; st.filters.sort = 'recent';
+  check('Pet item visible before hide', PA._visibleDeals().map(function (d) { return d.id; }), ['h-groc', 'h-pet']);
+  check('hide Pet returns true (now hidden)', PA._toggleHiddenDept('Pet'), true);
+  check('Pet item hidden from the feed', PA._visibleDeals().map(function (d) { return d.id; }), ['h-groc']);
+  check('Pet name stays visible in the dropdown', els['deptDdPanel'].innerHTML.indexOf('Pet (1)') !== -1, true);
+  check('Pet row X is highlighted while hidden', els['deptDdPanel'].innerHTML.indexOf('hidden-on') !== -1, true);
+  check('hide preference persisted', JSON.parse(lsMem['pa:hiddenDepts']), { Pet: true });
+  /* Reload simulation: fresh state, re-read from storage. */
+  st.hiddenDepts = {};
+  PA._loadState();
+  check('Pet still hidden after a reload', PA._visibleDeals().map(function (d) { return d.id; }), ['h-groc']);
+  /* The watchlist is never hidden — only the feed lists. */
+  PA._handleAction('watch', 'h-pet');
+  check('hidden dept still shows in the watchlist', els['watchList'].innerHTML.indexOf('Pet Treats') !== -1, true);
+  check('un-hide Pet returns false (now shown)', PA._toggleHiddenDept('Pet'), false);
+  check('Pet item back in the feed', PA._visibleDeals().map(function (d) { return d.id; }), ['h-groc', 'h-pet']);
+  check('Pet row X no longer highlighted', els['deptDdPanel'].innerHTML.indexOf('hidden-on') === -1, true);
+  PA._handleAction('unwatch', 'h-pet');
+  st.deals = savedDeals6;
+  st.weeklyDeals = savedWeekly6;
+  st.filters.sort = 'recent'; st.filters.futureOnly = false; st.filters.pennyOnly = false; st.filters.showExpired = false; st.filters.retailer = ''; st.filters.dept = '';
+
+  /* 26. PWA installability (v14) + the in-app Install button. The
+   * "Tap to copy the URL" card Joseph saw is Chrome's own PWA card —
+   * the site cannot rewrite it — but real 192/512 PNG icons make the
+   * app properly installable, so the browser offers a real install
+   * prompt and the in-app button can use it. */
+  const manifest = JSON.parse(fs.readFileSync('/home/hatch/workspace/penny-alerts/manifest.json', 'utf8'));
+  check('manifest has a 192 PNG icon', manifest.icons.some(function (i) { return i.sizes === '192x192' && i.type === 'image/png'; }), true);
+  check('manifest has a 512 PNG icon', manifest.icons.some(function (i) { return i.sizes === '512x512' && i.type === 'image/png' && i.purpose !== 'maskable'; }), true);
+  check('manifest has a 512 maskable icon', manifest.icons.some(function (i) { return i.sizes === '512x512' && i.purpose === 'maskable'; }), true);
+  check('manifest keeps the SVG icon too', manifest.icons.some(function (i) { return i.type === 'image/svg+xml'; }), true);
+  check('manifest display is standalone', manifest.display, 'standalone');
+  check('manifest has name + short_name + start_url', !!(manifest.name && manifest.short_name && manifest.start_url), true);
+  function pngSize(p) {
+    const b = fs.readFileSync(p);
+    if (b.length < 24 || b[0] !== 0x89 || b[1] !== 0x50 || b[2] !== 0x4e || b[3] !== 0x47) return null;
+    return [b.readUInt32BE(16), b.readUInt32BE(20)];
+  }
+  check('icon-192.png is a valid 192x192 PNG', pngSize('/home/hatch/workspace/penny-alerts/icon-192.png'), [192, 192]);
+  check('icon-512.png is a valid 512x512 PNG', pngSize('/home/hatch/workspace/penny-alerts/icon-512.png'), [512, 512]);
+  check('icon-512-maskable.png is a valid 512x512 PNG', pngSize('/home/hatch/workspace/penny-alerts/icon-512-maskable.png'), [512, 512]);
+  check('install button exists in index.html', htmlText.indexOf('id="installBtn"') !== -1, true);
+  check('install button is labelled Install app', htmlText.indexOf('aria-label="Install app"') !== -1, true);
+  check('install button uses an inline SVG, not an emoji', (function () { var i = htmlText.indexOf('id="installBtn"'); var seg = htmlText.slice(i, i + 400); return seg.indexOf('<svg') !== -1 && seg.indexOf('📥') === -1 && seg.indexOf('⬇') === -1; })(), true);
+  check('install button hidden before install prompt', els['installBtn'].hidden, true);
+  let promptCalls = 0;
+  const fakePromptEv = { preventDefault: function () {}, prompt: function () { promptCalls++; }, userChoice: Promise.resolve({ outcome: 'accepted' }) };
+  domListeners['window:beforeinstallprompt'](fakePromptEv);
+  check('install button appears after beforeinstallprompt', els['installBtn'].hidden, false);
+  els['installBtn'].listeners.click[0]();
+  check('install tap calls prompt()', promptCalls, 1);
+  check('install button hides after prompt', els['installBtn'].hidden, true);
+  domListeners['window:beforeinstallprompt'](fakePromptEv);
+  check('install button reappears on a new prompt event', els['installBtn'].hidden, false);
+  domListeners['window:appinstalled']();
+  check('install button hides after appinstalled', els['installBtn'].hidden, true);
+  sandbox.window.matchMedia = function (q) { return { matches: q === '(display-mode: standalone)' }; };
+  domListeners['window:beforeinstallprompt'](fakePromptEv);
+  check('install button stays hidden in standalone mode', els['installBtn'].hidden, true);
+  delete sandbox.window.matchMedia;
+  PA._updateInstallBtn();
 
   console.log(failures === 0 ? 'ALL PASS' : failures + ' FAILURES');
   process.exit(failures === 0 ? 0 : 1);

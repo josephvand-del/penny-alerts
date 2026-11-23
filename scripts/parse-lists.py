@@ -797,22 +797,24 @@ def _retailer_for(title: str, summary: str) -> str:
 
 
 def _extract_price(title: str, summary: str):
-    prices = []
-    for src in (title, summary):
-        for m in PRICE_RE.finditer(src or ""):
-            try:
-                p = float(m.group(1).replace(",", ""))
-                if 0 < p < 100000:
-                    prices.append(p)
-            except ValueError:
-                pass
-    if not prices:
-        return "", ""
-    cur = min(prices)
-    rest = sorted(set(prices) - {cur})
-    if rest and rest[-1] >= cur * 1.2:
-        return f"${cur:.2f}", f"${rest[-1]:.2f}"
-    return f"${cur:.2f}", ""
+    """Deal price from a title + summary (Slickdeals, DealNews, TT).
+
+    The price is the FIRST real $ amount in the TITLE — deal titles
+    lead with the deal price ('$150 + Free Shipping w/ Walmart+ or on
+    $35+'). NEVER take the minimum across title+summary: the summary
+    is full of incidental amounts ('$1 Walmart+ trial available', 'on
+    $35+') that are not the price. The Blackstone griddle (title $150,
+    summary '$1 trial') came out as price $1.00 / was $150.00 under
+    the old min() rule; it is $150.00 / no was. _title_price_was
+    already implements the first-price rule (plus Reg/was clauses and
+    shipping-threshold stripping), so the title goes through it; the
+    summary is only used, with the same rule, when the title carries
+    no price at all.
+    """
+    cur, orig = _title_price_was(title)
+    if cur:
+        return cur, orig
+    return _title_price_was(summary or "")
 
 
 def parse_slickdeals(raw: str, force_retailer: str = "", require_title: str = "",

@@ -1,11 +1,14 @@
-/* Penny Alerts v4 service worker.
+/* Penny Alerts v14 service worker.
  * Caches the app shell so the app opens offline. The deal briefing JSON is
  * NEVER cached here — it is always fetched fresh (network-first) because
  * penny lists go stale fast. v3 adds background push: the 'push' event
  * shows the sender's summary notification, and tapping it opens the app.
- * v4: new cache name for the thumbnail layout change. */
-var CACHE = 'penny-alerts-v13';
-var SHELL = ['index.html', 'styles.css', 'app.js', 'manifest.json', 'icon.svg'];
+ * v4: new cache name for the thumbnail layout change. v14: real PNG
+ * icons in the shell (the push icon/badge), and a richer push
+ * notification — deal names + prices from the payload, a View deals
+ * action, and vibration. */
+var CACHE = 'penny-alerts-v14';
+var SHELL = ['index.html', 'styles.css', 'app.js', 'manifest.json', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-512-maskable.png'];
 var BRIEFING = 'rocketshon.github.io/penny-finder-backend/briefings/latest.json';
 var WEEKLY = 'feed/weekly.json';
 
@@ -52,8 +55,12 @@ self.addEventListener('fetch', function (event) {
   }
 });
 
-/* Background push (v3). The sender posts {title, body, url}; the tap opens
- * (or focuses) the app. */
+/* Background push (v3, richer in v14). The sender posts {title, body,
+ * url} — the title is "Penny Alerts: N new deals" and the body names
+ * the top new deals with prices. The notification shows the real PNG
+ * icon + badge, a View deals action, and a vibration pattern. Tapping
+ * the notification or the View deals action opens (or focuses) the app
+ * at the URL from the payload. */
 self.addEventListener('push', function (event) {
   var data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
@@ -63,9 +70,11 @@ self.addEventListener('push', function (event) {
   event.waitUntil(
     self.registration.showNotification(title, {
       body: body,
-      icon: 'icon.svg',
-      badge: 'icon.svg',
+      icon: 'icon-512.png',
+      badge: 'icon-192.png',
       tag: 'penny-alerts-new',
+      vibrate: [200, 100, 200],
+      actions: [{ action: 'open', title: 'View deals' }],
       data: { url: url }
     })
   );

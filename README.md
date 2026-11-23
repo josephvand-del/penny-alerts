@@ -28,7 +28,23 @@ phone's home screen (it's a PWA).
   watched automatically (no API, login wall, video), but the same stacks
   appear in text on those sites. Digital coupons and rewards vary by
   account — clip them in the store app first and confirm before you
-  shop. Stacks never appear on the Deals tab.
+  shop. Stacks never appear on the Deals tab. **v14 controls:** sort
+  (Most verified / Most recent / Biggest deals — biggest = largest
+  dollar saving, was − price), store and department dropdowns built
+  from the stacks only, and a Future checkbox with the same rules as
+  the Deals tab. The badge counts the stacks matching the active
+  filters.
+- **Department hide (v14):** every row in the department dropdown
+  (Deals and Bundles) carries an ✕. Tap it and that department's deals
+  leave both feed tabs; the ✕ stays highlighted and the name stays in
+  the dropdown, so it can be tapped again to bring the department
+  back. The preference persists on the phone (`pa:hiddenDepts`) across
+  reloads and app updates. The watchlist is never hidden — only the
+  feed lists.
+- **Stale-briefing banner (v14):** the "This briefing is N days old"
+  banner has an ✕ to dismiss it. The dismissal is remembered for that
+  briefing's date, so it stays gone across reloads and updates — but a
+  newer briefing shows the banner again.
 - **Instructions — every card (v13)**: an "Instructions" button on
   every deal card (Deals, Bundles, and watchlist) opens a panel with
   everything needed to get the deal: price / was, retailer, UPC or SKU
@@ -53,6 +69,43 @@ phone's home screen (it's a PWA).
   Until the one-time setup below is done, alerts are honestly labelled:
   **checked when you open the app.** Tap the button again to turn
   alerts off (the sender then prunes the dead subscription).
+  **v14 — alerts survive app updates:** the button used to go off
+  after an update (v13) because the app re-checked the browser's
+  subscription on load and one null result wiped the stored flag. Now
+  the stored flag is the user's intent: only a deliberate tap on "turn
+  off" (or a denied permission) turns alerts off. If the flag says on
+  but the browser reports no subscription — and permission is already
+  granted — the app re-subscribes automatically on load, no tap
+  needed. If alerts ever show off after an update, tap "Enable alerts"
+  once; the re-subscribe path covers the transient case from then on.
+  The button is a pill now — filled when alerts are on, muted outline
+  when off.
+- **Install the app (v14):** a download-icon button sits top-right in
+  the header. It appears only when the browser says the app is
+  installable (the manifest now carries real 192px and 512px PNG
+  icons, plus a 512px maskable icon — `scripts/make-icons.py`
+  regenerates them from `icon.svg`) — tap it to install Penny Alerts
+  on the home screen. It never shows when the app is already installed
+  or when the browser offers no install prompt, so it is never a dead
+  button.
+- **The "Tap to copy the URL" card is Chrome's, not ours:** the
+  notification card that reads "Penny Alerts — Tap to copy the URL for
+  this app" (Share / Open in Chrome browser, in the Silent section) is
+  Chrome's own PWA card — no code in the app writes that text, and the
+  site cannot rewrite it. What changed in v14 is the real alerts:
+  deal pushes now name the top new deals with prices (see below), and
+  the app installs properly with real icons, so the browser offers a
+  real install prompt. Do not expect the Chrome card itself to change
+  wording — it is Chrome's.
+- **Richer deal alerts (v14):** the background push now reads
+  "Penny Alerts: 5 new deals" with the top 3 new deals listed by name,
+  price and store ("Gerber Multi-Tool — $29.97 (Home Depot)"), then
+  "+N more" and "Open the app to see them." One push per morning run,
+  as before. The notification has a View deals button (tap it, or the
+  notification itself, to open the app) and a short vibration. The
+  in-app "new deals" popup names the top deals the same way, and no
+  longer auto-closes after 12 seconds (20 seconds max, and the OS
+  dismisses it).
 - **Deal photos**: every home-page card shows a thumbnail of the item
   (lazy-loaded). Items with no photo anywhere get a clean placeholder
   tile — a small product glyph plus the department name — never a
@@ -99,14 +152,15 @@ this priority order:
 6. **UPCitemdb** — only if a paid key is set (see below).
 
 Coverage is partial by design — measured on the 2026-11-23 regenerated
-feed (2,244 items): **1,268/2,244 (56%) have a photo**. Per source:
-PennyRecon 166/166, RetailShout 38/38, Slickdeals 25/25,
-Freebie Guy 104/135, Krazy Coupon Lady 20/88, FreeStuffFinder 15/103,
-PennyPinchinMom 5/105. The gaps are structural, not bugs: the DG
+feed (2,234 items): **1,281/2,234 (57%) have a photo**. Per source:
+PennyRecon 166/166, RetailShout 38/38, Freebie Guy 109/135,
+Krazy Coupon Lady 27/88, FreeStuffFinder 26/102,
+PennyPinchinMom 7/105. The gaps are structural, not bugs: the DG
 lists are text tables with no per-item photos and no per-item links,
 so only their UPCs that a free product database knows get a photo
-(Open Food Facts matched 89 of 442 UPCs in total, Open Products Facts
-4 more). The remaining 287 items show the placeholder tile.
+(Open Food Facts matched 89 of 442 UPCs on the 2026-11-22 sweep, Open
+Products Facts 4 more). The remaining 261 DG items show the
+placeholder tile.
 
 Diagnosis, verified 2026-11-22: the placeholders are **not** broken
 image loads. Every photo host in the feed was probed with a
@@ -196,6 +250,14 @@ no embedded page (retailers block framing, so the modal idea was dropped):
   on `#` (v10, the screw still would not open), and the screw still
   failed with other punctuation left in the path, so one symbol at a
   time was abandoned. Walmart and Target search by UPC, then name.
+  **v14 — Slickdeals title cleanup:** deal titles often lead with a
+  price + "FS" and end with the store name ("$29.97, FS, Gerber
+  Suspension NXT 15-N-1 Multi-Tool with Pocket Clip, HomeDepot") —
+  the store search now strips the leading price + FS marker and a
+  trailing retailer name first, so the Home Depot app searches the
+  clean product name ("Gerber Suspension NXT 15 N 1 Multi Tool with
+  Pocket Clip") instead of "29 97 FS Gerber ... HomeDepot". The
+  Google fallback keeps the raw name.
   Dollar General opens the app's home screen
   (`dollargeneral.com/`, v10): the DG app rejects `/product-search`
   deep links — the v8 link (with `&productSearchedMode=manual`) and
@@ -267,16 +329,39 @@ never future and show by default.
 
 **Bundles tab (v13):** shows only coupon stacks (`is_stack`), newest
 first, undated last; its badge counts the visible stacks. The Deals tab
-excludes stacks entirely.
+excludes stacks entirely. **v14:** the Bundles tab has its own sort
+(Most verified by default, Most recent, Biggest deals), store and
+department dropdowns built from the stacks only, and a Future checkbox
+with the Deals-tab semantics.
+
+**Department hide (v14):** the department dropdown is a button + panel
+(a native `<select>` cannot carry a per-row button). Each row has an ✕
+that hides that department from both feed tabs until tapped again; the
+name stays in the dropdown and the ✕ stays highlighted while hidden.
+The preference lives in localStorage (`pa:hiddenDepts`, no version in
+the key) and survives reloads and app updates. The watchlist is never
+hidden.
 
 The app subscribes this phone with the Web Push API (VAPID public key in
 `app.js` — public, safe to commit) and stores the subscription in
 Supabase (`push_subscriptions` table, shared "bulk finder" project).
 `scripts/send-push.py` runs in the same daily workflow right after the
 parser: it diffs the new feed against the committed one and, when there
-are new items, sends ONE summary push per subscribed phone ("3 new penny
-deals", naming the top items). Subscriptions the push service rejects
+are new items, sends ONE summary push per subscribed phone — v14: the
+title is the count ("Penny Alerts: 5 new deals") and the body names the
+top 3 new deals with prices and stores, then "+N more" and "Open the
+app to see them." Subscriptions the push service rejects
 (404/410) are pruned automatically. Push errors never fail the workflow.
+
+**v14 — Blackstone price fix:** the parser used to take the *minimum*
+`$` amount across a Slickdeals title + summary as the price, so the
+Blackstone 28" griddle (title $150, summary mentioning a "$1 Walmart+
+trial") came out as price $1.00 / was $150.00. The price is now the
+*first* real `$` amount in the title — titles lead with the deal price
+— and the summary is only used when the title has no price at all.
+The same first-price rule now covers every source that shares the
+helper (DealNews, TotallyTarget, the generic deal-blog feeds). The
+exact Blackstone thread is the regression test in `test-v1.mjs`.
 
 One-time setup, in order (Joseph):
 1. Add the workflow file on github.com (see
@@ -305,7 +390,7 @@ MIT): the UPC-line regex for the penny-list pages, the category/signal
 logic for RSS, and the retailer map + price extraction for Slickdeals.
 
 Verified live 2026-11-22, re-verified and corrected 2026-11-23
-(counts from the regenerated run — 2,244 items total, 51 ok sources, 7 link-only, 0 failed):
+(counts from the regenerated run — 2,234 items total, 51 ok sources, 7 link-only, 0 failed):
 
 ### Penny lists (Dollar General $0.01)
 
@@ -490,8 +575,10 @@ previous good items; the Lists & Sources tab shows each source's status.
 ## Files
 
 `index.html`, `app.js`, `styles.css`, `manifest.json`, `sw.js`
-(service-worker cache `penny-alerts-v13`), `icon.svg`, `README.md`,
+(service-worker cache `penny-alerts-v14`), `icon.svg`,
+`icon-192.png`, `icon-512.png`, `icon-512-maskable.png`, `README.md`,
 `scripts/parse-lists.py` + `scripts/send-push.py` +
+`scripts/make-icons.py` (regenerates the PNG icons from `icon.svg`) +
 `scripts/test-parse-images.py` +
 `scripts/requirements.txt` (the weekly-feed parser and the push sender),
 `feed/weekly.json` (generated daily by the parser; committed when it
