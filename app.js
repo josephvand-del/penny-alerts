@@ -379,7 +379,7 @@ var SELLER_SEARCH = {
   'walmart': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
   'target': { label: 'Target', host: 'www.target.com', path: '/s?searchTerm=', pkg: 'com.target.ui' },
   'home-depot': { label: 'Home Depot', host: 'www.homedepot.com', path: '/s/', pkg: 'com.thehomedepot' },
-  'dollar-general': { label: 'Dollar General', host: 'www.dollargeneral.com', path: '/product-search?q=', pkg: 'com.dollargeneral.android' }
+  'dollar-general': { label: 'Dollar General', host: 'www.dollargeneral.com', path: '/', pkg: 'com.dollargeneral.android', noQuery: true }
 };
 function isAndroid() {
   return (typeof navigator !== 'undefined' && navigator && /Android/i.test(navigator.userAgent || ''));
@@ -400,6 +400,26 @@ function sellerLinks(deal) {
       q = (deal.name || '').replace(/\//g, ' ');
     } else {
       q = deal.upc || deal.name || '';
+    }
+    /* '#' breaks store-app searches even when encoded as %23 (the HD app
+     * chokes on a query starting with '#10'), and it never helps a
+     * product search — strip it from every store query, then collapse
+     * the whitespace it leaves behind. The Google fallback keeps the
+     * raw name/UPC (googleShoppingUrl is untouched). */
+    q = q.replace(/#/g, '').replace(/\s+/g, ' ').trim();
+    if (s.noQuery) {
+      /* Home screen only: the DG app rejects /product-search deep links
+       * (v8 with the suffix and v9 without both fell back to Google on
+       * the phone), so land Joseph in the app and let him search/scan
+       * from there. */
+      var plainHome = 'https://' + s.host + s.path;
+      var urlHome = plainHome;
+      if (isAndroid()) {
+        urlHome = 'intent://' + s.host + s.path +
+          '#Intent;scheme=https;package=' + s.pkg +
+          ';S.browser_fallback_url=' + encodeURIComponent(googleShoppingUrl(deal)) + ';end';
+      }
+      return [{ label: 'Open in ' + s.label + ' app', url: urlHome }];
     }
     if (q) {
       var plain = 'https://' + s.host + s.path + encodeURIComponent(q);

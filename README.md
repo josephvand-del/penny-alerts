@@ -171,16 +171,18 @@ no embedded page (retailers block framing, so the modal idea was dropped):
   (iOS Universal Links open the app there). Home Depot searches by
   product name — a `/` in the name is replaced with a space before
   encoding (v9): `%2F` in the `/s/` path made the HD app search only
-  the first path segment ("1-1" for "1-1/2 in. ..."). Walmart,
-  Target, and Dollar General by UPC, then name.
-  Dollar General's search is
-  `dollargeneral.com/product-search?q=<query>` (the
-  `&productSearchedMode=manual` suffix was dropped in v9 — the `&`
-  inside the Android intent URL broke the DG link, and the bare
-  search URL was verified to load a search page).
-  DG catalog limit: a UPC search often returns 0 results for penny
-  items (the UPC matches nothing in DG's online catalog; name searches
-  return near-matches only) — expected for DG pennies, not a bug.
+  the first path segment ("1-1" for "1-1/2 in. ..."). A `#` is
+  stripped from every store query (v10): the HD app chokes on a query
+  starting with "#10" even when the `#` is encoded as `%23`. Walmart
+  and Target search by UPC, then name.
+  Dollar General opens the app's home screen
+  (`dollargeneral.com/`, v10): the DG app rejects `/product-search`
+  deep links — the v8 link (with `&productSearchedMode=manual`) and
+  the v9 link (bare) both fell back to Google on the phone — so the
+  link lands in the app and the search/scan happens from there.
+  DG catalog limit: most DG penny items are not in DG's online
+  catalog at all, so an in-app search may not find them either —
+  the in-store scan is the check for DG pennies.
 - **Google Shopping search** (every other store): `google.com/search?tbm=shop&q=<UPC>`
   when the item has a UPC, else `q=<item name, URL-encoded>`.
 
@@ -193,10 +195,10 @@ returned a live "Search Results for <UPC>" page; Home Depot
 returned a live "Search Results for <name>" page (2026-11-22), and
 `/s/<SKU>` resolves to the exact product page on the web but blanks
 the in-app view after its server redirect, which is why Home Depot
-searches by name. **Dollar General** uses the search pattern from
-its own search box (`/product-search?q=<query>`, verified 2026-11-22;
-the bare URL loads a search page — verified 2026-11-22 after the
-`&productSearchedMode=manual` suffix was dropped in v9); the old
+searches by name. **Dollar General** used the search pattern from
+its own search box (`/product-search?q=<query>`, verified 2026-11-22)
+through v9, but the DG app rejects that deep link on the phone, so
+v10 opens the app's home screen instead; the old
 `/search?query=` pattern is a branded
 404 and is never used. Labels say "search",
 never "buy" — a search link is a starting point, not a verified price

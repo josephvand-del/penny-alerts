@@ -230,7 +230,7 @@ const PA = sandbox.window.PennyAlerts;
   check('pushSupported false in stub env (no serviceWorker)', PA.pushSupported(), false);
   check('supabase URL is the shared bulk-finder project', PA.SUPABASE_URL, 'https://xwekulsnfarjibawqqih.supabase.co');
   const swText = fs.readFileSync('/home/hatch/workspace/penny-alerts/sw.js', 'utf8');
-  check('sw cache bumped to v9', swText.indexOf("penny-alerts-v9") !== -1, true);
+  check('sw cache bumped to v10', swText.indexOf("penny-alerts-v10") !== -1, true);
   check('sw has push handler', swText.indexOf("addEventListener('push'") !== -1, true);
   check('sw push shows a notification', swText.indexOf('showNotification') !== -1, true);
   check('sw has notificationclick handler', swText.indexOf("addEventListener('notificationclick'") !== -1, true);
@@ -309,12 +309,13 @@ const PA = sandbox.window.PennyAlerts;
   });
   check('real feed has some images', imgCount > 0, true);
 
-  /* 12. seller links (v9) — ONE link per card: an Android intent: URL
+  /* 12. seller links (v10) — ONE link per card: an Android intent: URL
    * (store app, Google fallback) on Android, the plain https retailer
    * URL elsewhere, Google Shopping only for unmapped stores. Home Depot
-   * searches by name with '/' turned into a space before encoding;
-   * Dollar General's URL has no suffix. No
-   * BrickSeek anywhere, no modal anywhere. */
+   * searches by name with '/' turned into a space before encoding and
+   * '#' stripped from every store query; Dollar General opens the
+   * app's home screen (the DG app rejects /product-search deep links).
+   * No BrickSeek anywhere, no modal anywhere. */
   function intentUrl(host, pathQ, pkg, deal) {
     var g = 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(deal.upc || deal.name || '');
     return 'intent://' + host + pathQ + '#Intent;scheme=https;package=' + pkg + ';S.browser_fallback_url=' + encodeURIComponent(g) + ';end';
@@ -349,11 +350,12 @@ const PA = sandbox.window.PennyAlerts;
   check('seller links: intent fallback is the Google Shopping URL (WM)', fallbackOf(slWm[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   check('seller links: intent fallback is the Google Shopping URL (TG)', fallbackOf(slTg[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   const slDg = PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' });
-  check('seller links: DG intent URL with UPC, no suffix', slDg[0].url, intentUrl('www.dollargeneral.com', '/product-search?q=012345678905', 'com.dollargeneral.android', { upc: '012345678905', name: 'Test Item' }));
+  check('seller links: DG intent opens app home screen', slDg[0].url, intentUrl('www.dollargeneral.com', '/', 'com.dollargeneral.android', { upc: '012345678905', name: 'Test Item' }));
   check('seller links: DG label is app-first', slDg[0].label, 'Open in Dollar General app');
   check('seller links: DG is exactly one link', slDg.length, 1);
   const slDgNoUpc = PA.sellerLinks({ storeId: 'dollar-general', upc: '', name: 'Blue Widget 12oz' });
-  check('seller links: DG without UPC searches by name, no suffix', slDgNoUpc[0].url, intentUrl('www.dollargeneral.com', '/product-search?q=Blue%20Widget%2012oz', 'com.dollargeneral.android', { upc: '', name: 'Blue Widget 12oz' }));
+  check('seller links: DG without UPC still opens app home screen', slDgNoUpc[0].url, intentUrl('www.dollargeneral.com', '/', 'com.dollargeneral.android', { upc: '', name: 'Blue Widget 12oz' }));
+  check('seller links: no product-search anywhere', JSON.stringify([].concat(slWm, slWmNoUpc, slTg, slHdName, slHdSkuUpc, slHd, slDg, slDgNoUpc)).indexOf('product-search') === -1, true);
   check('seller links: no productSearchedMode anywhere', JSON.stringify([].concat(slWm, slWmNoUpc, slTg, slHdName, slHdSkuUpc, slHd, slDg, slDgNoUpc)).indexOf('productSearchedMode') === -1, true);
   /* Home Depot slash fix: "1-1/2 in." must become "1-1 2 in." in the
    * /s/ path — a %2F there is decoded back to '/' by Android and the
@@ -362,6 +364,19 @@ const PA = sandbox.window.PennyAlerts;
   check('seller links: HD slash becomes space in the path', slHdSlash[0].url, intentUrl('www.homedepot.com', '/s/1-1%202%20in.%20x%205%20in.%20Nail%20Plate%20Bulk%20(100-Pack)', 'com.thehomedepot', { upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' }));
   check('seller links: HD /s/ path has no %2F', slHdSlash[0].url.split('/s/')[1].split('#Intent')[0].indexOf('%2F') === -1, true);
   check('seller links: HD /s/ path has no literal slash', slHdSlash[0].url.split('/s/')[1].split('#Intent')[0].indexOf('/') === -1, true);
+  /* v10: '#' is stripped from every store query — the HD app chokes on
+   * a query starting with '#10' even encoded as %23. The Google
+   * fallback keeps the raw name, so it still carries %23 — the data
+   * part (before #Intent) must not. */
+  const slHdHash = PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '#10 x 1-3/4 in. Black 6-Lobe Torx Drive Exterior Flat Head Multi-Material Screw 1 lb. -Box (106-Piece)' });
+  check('seller links: HD screw URL exact, hash stripped', slHdHash[0].url, intentUrl('www.homedepot.com', '/s/10%20x%201-3%204%20in.%20Black%206-Lobe%20Torx%20Drive%20Exterior%20Flat%20Head%20Multi-Material%20Screw%201%20lb.%20-Box%20(106-Piece)', 'com.thehomedepot', { upc: '', name: '#10 x 1-3/4 in. Black 6-Lobe Torx Drive Exterior Flat Head Multi-Material Screw 1 lb. -Box (106-Piece)' }));
+  check('seller links: HD screw query starts with 10', slHdHash[0].url.split('#Intent')[0].indexOf('10%20x%201-3') !== -1, true);
+  check('seller links: HD data part has no %23', slHdHash[0].url.split('#Intent')[0].indexOf('%23') === -1, true);
+  check('seller links: HD data part has no literal #', slHdHash[0].url.split('#Intent')[0].indexOf('#') === -1, true);
+  const slHashMid = PA.sellerLinks({ storeId: 'home-depot', upc: '', name: 'Screw #10 Pack' });
+  check('seller links: mid-string # stripped', slHashMid[0].url.split('#Intent')[0].indexOf('Screw%2010%20Pack') !== -1, true);
+  const slWmHash = PA.sellerLinks({ storeId: 'wm-ct', upc: '', name: 'Item #5' });
+  check('seller links: Walmart # stripped too', slWmHash[0].url.split('#Intent')[0].indexOf('Item%205') !== -1, true);
   check('seller links: intent fallback is the Google Shopping URL (DG)', fallbackOf(slDg[0].url), 'https://www.google.com/search?tbm=shop&q=012345678905');
   check('seller links: unknown retailer gets only the Google link', PA.sellerLinks({ storeId: 'amazon', upc: '012345678905', name: 'X' }).length, 1);
   check('seller links: no buy language anywhere', JSON.stringify([].concat(slWm, slTg, slHd, slHdName, slDg)).toLowerCase().indexOf('buy') === -1, true);
@@ -372,13 +387,14 @@ const PA = sandbox.window.PennyAlerts;
   check('seller links: non-Android Walmart is plain https', PA.sellerLinks({ storeId: 'wm-ct', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.walmart.com/search?q=012345678905');
   check('seller links: non-Android HD is plain https by name', PA.sellerLinks({ storeId: 'home-depot', sku: '1012-308-531', upc: '', name: 'Test Screw' })[0].url, 'https://www.homedepot.com/s/Test%20Screw');
   check('seller links: non-Android Target is plain https', PA.sellerLinks({ storeId: 'target', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.target.com/s?searchTerm=012345678905');
-  check('seller links: non-Android DG is plain https, no suffix', PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.dollargeneral.com/product-search?q=012345678905');
+  check('seller links: non-Android DG is plain https home screen', PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' })[0].url, 'https://www.dollargeneral.com/');
   check('seller links: non-Android HD slash becomes space', PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' })[0].url, 'https://www.homedepot.com/s/1-1%202%20in.%20x%205%20in.%20Nail%20Plate%20Bulk%20(100-Pack)');
   check('seller links: non-Android HD plain URL has no %2F', PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '1-1/2 in. x 5 in. Nail Plate Bulk (100-Pack)' })[0].url.indexOf('%2F') === -1, true);
+  check('seller links: non-Android HD hash stripped', PA.sellerLinks({ storeId: 'home-depot', upc: '', name: '#10 x 1-3/4 in. Black Screw' })[0].url, 'https://www.homedepot.com/s/10%20x%201-3%204%20in.%20Black%20Screw');
   sandbox.navigator.userAgent = '';
   const realHd = realWeekly.items.filter(function (it) { return it.retailer === 'home-depot'; })[0];
   const realHdNorm = realHd ? PA.normalizeWeekly({ items: [realHd] }).deals[0] : null;
-  check('real feed: HD link searches by product name', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url : '', realHdNorm ? 'https://www.homedepot.com/s/' + encodeURIComponent(realHdNorm.name.replace(/\//g, ' ')) : '');
+  check('real feed: HD link searches by product name', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url : '', realHdNorm ? 'https://www.homedepot.com/s/' + encodeURIComponent(realHdNorm.name.replace(/\//g, ' ').replace(/#/g, '').replace(/\s+/g, ' ').trim()) : '');
   check('real feed: HD link does not contain the SKU', realHdNorm ? PA.sellerLinks(realHdNorm)[0].url.indexOf(realHdNorm.sku.replace(/-/g, '')) === -1 : false, true);
   check('rendered cards include Google Shopping links', dealHtml.indexOf('google.com/search?tbm=shop') !== -1, true);
   const appText = fs.readFileSync('/home/hatch/workspace/penny-alerts/app.js', 'utf8');
