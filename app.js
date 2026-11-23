@@ -76,45 +76,9 @@ var STORE_NAMES = {
   'online': 'Online'
 };
 
-/* Hardcoded local stores — verified in the 2026-11-22 research. Do not add
- * stores that were not verified. */
-var STORES = [
-  { group: 'Walmart Supercenter', hours: '6am–11pm daily', note: 'Hidden clearance + rare $0.03 finds. Regular Walmart app does NOT show hidden-clearance prices — Walmart+ Scan & Go does. Register is the final truth.',
-    items: [
-      { name: '#1689 — closest, 5.7 mi', addr: '5650 S Chambers Rd, Aurora, CO 80015', phone: '303-690-6322', page: 'https://www.walmart.com/store/1689-aurora-co' },
-      { name: '#5137', addr: '6101 S Aurora Pkwy, Aurora, CO 80016', phone: '303-617-1261', page: 'https://www.walmart.com/store/5137-aurora-co' },
-      { name: '#3740', addr: '21475 E Quincy Ave, Aurora, CO 80015', phone: '303-248-4048' },
-      { name: '#1492', addr: '14000 E Exposition Ave, Aurora, CO 80012', phone: '303-368-1115' },
-      { name: '#5334', addr: '3301 Tower Rd, Aurora, CO 80011', phone: '720-374-0278' },
-      { name: 'Iliff Ave', addr: '15240 E Iliff Ave, Aurora, CO 80014', phone: '303-481-3904' }
-    ] },
-  { group: 'Target — clearance only, no penny system', hours: '', note: 'Store-specific markdowns — check the shelf tag in the Target app.',
-    items: [
-      { name: 'Quincy Ave — closest', addr: '16910 E Quincy Ave, Aurora, CO 80015', phone: '303-699-1020' },
-      { name: 'Ellsworth Ave (#1471)', addr: '14200 E Ellsworth Ave, Aurora, CO 80012', phone: '303-214-0114' },
-      { name: 'Aurora West', addr: '1400 S Havana St, Aurora, CO 80012', phone: '303-755-8530' },
-      { name: 'Aurora South', addr: '15700 E Briarwood Cir, Aurora, CO 80016', phone: '720-214-6000' },
-      { name: 'Saddle Rock', addr: '7400 S Gartrell Rd, Aurora, CO 80016', phone: '303-209-2827' }
-    ] },
-  { group: 'Dollar General', hours: '', note: 'Weekly Tuesday penny list — the most systematic penny program. NO remote price check exists: the penny price shows only in the DG app scan and at the register.',
-    items: [
-      { name: '#19055 — PERMANENTLY CLOSED, do not drive here', addr: '10204 E Colfax Ave, Aurora, CO 80010', phone: '', closed: true },
-      { name: '#13763 — nearest active, 12.2 mi', addr: '7400 CO-2, Commerce City, CO', phone: '' },
-      { name: '#31493 — 13.0 mi', addr: '1505 S Federal Blvd, Denver, CO', phone: '' }
-    ] },
-  { group: 'Home Depot', hours: '', note: 'Penny finds via the PennyRecon lists (linked under Lists & Sources). Register scan is the only proof; stores can refuse penny sales.',
-    items: [
-      { name: '#1501 — closest to Buckley', addr: '14001 E Mississippi Ave, Aurora, CO 80012', phone: '303-743-7557' },
-      { name: '#1551', addr: '3475 N Salida Ct, Aurora, CO 80011', phone: '720-374-3110' },
-      { name: '#1523', addr: '5600 S Chambers Rd, Aurora, CO 80015', phone: '303-699-5006' },
-      { name: '#1528', addr: '6000 S Gun Club Rd, Aurora, CO 80016', phone: '720-870-8839' },
-      { name: 'Brighton', addr: '2440 Buckley Rd, Brighton, CO 80601', phone: '' }
-    ] }
-];
-
 /* Weekly lists + source pages. Every URL below returned HTTP 200 on 2026-11-22. */
 var SOURCE_LINKS = [
-  { name: 'Freebie Guy — Dollar General penny list (master list)', url: 'https://THEFREEBIEGUY.COM/DOLLAR-GENERAL-PENNY-SHOPPING-MASTER-LIST/', note: 'The weekly DG penny list. New list usually Tuesday morning.' },
+  { name: 'Freebie Guy — Dollar General penny list (master list)', url: 'https://THEFREEBIEGUY.COM/DOLLAR-GENERAL-PENNY-SHOPPING-MASTER-LIST/', note: 'The weekly DG penny list. New list usually Tuesday morning. Honest note: the current section has no itemized list — its items come from previous weeks’ lists, and each card shows its list date.' },
   { name: 'RetailShout — latest Dollar General penny items', url: 'https://retailshout.com/latest-dollar-general-penny-items-near-you/', note: 'DG penny items with SKU, UPC and penny date.' },
   { name: 'SavingK — Walmart hidden clearance', url: 'https://savingk.com/walmart-hidden-clearance-how-to-find-these-secret-deals/', note: 'How Walmart hidden clearance works + the clearance database.' },
   { name: 'PennyRecon — Home Depot penny lists', url: 'https://www.pennyrecon.com/', note: 'Community Home Depot penny lists by store.' },
@@ -224,12 +188,15 @@ function normalizeBriefing(data) {
       upc: upc,
       storeId: p.store_id || 'dollar-general',
       source: p.source || 'community',
+      sources: [p.source || 'community'],
+      sourceCount: 1,
       note: p.note || '',
       price: '$0.01',
       originalPrice: '',
       saleStory: 'PENNY LIST',
       dept: classifyDept(p.item, 'Penny'),
       confirmedOn: p.confirmed_on || '',
+      listDate: p.confirmed_on || '',
       validTo: '',
       image: ''
     });
@@ -244,12 +211,15 @@ function normalizeBriefing(data) {
       upc: it.upc ? String(it.upc) : '',
       storeId: it.store_id || 'online',
       source: it.source || '',
+      sources: [it.source || ''],
+      sourceCount: 1,
       note: '',
       price: it.price || '',
       originalPrice: it.original_price || '',
       saleStory: it.sale_story || '',
       dept: 'General',
       confirmedOn: '',
+      listDate: '',
       validTo: it.valid_to || '',
       image: it.image_url || ''
     };
@@ -273,6 +243,7 @@ function normalizeWeekly(data) {
     var upc = it.upc ? String(it.upc) : '';
     var slug = String(it.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'item';
     var kind = it.price === '$0.01' ? 'penny' : 'deal';
+    var srcs = Array.isArray(it.sources) && it.sources.length ? it.sources : [it.source || 'weekly feed'];
     deals.push({
       id: 'w-' + (upc || (slug + '-' + (it.retailer || 'x'))),
       kind: kind,
@@ -280,12 +251,15 @@ function normalizeWeekly(data) {
       upc: upc,
       storeId: it.retailer || 'online',
       source: it.source || 'weekly feed',
+      sources: srcs,
+      sourceCount: (typeof it.source_count === 'number' && it.source_count >= 1) ? it.source_count : srcs.length,
       note: it.note || '',
       price: it.price || '',
       originalPrice: it.was || '',
       saleStory: 'WEEKLY FEED',
       dept: classifyDept(it.name, it.department || 'General'),
       confirmedOn: it.first_seen || '',
+      listDate: it.list_date || it.first_seen || '',
       validTo: it.valid_to || '',
       url: it.url || '',
       sku: it.sku || '',
@@ -309,7 +283,7 @@ var state = {
   ignored: {},    // id -> true
   seen: {},       // id -> first-seen date (YYYY-MM-DD)
   checks: {},     // watch id -> {scanned, shelf, register}
-  filters: { q: '', retailer: '', dept: '', pennyOnly: false, showExpired: false }
+  filters: { retailer: '', dept: '', pennyOnly: false, showExpired: false, futureOnly: false, sort: 'recent' }
 };
 function loadState() {
   state.watch = store.get(LS.watch, {});
@@ -327,18 +301,42 @@ function isNew(id) {
   var d = daysSince(state.seen[id], state.today);
   return d !== null && d <= 7;
 }
+/* Deal date (v12): the date of the list section the item came from, falling
+ * back to the confirmed/first-seen date. This is what "Most recent" and
+ * the "Future" toggle rank on — NOT the parser run date, which is the
+ * same for a whole feed. */
+function dealDate(d) {
+  return d.listDate || d.confirmedOn || '';
+}
+/* Sort a filtered deal list (v12). Most recent: list date DESC, ties by
+ * name. Most verified: number of independent sources DESC, then list
+ * date DESC, then name. Returns a new array; the input is untouched. */
+function sortDeals(list) {
+  var copy = list.slice();
+  var verified = (state.filters.sort === 'verified');
+  copy.sort(function (a, b) {
+    if (verified) {
+      var ca = a.sourceCount || 1, cb = b.sourceCount || 1;
+      if (cb !== ca) return cb - ca;
+    }
+    var da = dealDate(a), db = dealDate(b);
+    if (db !== da) return db < da ? -1 : 1;
+    return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
+  });
+  return copy;
+}
 function visibleDeals() {
   var f = state.filters;
-  var q = f.q.trim().toLowerCase();
-  return state.deals.filter(function (d) {
+  var filtered = state.deals.filter(function (d) {
     if (state.ignored[d.id]) return false;
     if (f.pennyOnly && d.kind !== 'penny') return false;
     if (!f.showExpired && isExpired(d, state.today)) return false;
+    if (f.futureOnly && !(dealDate(d) && dealDate(d) > state.today)) return false;
     if (f.retailer && d.storeId !== f.retailer) return false;
     if (f.dept && d.dept !== f.dept) return false;
-    if (q && d.name.toLowerCase().indexOf(q) === -1 && (d.upc || '').indexOf(q) === -1) return false;
     return true;
   });
+  return sortDeals(filtered);
 }
 /* Seller links (v9) — ONE link per card. For the four app-mapped
  * stores the link is labelled 'Open in {Store} app'. On Android it is an
@@ -380,7 +378,7 @@ function visibleDeals() {
  * utm, or redirector parameters in any link. Labels say "app" /
  * "search", never "buy" — a search link is not a verified price or a
  * confirmed listing. */
-var APP_VERSION = 'v11';
+var APP_VERSION = 'v12';
 var SELLER_SEARCH = {
   'wm-ct': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
   'walmart': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
@@ -541,16 +539,29 @@ function thumbHtml(d) {
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5V8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 8l9 5 9-5M12 13v8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>' +
     '<span class="deal-thumb-ph-label">' + esc(dept) + '</span></span>' + img + '</div>';
 }
+/* Source count under the picture (v12) — shown ONLY in "Most verified"
+ * mode, on deal cards. The count is the number of independent lists that
+ * carried the item (recorded by the parser before dedupe), so a "3
+ * sources" item was listed by three lists, not one. */
+function sourceCountHtml(d) {
+  if (state.filters.sort !== 'verified') return '';
+  var n = d.sourceCount || 1;
+  return '<div class="source-count">✓ ' + n + (n === 1 ? ' source' : ' sources') + '</div>';
+}
 function dealCard(d) {
   var isW = !!state.watch[d.id];
   var price = d.price ? '<span class="price">' + esc(d.price) + '</span>' : '';
   var was = d.originalPrice ? '<span class="was">was ' + esc(d.originalPrice) + '</span>' : '';
   var valid = d.validTo ? '<span class="meta">valid to ' + esc(d.validTo) + (isExpired(d, state.today) ? ' · EXPIRED' : '') + '</span>' : '';
-  var conf = d.confirmedOn ? '<span class="meta">penny list ' + esc(d.confirmedOn) + '</span>' : '';
+  /* The list date is the date of the list section the item came from —
+   * an Oct 27 Freebie Guy item reads "penny list 2026-10-27", not the
+   * date the parser happened to run. */
+  var listDate = d.listDate || d.confirmedOn;
+  var conf = listDate ? '<span class="meta">penny list ' + esc(listDate) + '</span>' : '';
   var upc = d.upc ? '<span class="meta">UPC ' + esc(d.upc) + '</span>' : '<span class="meta">no UPC in this listing</span>';
   var badge = isNew(d.id) ? '<span class="badge-new">NEW</span>' : '';
   var penny = d.kind === 'penny' ? '<span class="badge-penny">PENNY</span>' : '';
-  return '<article class="deal"><div class="deal-row">' + thumbHtml(d) + '<div class="deal-main">' +
+  return '<article class="deal"><div class="deal-row"><div class="deal-thumb-col">' + thumbHtml(d) + sourceCountHtml(d) + '</div><div class="deal-main">' +
     '<div class="deal-top">' + penny + badge + '<span class="retailer">' + esc(prettyStore(d.storeId)) + '</span>' +
     '<span class="dept">' + esc(d.dept) + '</span></div>' +
     '<h3>' + esc(d.name) + ' <button type="button" class="btn small" data-action="copy" data-name="' + esc(d.name) + '">Copy</button></h3>' +
@@ -574,7 +585,7 @@ function renderDeals() {
     return;
   }
   if (!list.length) {
-    el.innerHTML = '<p class="empty">Nothing matches these filters. Clear the search or turn off “Pennies only”.</p>';
+    el.innerHTML = '<p class="empty">Nothing matches these filters. Try turning off “Pennies only” or “Future”.</p>';
     return;
   }
   el.innerHTML = list.slice(0, 400).map(dealCard).join('') +
@@ -696,21 +707,6 @@ function renderWatchlist() {
         }).join('')
       : '<p class="empty">Nothing marked off.</p>';
   }
-}
-function renderStores() {
-  var el = $('storeList');
-  if (!el) return;
-  el.innerHTML = STORES.map(function (g) {
-    var rows = g.items.map(function (s) {
-      var tel = s.phone ? '<a href="tel:+1' + s.phone.replace(/[^0-9]/g, '') + '">' + esc(s.phone) + '</a>' : '—';
-      var page = s.page ? ' · <a href="' + esc(s.page) + '" target="_blank" rel="noopener">Store page</a>' : '';
-      return '<div class="store' + (s.closed ? ' closed' : '') + '">' +
-        '<strong>' + esc(s.name) + '</strong><br>' + esc(s.addr) + '<br>' +
-        '<span class="meta">Phone: ' + tel + page + '</span></div>';
-    }).join('');
-    return '<section class="store-group"><h2>' + esc(g.group) + (g.hours ? ' <span class="meta">· ' + esc(g.hours) + '</span>' : '') + '</h2>' +
-      (g.note ? '<p class="hint">' + esc(g.note) + '</p>' : '') + rows + '</section>';
-  }).join('');
 }
 function renderSources() {
   var el = $('sourceLinks');
@@ -992,11 +988,10 @@ function switchTab(name) {
 }
 function init() {
   loadState();
-  renderStores();
   renderSources();
   renderNotif();
   renderWatchlist();
-  /* Version footer (v11) — the one place the running version is
+  /* Version footer (v12) — the one place the running version is
    * visible, so a stale cached copy is obvious at a glance. */
   var av = $('appVersion');
   if (av) av.textContent = 'Penny Alerts ' + APP_VERSION;
@@ -1031,8 +1026,8 @@ function init() {
     var b = ev.target && ev.target.closest ? ev.target.closest('[data-action]') : null;
     if (b) handleAction(b.getAttribute('data-action'), b.getAttribute('data-id'));
   });
-  var sb = $('searchBox');
-  if (sb) sb.addEventListener('input', function () { state.filters.q = sb.value; renderDeals(); });
+  var ss = $('sortSelect');
+  if (ss) ss.addEventListener('change', function () { state.filters.sort = ss.value; renderDeals(); });
   var rf = $('retailerFilter');
   if (rf) rf.addEventListener('change', function () { state.filters.retailer = rf.value; renderDeals(); });
   var df = $('deptFilter');
@@ -1041,6 +1036,8 @@ function init() {
   if (po) po.addEventListener('change', function () { state.filters.pennyOnly = po.checked; renderDeals(); });
   var se = $('showExpired');
   if (se) se.addEventListener('change', function () { state.filters.showExpired = se.checked; renderDeals(); });
+  var fo = $('futureOnly');
+  if (fo) fo.addEventListener('change', function () { state.filters.futureOnly = fo.checked; renderDeals(); });
   var nb = $('notifBtn');
   if (nb) nb.addEventListener('click', function () {
     if (!pushSupported()) {
@@ -1084,7 +1081,10 @@ if (typeof window !== 'undefined') {
     copyDealName: copyDealName,
     APP_VERSION: APP_VERSION,
     thumbHtml: thumbHtml,
-    STORES: STORES,
+    dealCard: dealCard,
+    sourceCountHtml: sourceCountHtml,
+    sortDeals: sortDeals,
+    dealDate: dealDate,
     SOURCE_LINKS: SOURCE_LINKS,
     _state: state,
     _visibleDeals: visibleDeals,

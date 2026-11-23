@@ -30,7 +30,7 @@ import os
 import re
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urljoin
 
 import feedparser
@@ -79,6 +79,58 @@ def clean(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+_MONTHS = {
+    "january": 1, "february": 2, "march": 3, "april": 4, "may": 5, "june": 6,
+    "july": 7, "august": 8, "september": 9, "october": 10, "november": 11,
+    "december": 12, "jan": 1, "feb": 2, "mar": 3, "apr": 4, "jun": 6,
+    "jul": 7, "aug": 8, "sep": 9, "sept": 9, "oct": 10, "nov": 11, "dec": 12,
+}
+_MONTH_RE = (r"(January|February|March|April|May|June|July|August|September|"
+             r"October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|"
+             r"Oct|Nov|Dec)\.?")
+
+
+def parse_list_date(text: str, default_year: int | None = None) -> str:
+    """Parse a list-section date out of free text. Accepts 'November 17,
+    2026', 'Nov 20, 2026', 'November 10th' (year defaults to the run year),
+    and '11/24/2026'. Returns 'YYYY-MM-DD' or '' when nothing parses."""
+    if not text:
+        return ""
+    if default_year is None:
+        default_year = datetime.now(timezone.utc).year
+    m = re.search(
+        _MONTH_RE + r"\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?",
+        text, re.IGNORECASE)
+    if m:
+        month = _MONTHS[m.group(1).lower().rstrip(".")]
+        day = int(m.group(2))
+        year = int(m.group(3)) if m.group(3) else default_year
+        try:
+            return datetime(year, month, day).date().isoformat()
+        except ValueError:
+            return ""
+    m = re.search(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", text)
+    if m:
+        try:
+            return datetime(int(m.group(3)), int(m.group(1)),
+                            int(m.group(2))).date().isoformat()
+        except ValueError:
+            return ""
+    return ""
+
+
+def normalize_upc(upc: str) -> str:
+    """One canonical form for a UPC: whitespace stripped; an 11-digit UPC-A
+    (leading zero dropped, as RetailShout publishes) is padded back to 12.
+    12- and 13-digit codes pass through unchanged. Dedupe keys on this —
+    without it the same product enters twice (23 duplicates in the
+    2026-11-22 feed)."""
+    upc = re.sub(r"\s+", "", str(upc or ""))
+    if re.fullmatch(r"\d{11}", upc):
+        return "0" + upc
+    return upc
+
+
 def department_for(name: str, kind: str) -> str:
     if kind == "penny":
         return "Penny"
@@ -109,11 +161,11 @@ def department_for(name: str, kind: str) -> str:
 
 
 def make_item(name, retailer, source, kind="deal", upc="", price="", was="",
-              valid_to="", url="", image=""):
+              valid_to="", url="", image="", list_date=""):
     name = clean(name)[:140] or "Unknown item"
     return {
         "name": name,
-        "upc": upc,
+        "upc": normalize_upc(upc),
         "price": price,
         "was": was,
         "retailer": retailer,
@@ -123,6 +175,9 @@ def make_item(name, retailer, source, kind="deal", upc="", price="", was="",
         "valid_to": valid_to,
         "url": url,
         "image": image,
+        # Date of the list section this item came from (YYYY-MM-DD).
+        # '' here means "unknown yet" — main() fills it from first_seen.
+        "list_date": list_date or "",
     }
 
 
@@ -240,9 +295,12 @@ def safe_get(client: httpx.Client, url: str, timeout: float = 25.0):
 
 
 # ---------------------------------------------------------------- penny pages
-def extract_upc_lines(html_text: str, retailer: str, source: str, base_url: str = ""):
+def extract_upc_lines(html_text: str, retailer: str, source: str, base_url: str = "",
+                      list_date: str = ""):
     """Penny Hunter penny_pages.py approach: UPC-line regex over list text.
-    Also captures a nearby <img> per item when the markup has one."""
+    Also captures a nearby <img> per item when the markup has one.
+    list_date tags every item with the date of the list it came from
+    ('' = unknown, filled from first_seen in main())."""
     tree = HTMLParser(html_text)
     seen = set()
     items = []
@@ -256,13 +314,114 @@ def extract_upc_lines(html_text: str, retailer: str, source: str, base_url: str 
         if not m:
             continue
         item = m.group("item").strip(" -–—:")
-        upc = m.group("upc")
+        upc = normalize_upc(m.group("upc"))
         if upc in seen:
             continue
         seen.add(upc)
         items.append(make_item(item, retailer, source, kind="penny",
                                upc=upc, price="$0.01",
-                               image=nearest_image(el, base_url)))
+                               image=nearest_image(el, base_url),
+                               list_date=list_date))
+    return items
+
+
+def extract_upc_lines_tracked(html_text: str, retailer: str, source: str,
+                              base_url: str = "", this_week_date: str = ""):
+    """Section-aware UPC-line extraction for pages that stack several weekly
+    lists (Krazy Coupon Lady, FreeStuffFinder). Walks li/p/h2/h3/h4 in
+    document order, tracking the current list section:
+    - a heading 'Penny Items for <Month> <day>' sets the current list date
+      (year = run year; a date in the future is last year's — these are
+      archive pages, a future-dated section cannot be real);
+    - a heading starting "This Week's" sets the current date to
+      this_week_date (the page's H1 date, e.g. KCL's Nov 3);
+    - a heading starting "Past" clears the current date (past lists on
+      that page carry no dates — those items fall back to the run date).
+    Items found before any dated heading get the run date."""
+    tree = HTMLParser(html_text)
+    today = today_str()
+    seen = set()
+    items = []
+    current_date = None
+    for el in tree.css("li, p, h2, h3, h4"):
+        text = clean(el.text(separator=" "))
+        if not (5 < len(text) < 300):
+            continue
+        if el.tag in ("h2", "h3", "h4"):
+            low = text.lower()
+            if low.startswith("this week"):
+                current_date = this_week_date or today
+            elif low.startswith("past"):
+                current_date = None
+            else:
+                d = parse_list_date(text)
+                if d:
+                    if d > today:  # archive page: future section date is last year's
+                        y, mo, dy = (int(p) for p in d.split("-"))
+                        d = datetime(y - 1, mo, dy).date().isoformat()
+                    current_date = d
+        if any(text.lower().startswith(p) for p in _NOISE_PREFIXES):
+            continue
+        m = UPC_LINE.search(text)
+        if not m:
+            continue
+        item = m.group("item").strip(" -–—:")
+        upc = normalize_upc(m.group("upc"))
+        if upc in seen:
+            continue
+        seen.add(upc)
+        items.append(make_item(item, retailer, source, kind="penny",
+                               upc=upc, price="$0.01",
+                               image=nearest_image(el, base_url),
+                               list_date=current_date or today))
+    return items
+
+
+def extract_fg_dg(html_text: str, base_url: str = ""):
+    """Freebie Guy DG master list. The page's CURRENT section has no
+    itemized list at all (category names only, verified 2026-11-22) — the
+    items live in collapsed <details> blocks under 'Previous 4 Dollar
+    General Penny Lists', each with a dated <summary>. Items are tagged
+    with their block's date; anything outside a <details> block (the
+    current section, if it ever gains items) gets the page's 'Effective'
+    date, else the run date."""
+    tree = HTMLParser(html_text)
+    today = today_str()
+    eff_m = re.search(r"Effective\s+[^<\n]{0,80}", html_text)
+    eff = parse_list_date(eff_m.group(0)) if eff_m else ""
+    seen = set()
+    items = []
+    for el in tree.css("li, p, h2, h3, h4"):
+        text = clean(el.text(separator=" "))
+        if not (5 < len(text) < 300):
+            continue
+        if any(text.lower().startswith(p) for p in _NOISE_PREFIXES):
+            continue
+        m = UPC_LINE.search(text)
+        if not m:
+            continue
+        item = m.group("item").strip(" -–—:")
+        upc = normalize_upc(m.group("upc"))
+        if upc in seen:
+            continue
+        seen.add(upc)
+        list_date = ""
+        node = el
+        found_details = False
+        while node is not None:
+            if getattr(node, "tag", "") == "details":
+                found_details = True
+                summary = node.css_first("summary") if hasattr(node, "css_first") else None
+                if summary is not None:
+                    list_date = parse_list_date(clean(summary.text()))
+                break
+            node = getattr(node, "parent", None)
+        if not found_details:
+            list_date = eff or today
+        items.append(make_item(item, "dollar-general", "thefreebieguy.com",
+                               kind="penny", upc=upc, price="$0.01",
+                               image=nearest_image(el, base_url),
+                               list_date=list_date or today))
     return items
 
 
@@ -276,7 +435,10 @@ def parse_retailshout(html_text: str):
         if not upc_el:
             continue
         upc = clean(upc_el.text())
-        if not re.fullmatch(r"\d{11,13}", upc) or upc in seen:
+        if not re.fullmatch(r"\d{11,13}", upc):
+            continue
+        upc = normalize_upc(upc)
+        if upc in seen:
             continue
         seen.add(upc)
         name_el = card.css_first("h4")
@@ -293,15 +455,19 @@ def parse_retailshout(html_text: str):
                 or attrs.get("data-lazy-src") or "",
                 "https://retailshout.com/")
         it = make_item(name, "dollar-general", "retailshout.com",
-                       kind="penny", upc=upc, price="$0.01", image=img)
+                       kind="penny", upc=upc, price="$0.01", image=img,
+                       # The card's own penny date ("Penny Date: Nov 20,
+                       # 2026") is the list date for this item.
+                       list_date=parse_list_date(note) or today_str())
         if note:
             it["note"] = note
         items.append(it)
     return items
 
 
-def parse_ppm_table(html_text: str):
-    """PennyPinchinMom: a table, one row per item — name | UPC."""
+def parse_ppm_table(html_text: str, list_date: str = ""):
+    """PennyPinchinMom: a table, one row per item — name | UPC.
+    list_date is the date in the page title (e.g. 11/24/2026)."""
     tree = HTMLParser(html_text)
     items = []
     seen = set()
@@ -313,12 +479,13 @@ def parse_ppm_table(html_text: str):
         m = UPC_ANY.search(clean(cells[1].text()))
         if not name or not m:
             continue
-        upc = m.group(0)
+        upc = normalize_upc(m.group(0))
         if upc in seen:
             continue
         seen.add(upc)
         items.append(make_item(name, "dollar-general", "pennypinchinmom.com",
-                               kind="penny", upc=upc, price="$0.01"))
+                               kind="penny", upc=upc, price="$0.01",
+                               list_date=list_date or today_str()))
     return items
 
 
@@ -358,6 +525,7 @@ def parse_pennyrecon(html_text: str):
         sku = ""
         retail = ""
         img = ""
+        last = ""
         for _ in range(4):
             node = node.parent
             if node is None:
@@ -389,10 +557,24 @@ def parse_pennyrecon(html_text: str):
                         attrs.get("src") or attrs.get("data-src")
                         or attrs.get("data-lazy-src") or "",
                         "https://www.pennyrecon.com/")
+                # "Last seen | today" (or a date) is this item's list date.
+                lm = re.search(
+                    r"Last seen\s*\|\s*([A-Za-z]+\s+\d{1,2}(?:,?\s*\d{4})?|today|yesterday)",
+                    clean(node.text(separator=" ")), re.IGNORECASE)
+                if lm:
+                    v = lm.group(1).strip().lower()
+                    if v == "today":
+                        last = today_str()
+                    elif v == "yesterday":
+                        last = (datetime.now(timezone.utc)
+                                - timedelta(days=1)).date().isoformat()
+                    else:
+                        last = parse_list_date(lm.group(1))
                 break
         it = make_item(name, "home-depot", "pennyrecon.com",
                        kind="penny", upc="", price="$0.01",
-                       was=retail, url=url, image=img)
+                       was=retail, url=url, image=img,
+                       list_date=last or today_str())
         if sku:
             it["sku"] = sku
         items.append(it)
@@ -586,6 +768,28 @@ OFF_UA = "PennyAlerts/0.1"
 UPCDB_PAID = "https://api.upcitemdb.com/prod/v1/lookup"
 
 
+def load_first_seen_map() -> dict:
+    """(key -> first_seen) from the previous feed/weekly.json, so a re-run
+    doesn't stamp every old item with today's date. Key is ('upc', upc)
+    or ('name', (name.lower(), retailer)) — the same identity dedupe uses."""
+    prev = {}
+    try:
+        with open(OUT_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+        for it in data.get("items", []) or []:
+            fs = it.get("first_seen") or ""
+            if not fs:
+                continue
+            if it.get("upc"):
+                prev.setdefault(("upc", normalize_upc(it["upc"])), fs)
+            else:
+                prev.setdefault(("name", (str(it.get("name", "")).lower(),
+                                         it.get("retailer", ""))), fs)
+    except Exception:
+        pass
+    return prev
+
+
 def load_image_cache() -> dict:
     """UPC -> image URL from the previous feed/weekly.json (if any)."""
     cache = {}
@@ -730,14 +934,11 @@ SOURCES = [
      "https://pennypinchinmom.com/feed/", "fetch"),
     ("kcl-hd", "Krazy Coupon Lady — Home Depot penny items",
      "https://thekrazycouponlady.com/tips/store-hacks/home-depot-penny-items", "link-only"),
-    ("freebie-guy-hd", "Freebie Guy — Home Depot penny list",
-     "https://thefreebieguy.com/home-depot-penny-list/", "link-only"),
 ]
 
 LINK_ONLY_NOTES = {
     "savingk-walmart": "Guide page only — no parseable deal database exists; open the page to read it.",
     "kcl-hd": "Page loads but the list is not in the static HTML (JS-rendered) — open it in a browser.",
-    "freebie-guy-hd": "Page returns 404 (removed) — kept as a link in case it comes back.",
 }
 
 
@@ -753,15 +954,24 @@ def run_source(client: httpx.Client, key: str, name: str, url: str, kind: str):
             return [], {"name": name, "url": url, "status": status,
                         "item_count": 0, "note": err or "fetch failed"}
         if key == "freebie-guy-dg":
-            items = extract_upc_lines(body, "dollar-general", "thefreebieguy.com", url)
+            items = extract_fg_dg(body, url)
         elif key == "retailshout-dg":
             items = parse_retailshout(body)
         elif key == "kcl-dg":
-            items = extract_upc_lines(body, "dollar-general", "krazycouponlady.com", url)
+            # The page's H1 carries the current list's date
+            # ("Dollar General Penny List Nov 3: ...").
+            h1_m = re.search(r"<h1[^>]*>(.*?)</h1>", body, re.S)
+            h1_date = parse_list_date(clean(h1_m.group(1))) if h1_m else ""
+            items = extract_upc_lines_tracked(
+                body, "dollar-general", "krazycouponlady.com", url,
+                this_week_date=h1_date)
         elif key == "pennypinchinmom-dg":
-            items = parse_ppm_table(body)
+            title_m = re.search(r"<title[^>]*>(.*?)</title>", body, re.S)
+            ppm_date = parse_list_date(clean(title_m.group(1))) if title_m else ""
+            items = parse_ppm_table(body, ppm_date)
         elif key == "freestufffinder-dg":
-            items = extract_upc_lines(body, "dollar-general", "freestufffinder.com", url)
+            items = extract_upc_lines_tracked(
+                body, "dollar-general", "freestufffinder.com", url)
         elif key == "slickdeals":
             items = parse_slickdeals(body)
         elif key == "pennyrecon-hd":
@@ -771,8 +981,17 @@ def run_source(client: httpx.Client, key: str, name: str, url: str, kind: str):
             items, _err = parse_rss(body, src)
         else:
             items = []
-        return items, {"name": name, "url": url, "status": "ok",
-                       "item_count": len(items)}
+        status = {"name": name, "url": url, "status": "ok",
+                  "item_count": len(items)}
+        if key == "pennyrecon-hd":
+            # The site lists more items than have detail pages; only the
+            # latter are parseable. Say so instead of silently showing a
+            # subset (2026-11-22: 304 live, 166 with /item/ links).
+            tm = re.search(r"(\d+)\s+live \$0\.01 items", body)
+            if tm:
+                status["note"] = (f"{len(items)} of {tm.group(1)} live on site "
+                                  "— only items with detail pages are parsed")
+        return items, status
     except Exception as e:  # one bad source must never kill the run
         return [], {"name": name, "url": url, "status": "failed",
                     "item_count": 0, "note": f"{type(e).__name__}: {e}"}
@@ -792,11 +1011,17 @@ def main() -> int:
             print(f"{key:22} {status['status']:9} {status['item_count']:4} items"
                   + (f" — {status['note']}" if status.get("note") else ""))
 
-        # Dedupe: by UPC first (keep the first source's copy), else name+retailer.
-        # A later copy replaces an earlier one when it has a photo and the
-        # earlier one does not — the photo is the more useful copy. Item
-        # identity (UPC, else name+retailer) never changes, so the push
-        # sender's diff is unaffected by the image field.
+        # Dedupe: by UPC first (normalized — see normalize_upc), else
+        # name+retailer. FIRST source wins, always: a later copy never
+        # replaces the kept item (the old code did exactly that when the
+        # later copy had an image, which stole 83 of Freebie Guy's 135
+        # UPCs for other sources). A later copy may only LEND its image
+        # when the kept copy has none. Every source that listed the item
+        # is recorded on the kept copy (sources / source_count) BEFORE
+        # the duplicates are dropped — that is what the app's "Most
+        # verified" sort ranks on. list_date keeps the LATEST listing
+        # date (the freshest confirmation the item is still a penny);
+        # first_seen keeps the earliest.
         seen_upc = {}
         seen_name = {}
         deduped = []
@@ -805,20 +1030,45 @@ def main() -> int:
                 idx = seen_upc.get(it["upc"])
                 if idx is None:
                     seen_upc[it["upc"]] = len(deduped)
+                    it["sources"] = [it["source"]]
+                    it["source_count"] = 1
                     deduped.append(it)
-                elif it.get("image") and not deduped[idx].get("image"):
-                    it["first_seen"] = min(it["first_seen"], deduped[idx]["first_seen"])
-                    deduped[idx] = it
+                    continue
             else:
                 k = (it["name"].lower(), it["retailer"])
                 idx = seen_name.get(k)
                 if idx is None:
                     seen_name[k] = len(deduped)
+                    it["sources"] = [it["source"]]
+                    it["source_count"] = 1
                     deduped.append(it)
-                elif it.get("image") and not deduped[idx].get("image"):
-                    it["first_seen"] = min(it["first_seen"], deduped[idx]["first_seen"])
-                    deduped[idx] = it
+                    continue
+            kept = deduped[idx]
+            if it["source"] not in kept["sources"]:
+                kept["sources"].append(it["source"])
+                kept["source_count"] = len(kept["sources"])
+            if it.get("image") and not kept.get("image"):
+                kept["image"] = it["image"]
+            if it["first_seen"] < kept["first_seen"]:
+                kept["first_seen"] = it["first_seen"]
+            if it.get("list_date") and (not kept.get("list_date")
+                                        or it["list_date"] > kept["list_date"]):
+                kept["list_date"] = it["list_date"]
         deduped.sort(key=lambda d: (d["retailer"], d["name"].lower()))
+
+        # Preserve first_seen from the previous feed (per UPC, else
+        # name+retailer): without this every re-run re-stamps old items
+        # with today's date and "Most recent" can never tell a new item
+        # from an old one. Items with no list_date yet fall back to
+        # first_seen (RSS/Slickdeals items carry no list date).
+        prev_seen = load_first_seen_map()
+        for it in deduped:
+            key = (("upc", it["upc"]) if it.get("upc")
+                   else ("name", (it["name"].lower(), it["retailer"])))
+            if key in prev_seen:
+                it["first_seen"] = prev_seen[key]
+            if not it.get("list_date"):
+                it["list_date"] = it["first_seen"]
 
         # Shared decorative images (page header photos) are not product
         # photos — drop them before enrichment.

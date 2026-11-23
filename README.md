@@ -12,16 +12,19 @@ phone's home screen (it's a PWA).
   (`https://rocketshon.github.io/penny-finder-backend/briefings/latest.json`),
   filterable by store, department, and "pennies only". Each deal shows its
   name, price / was-price, source, and a Watch button. Where the same UPC
-  appears in both feeds, the weekly copy wins (it is fresher).
+  appears in both feeds, the weekly copy wins (it is fresher). Each card
+  shows the **list date** the item came from ("penny list 2026-10-27") —
+  not the date the parser ran — so an old archive item reads as old.
+- **Sort + Future**: the Deals tab sorts **Most recent** (newest list date
+  first, the default) or **Most verified** (most independent sources first;
+  in that mode each card shows "✓ N sources" under its picture). The
+  **Future** checkbox shows only deals whose list date is after today —
+  right now that is PennyPinchinMom's Nov 24 list (105 items).
 - **Watchlist** (saved on your phone): tap Watch on any deal. Each watched
   item gets an in-store checklist — scan in the store's app, find it on the
   shelf, confirm the register price.
 - **Mark-off / ignore list**: "Don't show again" hides an item everywhere,
   with a way to un-mark it.
-- **Stores**: the verified local store list — 6 Walmart Supercenters,
-  5 Targets, Dollar General (nearest Aurora location is permanently closed;
-  nearest active are Commerce City and Denver), and 5 Home Depots — with
-  addresses, phones, and per-store notes.
 - **One-tap app links**: each card has one link — "Open in {Store} app"
   for Walmart, Target, Home Depot, and Dollar General. On Android it opens the store's
   app (falling back to a Google search for the item if the app isn't
@@ -77,15 +80,15 @@ this priority order:
    (env `OG_LOOKUPS_PER_RUN`), ~1/sec, one retry on transient errors.
 6. **UPCitemdb** — only if a paid key is set (see below).
 
-Coverage is partial by design — measured on the 2026-11-22 full sweep
-(683 items): **334/683 (48%) have a photo**. Per source:
-PennyRecon 166/166, RetailShout 50/50, Slickdeals 25/25,
-FreeStuffFinder 48/180, Krazy Coupon Lady 23/105, Freebie Guy 17/52,
+Coverage is partial by design — measured on the 2026-11-23 regenerated
+feed (660 items): **373/660 (56%) have a photo**. Per source:
+PennyRecon 166/166, RetailShout 38/38, Slickdeals 25/25,
+Freebie Guy 104/135, Krazy Coupon Lady 20/88, FreeStuffFinder 15/103,
 PennyPinchinMom 5/105. The gaps are structural, not bugs: the DG
 lists are text tables with no per-item photos and no per-item links,
 so only their UPCs that a free product database knows get a photo
 (Open Food Facts matched 89 of 442 UPCs in total, Open Products Facts
-4 more). The remaining 349 items show the placeholder tile.
+4 more). The remaining 287 items show the placeholder tile.
 
 Diagnosis, verified 2026-11-22: the placeholders are **not** broken
 image loads. Every photo host in the feed was probed with a
@@ -93,7 +96,7 @@ browser-like request (browser user agent + the app page as Referer):
 `images.thdstatic.com` 8/8 loaded, `images.openfoodfacts.org` 8/8,
 `retailshout.com` 8/8, `slickdeals.net` 3/3,
 `images.openproductsfacts.org` 3/3 — no hotlink protection anywhere.
-The 349 letter tiles are items with no image in the feed at all.
+The 287 letter tiles are items with no image in the feed at all.
 
 One honest note: PennyRecon's product photos live on Home Depot's
 image CDN (`images.thdstatic.com`) — that is the URL PennyRecon
@@ -196,7 +199,7 @@ no embedded page (retailers block framing, so the modal idea was dropped):
 - **Version footer** (v11): the page footer reads "Penny Alerts v11"
   (bumped every release) so the version a phone is actually running
   is visible at a glance — the repeated stale-cache confusion is
-  why it exists.
+  why it exists. (v12: "Penny Alerts v12".)
 - **Google Shopping search** (every other store): `google.com/search?tbm=shop&q=<UPC>`
   when the item has a UPC, else `q=<item name, URL-encoded>`.
 
@@ -221,17 +224,24 @@ could not be read by any automated fetch (PerimeterX "Robot or
 human?" wall); a tap opens the page in your own browser, which is a
 different thing from our fetch.
 
-## Filters — stores and departments
+## Filters — stores, departments, sort, Future
 
 Both dropdowns are built from the **weekly feed only** — the stale
 briefing's stores never appear, so the store list is just the stores
 with current deals. Each entry shows a deal count after the name
-("Dollar General (492)"), most deals first, ties alphabetical.
+("Dollar General (469)"), most deals first, ties alphabetical.
 Departments come from a keyword classifier on the item name
 (`classifyDept` in `app.js`): it is a best-guess from names, so some
 items land in General, and a few will be misfiled. There is no
 "Penny" department — penny-ness shows via the $0.01 price and the
 PENNY badge, not the department.
+
+**Sort (v12):** "Most recent" (default) orders by the item's list date,
+newest first; "Most verified" orders by how many independent lists
+carried the item, then by list date. In Most verified mode each card
+shows "✓ N sources" under its picture. **Future (v12):** the checkbox
+next to "Show expired" shows only deals whose list date is after today
+— currently PennyPinchinMom's Nov 24 list.
 
 The app subscribes this phone with the Web Push API (VAPID public key in
 `app.js` — public, safe to commit) and stores the subscription in
@@ -268,21 +278,64 @@ site. Parsing reuses Penny Hunter's approach
 MIT): the UPC-line regex for the penny-list pages, the category/signal
 logic for RSS, and the retailer map + price extraction for Slickdeals.
 
-Verified live 2026-11-22 (counts from the first run — 683 items total):
+Verified live 2026-11-22, re-verified and corrected 2026-11-23
+(counts from the regenerated run — 660 items total, 469 unique UPCs):
 
 | Source | What happens |
 | --- | --- |
-| Freebie Guy — DG penny list (master list) | Parsed — 135 items |
-| RetailShout — DG penny items | Parsed — 50 items (structured cards) |
-| Krazy Coupon Lady — DG penny list | Parsed — 105 items |
-| PennyPinchinMom — DG penny list | Parsed — 105 items (table) |
-| FreeStuffFinder — DG penny list | Parsed — 266 items |
-| Slickdeals — frontpage RSS | Parsed — 25 online deals |
-| PennyRecon — Home Depot penny items | Parsed — 166 items (name + HD SKU + retail; no UPC is exposed in the list HTML) |
-| Freebie Guy RSS / PennyPinchinMom RSS | Parsed — post-level signals only (0–1 items; the list pages carry the real UPCs) |
+| Freebie Guy — DG penny list (master list) | Parsed — 135 items, all from previous weeks' lists (see audit below) |
+| RetailShout — DG penny items | Parsed — 50 items (structured cards); 38 survive dedupe |
+| Krazy Coupon Lady — DG penny list | Parsed — 105 items; 88 survive dedupe |
+| PennyPinchinMom — DG penny list | Parsed — 105 items (table), all dated Nov 24, 2026 |
+| FreeStuffFinder — DG penny list | Parsed — 266 items; 103 survive dedupe |
+| Slickdeals — frontpage RSS | Parsed — 25 online deals (expire within hours) |
+| PennyRecon — Home Depot penny items | Parsed — 166 of 304 live on site (name + HD SKU + retail; no UPC is exposed in the list HTML; only items with detail pages are parseable) |
+| Freebie Guy RSS / PennyPinchinMom RSS | Parsed — post-level signals only (0 items; the list pages carry the real UPCs) |
 | SavingK — Walmart hidden clearance | Link-only — the page is a guide, no parseable deal database exists |
 | Krazy Coupon Lady — Home Depot penny items | Link-only — the page loads but the list is not in the static HTML (JS-rendered) |
-| Freebie Guy — Home Depot penny list | Link-only — the page returns 404 (removed) |
+
+The Freebie Guy Home Depot link was dropped in v12 — the page is a
+404, and a dead link is worse than no link.
+
+### Audit findings (2026-11-22, fixed in v12)
+
+Joseph clicked the Freebie Guy link, saw no list of items, and suspected
+false data. He was right about what he saw, and the data was real — both
+at once:
+
+- **Freebie Guy's 135 UPCs are real and on the page — but none of them
+  are the current list.** The page's current section ("Effective Friday,
+  November 20, 2026") has zero items, only category names. All 135 come
+  from four collapsed "Previous 4 Dollar General Penny Lists" sections
+  (Oct 27: 79, Nov 17: 28, Nov 3: 25, Sep 15: 3), closed by default on
+  phones. Every card now shows the list date it came from, so an Oct 27
+  item reads "penny list 2026-10-27".
+- **Staleness is systemic, not one source.** Of the 492 DG items, only
+  ~179 come from a current-week section: KCL has 15/105 in "This Week's"
+  (90 under "Past…", which carries no dates on the page), FreeStuffFinder
+  has 9 in its current Nov 10 section (110 from Oct 27 alone).
+  PennyPinchinMom is the cleanest — all 105 from one list dated
+  Nov 24, 2026 — and RetailShout is all current (Nov 20). Archive items
+  are kept on purpose: an old penny can still ring up in a store. But
+  their age is now visible and sortable instead of hidden behind the
+  parser's run date.
+- **Dedupe bug (fixed):** the old code let a later copy of a UPC replace
+  the first copy when it had a photo — which stole 83 of Freebie Guy's
+  135 UPCs for other sources, because Freebie Guy carries no per-item
+  photos and the other lists pick up a generic page-header photo (later
+  stripped anyway). First source now always wins; a later copy may only
+  lend its photo. Freebie Guy is back to 135 in the feed.
+- **UPC bug (fixed):** UPCs were compared as exact strings, but
+  RetailShout drops the leading zero (11-digit). The same product
+  entered twice — 23 duplicates. UPCs are now normalized (11-digit
+  padded to 12) before dedupe: 492 UPC items → 469 unique products.
+- **Source counts (new):** the parser records every list that carried an
+  item before deduping (`sources` / `source_count` per item: 494 items
+  in 1 source, 140 in 2, 26 in 3). That is what "Most verified" ranks on.
+- **PennyRecon honesty:** the site lists 304 live $0.01 items, but only
+  166 have detail pages the parser can read — and all 138 dropped are
+  "Low likelihood". The source line now says "166 of 304" instead of
+  silently showing a subset.
 
 The Penny Hunter briefing JSON (30+ sources incl. the KCL DG penny list,
 Freebie Guy, Slickdeals, Flipp weekly ads) is still read as a fallback —
@@ -320,7 +373,7 @@ previous good items; the Lists & Sources tab shows each source's status.
 ## Files
 
 `index.html`, `app.js`, `styles.css`, `manifest.json`, `sw.js`
-(service-worker cache `penny-alerts-v5`), `icon.svg`, `README.md`,
+(service-worker cache `penny-alerts-v12`), `icon.svg`, `README.md`,
 `scripts/parse-lists.py` + `scripts/send-push.py` +
 `scripts/test-parse-images.py` +
 `scripts/requirements.txt` (the weekly-feed parser and the push sender),

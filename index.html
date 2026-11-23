@@ -26,14 +26,16 @@
 <nav class="tabs" role="tablist" aria-label="Sections">
   <button type="button" class="tab active" data-tab="deals" role="tab">Deals <span id="dealCount" class="count"></span></button>
   <button type="button" class="tab" data-tab="watchlist" role="tab">Watchlist <span id="watchCount" class="count"></span></button>
-  <button type="button" class="tab" data-tab="stores" role="tab">Stores</button>
   <button type="button" class="tab" data-tab="lists" role="tab">Lists &amp; Sources</button>
 </nav>
 
 <main>
   <section id="tab-deals" class="tab-panel">
     <div class="filters">
-      <input id="searchBox" type="search" placeholder="Search deals…" aria-label="Search deals">
+      <select id="sortSelect" aria-label="Sort deals">
+        <option value="recent">Most recent</option>
+        <option value="verified">Most verified</option>
+      </select>
       <select id="retailerFilter" aria-label="Filter by store">
         <option value="">All stores</option>
       </select>
@@ -42,6 +44,7 @@
       </select>
       <label class="check"><input id="pennyOnly" type="checkbox"> Pennies only ($0.01)</label>
       <label class="check"><input id="showExpired" type="checkbox"> Show expired</label>
+      <label class="check"><input id="futureOnly" type="checkbox"> Future</label>
     </div>
     <p class="hint">Leads, not confirmations. A deal here means “go check it” — the register is the final truth.</p>
     <div id="dealList" class="deal-list"></div>
@@ -53,11 +56,6 @@
     <h2>Marked off — don’t show again</h2>
     <p class="hint">Hidden everywhere in the feed. Un-mark anything to see it again.</p>
     <div id="ignoredList" class="deal-list"></div>
-  </section>
-
-  <section id="tab-stores" class="tab-panel" hidden>
-    <p class="hint">Your local stores. Tap a phone number to call. “Check” links open the store’s own checker page — you do the check, the app never scrapes a store.</p>
-    <div id="storeList"></div>
   </section>
 
   <section id="tab-lists" class="tab-panel" hidden>
@@ -86,7 +84,7 @@
 
 <footer class="app-footer">
   <p>Free forever. Data: Penny Hunter’s public briefing + the community penny lists linked above. Not affiliated with Walmart, Target, Dollar General, Home Depot or Penny Hunter.</p>
-  <p id="appVersion" class="version">Penny Alerts v11</p>
+  <p id="appVersion" class="version">Penny Alerts v12</p>
 </footer>
 
 <script src="app.js"></script>

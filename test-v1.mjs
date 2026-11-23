@@ -199,13 +199,10 @@ const PA = sandbox.window.PennyAlerts;
   PA._handleAction('unignore', firstPenny);
   check('ignored list empty again', Object.keys(st.ignored).length, 0);
 
-  /* 8. stores data intact */
-  check('store groups', PA.STORES.length, 4);
-  check('walmart store count', PA.STORES[0].items.length, 6);
-  check('target store count', PA.STORES[1].items.length, 5);
-  check('DG closed store flagged', PA.STORES[2].items[0].closed, true);
-  check('DG active count', PA.STORES[2].items.filter(function (s) { return !s.closed; }).length, 2);
-  check('home depot count', PA.STORES[3].items.length, 5);
+  /* 8. stores data is gone (v12) — Joseph asked for the Stores tab to be
+   * deleted, list and all. */
+  check('STORES is gone from the app export', typeof PA.STORES, 'undefined');
+  check('no storeList element is ever created', typeof els['storeList'], 'undefined');
 
   /* 9. background push (v3) */
   check('VAPID public key present', typeof PA.VAPID_PUBLIC_KEY, 'string');
@@ -230,7 +227,7 @@ const PA = sandbox.window.PennyAlerts;
   check('pushSupported false in stub env (no serviceWorker)', PA.pushSupported(), false);
   check('supabase URL is the shared bulk-finder project', PA.SUPABASE_URL, 'https://xwekulsnfarjibawqqih.supabase.co');
   const swText = fs.readFileSync('/home/hatch/workspace/penny-alerts/sw.js', 'utf8');
-  check('sw cache bumped to v11', swText.indexOf("penny-alerts-v11") !== -1, true);
+  check('sw cache bumped to v12', swText.indexOf("penny-alerts-v12") !== -1, true);
   check('sw has push handler', swText.indexOf("addEventListener('push'") !== -1, true);
   check('sw push shows a notification', swText.indexOf('showNotification') !== -1, true);
   check('sw has notificationclick handler', swText.indexOf("addEventListener('notificationclick'") !== -1, true);
@@ -483,11 +480,98 @@ const PA = sandbox.window.PennyAlerts;
   check('watchlist cards carry a Copy button', watchHtml.indexOf('data-action="copy"') !== -1, true);
   check('watchlist Copy button carries the raw name', watchHtml.indexOf('data-name="' + pennies[1].name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;') + '"') !== -1, true);
   PA._handleAction('unwatch', firstPenny);
-  /* Version footer: APP_VERSION is v11, the page footer reads
-   * "Penny Alerts v11", and init() set the rendered element. */
-  check('APP_VERSION is v11', PA.APP_VERSION, 'v11');
-  check('index.html footer reads Penny Alerts v11', htmlText.indexOf('Penny Alerts v11') !== -1, true);
-  check('rendered version footer reads Penny Alerts v11', els['appVersion'].textContent, 'Penny Alerts v11');
+  /* Version footer: APP_VERSION is v12, the page footer reads
+   * "Penny Alerts v12", and init() set the rendered element. */
+  check('APP_VERSION is v12', PA.APP_VERSION, 'v12');
+  check('index.html footer reads Penny Alerts v12', htmlText.indexOf('Penny Alerts v12') !== -1, true);
+  check('rendered version footer reads Penny Alerts v12', els['appVersion'].textContent, 'Penny Alerts v12');
+
+  /* 16. sort dropdown + Future toggle + source count (v12). The search
+   * bar and the Stores tab are deleted; the Deals tab sorts Most recent
+   * (default) or Most verified, and a Future checkbox shows only deals
+   * whose list date is after today. */
+  check('default sort is Most recent', st.filters.sort, 'recent');
+  check('sort select exists in index.html', htmlText.indexOf('id="sortSelect"') !== -1, true);
+  check('sort select has Most recent option', htmlText.indexOf('>Most recent<') !== -1, true);
+  check('sort select has Most verified option', htmlText.indexOf('>Most verified<') !== -1, true);
+  check('sort select defaults to recent', htmlText.indexOf('<option value="recent">Most recent</option>') !== -1, true);
+  check('Future checkbox exists in index.html', htmlText.indexOf('id="futureOnly"') !== -1, true);
+  check('Future label reads Future', htmlText.indexOf('> Future</label>') !== -1, true);
+  check('search box is gone from index.html', htmlText.indexOf('searchBox') === -1, true);
+  check('Stores tab is gone from index.html', htmlText.indexOf('tab-stores') === -1 && htmlText.indexOf('data-tab="stores"') === -1, true);
+  check('filters carry no search query', ('q' in st.filters), false);
+  check('sort select is wired (change listener)', Array.isArray(els['sortSelect'].listeners.change) && els['sortSelect'].listeners.change.length === 1, true);
+  check('future checkbox is wired (change listener)', Array.isArray(els['futureOnly'].listeners.change) && els['futureOnly'].listeners.change.length === 1, true);
+  const sortDeals = [
+    { id: 's-a', kind: 'penny', name: 'Alpha Item', upc: '', storeId: 'dollar-general', source: 'a.com', sources: ['a.com'], sourceCount: 1, price: '$0.01', originalPrice: '', dept: 'General', confirmedOn: '2026-10-27', listDate: '2026-10-27', validTo: '', image: '' },
+    { id: 's-b', kind: 'penny', name: 'Beta Item', upc: '', storeId: 'dollar-general', source: 'b.com', sources: ['b.com', 'c.com', 'd.com'], sourceCount: 3, price: '$0.01', originalPrice: '', dept: 'General', confirmedOn: '2026-11-03', listDate: '2026-11-03', validTo: '', image: '' },
+    { id: 's-c', kind: 'penny', name: 'Gamma Item', upc: '', storeId: 'dollar-general', source: 'c.com', sources: ['c.com', 'e.com'], sourceCount: 2, price: '$0.01', originalPrice: '', dept: 'General', confirmedOn: '2099-01-01', listDate: '2099-01-01', validTo: '', image: '' }
+  ];
+  const savedDeals = st.deals;
+  st.deals = sortDeals;
+  st.filters.pennyOnly = false; st.filters.showExpired = false; st.filters.futureOnly = false; st.filters.retailer = ''; st.filters.dept = '';
+  st.filters.sort = 'recent';
+  check('Most recent sorts by list date desc', PA._visibleDeals().map(function (d) { return d.id; }), ['s-c', 's-b', 's-a']);
+  st.filters.sort = 'verified';
+  check('Most verified sorts by source count desc', PA._visibleDeals().map(function (d) { return d.id; }), ['s-b', 's-c', 's-a']);
+  /* The sort select drives the same state the tests just set directly. */
+  els['sortSelect'].value = 'recent';
+  els['sortSelect'].listeners.change[0]();
+  check('sort select change sets Most recent', st.filters.sort, 'recent');
+  check('sort select change re-sorts Most recent', PA._visibleDeals().map(function (d) { return d.id; }), ['s-c', 's-b', 's-a']);
+  els['sortSelect'].value = 'verified';
+  els['sortSelect'].listeners.change[0]();
+  check('sort select change sets Most verified', st.filters.sort, 'verified');
+  /* Source count under the picture: verified mode only. */
+  const cardV = PA.dealCard(sortDeals[1]);
+  check('verified card shows source count under picture', cardV.indexOf('✓ 3 sources') !== -1, true);
+  check('verified card source count sits in the thumb column', cardV.indexOf('deal-thumb-col') !== -1 && cardV.indexOf('source-count') !== -1, true);
+  check('verified card shows 1 source as singular', PA.dealCard(sortDeals[0]).indexOf('✓ 1 source</div>') !== -1, true);
+  st.filters.sort = 'recent';
+  const cardR = PA.dealCard(sortDeals[1]);
+  check('recent card shows no source count', cardR.indexOf('source-count') === -1, true);
+  check('card penny-list line uses the list date', cardR.indexOf('penny list 2026-11-03') !== -1, true);
+  check('card penny-list line does not use the run date', cardR.indexOf('penny list 2026-11-22') === -1 && cardR.indexOf('penny list 2026-11-23') === -1, true);
+  /* Future toggle: only the 2099-dated deal survives. */
+  st.filters.futureOnly = true;
+  check('Future shows only future-dated deals', PA._visibleDeals().map(function (d) { return d.id; }), ['s-c']);
+  els['futureOnly'].checked = false;
+  els['futureOnly'].listeners.change[0]();
+  check('Future off shows all again', PA._visibleDeals().length, 3);
+  st.deals = savedDeals;
+  st.filters.sort = 'recent'; st.filters.futureOnly = false; st.filters.pennyOnly = false; st.filters.showExpired = false; st.filters.retailer = ''; st.filters.dept = '';
+
+  /* 17. normalizeWeekly carries sources / source_count / listDate (v12). */
+  const wsrc = PA.normalizeWeekly({ generated_at: '', sources: [], items: [
+    { name: 'Multi Source Item', upc: '012345678905', price: '$0.01', was: '', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', sources: ['thefreebieguy.com', 'freestufffinder.com', 'krazycouponlady.com'], source_count: 3, first_seen: '2026-11-22', valid_to: '', url: '', image: '', list_date: '2026-10-27' },
+    { name: 'Single Source Item', upc: '', price: '$0.01', was: '', retailer: 'home-depot', department: 'Penny', source: 'pennyrecon.com', first_seen: '2026-11-23', valid_to: '', url: '', image: '' }
+  ] });
+  check('normalizeWeekly keeps all three sources', wsrc.deals[0].sources, ['thefreebieguy.com', 'freestufffinder.com', 'krazycouponlady.com']);
+  check('normalizeWeekly carries source_count 3', wsrc.deals[0].sourceCount, 3);
+  check('normalizeWeekly carries list_date', wsrc.deals[0].listDate, '2026-10-27');
+  check('normalizeWeekly defaults missing source_count to 1', wsrc.deals[1].sourceCount, 1);
+  check('normalizeWeekly defaults missing sources to [source]', wsrc.deals[1].sources, ['pennyrecon.com']);
+  check('normalizeWeekly falls back listDate to first_seen', wsrc.deals[1].listDate, '2026-11-23');
+  const bsrc = PA.normalizeBriefing({ generated_at: '', week_id: '', week_of: '', penny_list: [{ item: 'Briefing Penny', upc: '012345678906', store_id: 'dollar-general', source: 'x', confirmed_on: '2026-10-20' }], all_items: [] });
+  check('briefing penny gets source_count 1', bsrc.deals[0].sourceCount, 1);
+  check('briefing penny listDate is confirmed_on', bsrc.deals[0].listDate, '2026-10-20');
+
+  /* 18. regenerated real feed (v12): first-wins attribution, no UPC
+   * duplicates, every item carries sources + list_date. */
+  check('real feed Freebie Guy count is 135 (first-wins)', realWeekly.items.filter(function (it) { return it.source === 'thefreebieguy.com'; }).length, 135);
+  const normUpc = function (u) { return (u && u.length === 11) ? '0' + u : u; };
+  const seenU = {};
+  const dupU = realWeekly.items.filter(function (it) { if (!it.upc) return false; const u = normUpc(it.upc); if (seenU[u]) return true; seenU[u] = 1; return false; });
+  check('real feed has no duplicate normalized UPCs', dupU.length, 0);
+  check('real feed total is 660 (683 minus 23 UPC dupes)', realWeekly.items.length, 660);
+  check('real feed every item has a sources array', realWeekly.items.every(function (it) { return Array.isArray(it.sources) && it.sources.length >= 1; }), true);
+  check('real feed source_count equals sources.length', realWeekly.items.every(function (it) { return it.source_count === it.sources.length; }), true);
+  check('real feed every item has a list_date', realWeekly.items.every(function (it) { return typeof it.list_date === 'string' && it.list_date.length === 10; }), true);
+  check('real feed multi-source items number 166', realWeekly.items.filter(function (it) { return it.source_count >= 2; }).length, 166);
+  check('real feed future items are the 105 PPM Nov 24 items', realWeekly.items.filter(function (it) { return it.list_date > '2026-11-23'; }).length, 105);
+  check('real feed PennyRecon note says 166 of 304', (realWeekly.sources.filter(function (s) { return s.name.indexOf('PennyRecon') !== -1; })[0].note || '').indexOf('166 of 304') !== -1, true);
+  check('real feed has no Freebie Guy HD source', realWeekly.sources.some(function (s) { return s.name.indexOf('Freebie Guy — Home Depot') !== -1; }), false);
+  check('real feed image coverage is 373/660', realWeekly.items.filter(function (it) { return !!it.image; }).length, 373);
 
   console.log(failures === 0 ? 'ALL PASS' : failures + ' FAILURES');
   process.exit(failures === 0 ? 0 : 1);
