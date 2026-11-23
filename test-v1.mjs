@@ -137,7 +137,7 @@ const PA = sandbox.window.PennyAlerts;
     items: [
       { name: pennies[0].name, upc: pennies[0].upc, price: '$0.01', was: '', retailer: 'dollar-general', department: 'Penny', source: 'thefreebieguy.com', first_seen: '2026-11-22', valid_to: '', url: '', image: '' },
       { name: 'Weekly Test HD Screw', upc: '', price: '$0.01', was: '$12.98', retailer: 'home-depot', department: 'Penny', source: 'pennyrecon.com', first_seen: '2026-11-22', valid_to: '', url: 'https://www.pennyrecon.com/item/123/', image: 'https://images.thdstatic.com/productImages/test/svn/test-screw-64_600.jpg' },
-      { name: 'Weekly Test Charger', upc: '', price: '$39.99', was: '', retailer: 'amazon', department: 'Electronics', source: 'slickdeals.net', first_seen: '2026-11-22', valid_to: '2026-11-22', url: '', image: '' }
+      { name: 'Weekly Test Charger', upc: '', price: '$39.99', was: '', retailer: 'amazon', department: 'Electronics', source: 'slickdeals.net', first_seen: '2026-11-22', valid_to: '2099-01-01', url: '', image: '' }
     ]
   };
   const wnorm = PA.normalizeWeekly(weeklyFixture);
@@ -164,8 +164,8 @@ const PA = sandbox.window.PennyAlerts;
   check('briefing bar mentions weekly feed date', els['briefingBar'].textContent.indexOf('2026-11-22') !== -1, true);
   check('weekly sources rendered', els['weeklySources'].innerHTML.indexOf('Freebie Guy') !== -1, true);
   check('weekly sources show link-only', els['weeklySources'].innerHTML.indexOf('link only') !== -1, true);
-  check('stale bar shown (briefing 50 days old)', els['staleBar'].hidden, false);
-  check('stale bar mentions days old', els['staleBar'].textContent.indexOf('50 days old') !== -1, true);
+  check('stale bar shown (briefing 50+ days old)', els['staleBar'].hidden, false);
+  check('stale bar mentions days old', els['staleBar'].textContent.indexOf(PA.daysSince('2026-10-03', PA._state.today) + ' days old') !== -1, true);
   check('stale bar mentions weekly feed', els['staleBar'].textContent.indexOf('weekly feed') !== -1, true);
   check('deal list rendered cards', (els['dealList'].innerHTML.match(/<article/g) || []).length > 0, true);
   check('retailer filter populated', els['retailerFilter'].options.length > 5, true);
@@ -223,7 +223,7 @@ const PA = sandbox.window.PennyAlerts;
   check('pushSupported false in stub env (no serviceWorker)', PA.pushSupported(), false);
   check('supabase URL is the shared bulk-finder project', PA.SUPABASE_URL, 'https://xwekulsnfarjibawqqih.supabase.co');
   const swText = fs.readFileSync('/home/hatch/workspace/penny-alerts/sw.js', 'utf8');
-  check('sw cache bumped to v4', swText.indexOf("penny-alerts-v4") !== -1, true);
+  check('sw cache bumped to v5', swText.indexOf("penny-alerts-v5") !== -1, true);
   check('sw has push handler', swText.indexOf("addEventListener('push'") !== -1, true);
   check('sw push shows a notification', swText.indexOf('showNotification') !== -1, true);
   check('sw has notificationclick handler', swText.indexOf("addEventListener('notificationclick'") !== -1, true);
@@ -258,14 +258,17 @@ const PA = sandbox.window.PennyAlerts;
   const dryImg = execFileSync('python3', [senderPath, '--dry-run', '--feed', '/tmp/pa-sender-img.json', '--old-feed', '/tmp/pa-sender-old.json'], { encoding: 'utf8' });
   check('sender: image-only change is not a new item', dryImg.indexOf('no new items') !== -1, true);
 
-  /* 11. deal photos (v4) */
+  /* 11. deal photos (v5) */
   const withImg = PA.thumbHtml({ dept: 'Penny', image: 'https://images.thdstatic.com/productImages/test/svn/test-screw-64_600.jpg' });
   check('thumb with image renders lazy img', withImg.indexOf('<img src="https://images.thdstatic.com/productImages/test/svn/test-screw-64_600.jpg" alt="" loading="lazy"') !== -1, true);
   check('thumb img has onerror fallback', withImg.indexOf('onerror="this.remove()"') !== -1, true);
   const noImg = PA.thumbHtml({ dept: 'Penny', image: '' });
   check('thumb without image renders placeholder', noImg.indexOf('deal-thumb-ph') !== -1, true);
   check('thumb without image has no img tag', noImg.indexOf('<img') === -1, true);
-  check('thumb placeholder shows dept initial', noImg.indexOf('>P<') !== -1, true);
+  check('thumb placeholder is a glyph, not a big letter', noImg.indexOf('<svg') !== -1 && noImg.indexOf('>P<') === -1, true);
+  check('thumb placeholder names the department', noImg.indexOf('deal-thumb-ph-label') !== -1 && noImg.indexOf('>Penny<') !== -1, true);
+  const noImgElec = PA.thumbHtml({ dept: 'Electronics', image: '' });
+  check('thumb placeholder label follows dept', noImgElec.indexOf('>Electronics<') !== -1, true);
   const dealHtml = els['dealList'].innerHTML;
   check('rendered cards include the fixture HD image', dealHtml.indexOf('https://images.thdstatic.com/productImages/test/svn/test-screw-64_600.jpg') !== -1, true);
   check('rendered cards use lazy loading', dealHtml.indexOf('loading="lazy"') !== -1, true);
@@ -298,6 +301,32 @@ const PA = sandbox.window.PennyAlerts;
     console.log('COVERAGE ' + s + ': ' + bySrc[s].img + '/' + bySrc[s].total);
   });
   check('real feed has some images', imgCount > 0, true);
+
+  /* 12. seller links (v5) — on the card, no modal anywhere */
+  const slWm = PA.sellerLinks({ storeId: 'wm-ct', upc: '012345678905', name: 'Test Item' });
+  check('seller links: Google Shopping by UPC', slWm[0].url, 'https://www.google.com/search?tbm=shop&q=012345678905');
+  check('seller links: Google label is a search', slWm[0].label, 'Google Shopping search');
+  check('seller links: Walmart link for wm-ct + UPC', slWm[1].url, 'https://www.walmart.com/search?q=012345678905');
+  check('seller links: Walmart label says search', slWm[1].label, 'Search Walmart for this UPC');
+  const slTg = PA.sellerLinks({ storeId: 'target', upc: '012345678905', name: 'Test Item' });
+  check('seller links: Target link', slTg[1].url, 'https://www.target.com/s?searchTerm=012345678905');
+  const slHd = PA.sellerLinks({ storeId: 'home-depot', upc: '', name: 'Test Screw' });
+  check('seller links: no retailer link without UPC', slHd.length, 1);
+  const slHdUpc = PA.sellerLinks({ storeId: 'home-depot', upc: '123456', name: 'Test Screw' });
+  check('seller links: Home Depot link', slHdUpc[1].url, 'https://www.homedepot.com/s/123456');
+  const slDg = PA.sellerLinks({ storeId: 'dollar-general', upc: '012345678905', name: 'Test Item' });
+  check('seller links: NO Dollar General link (pattern unconfirmed)', slDg.length, 1);
+  const slNoUpc = PA.sellerLinks({ storeId: 'target', upc: '', name: 'Blue Widget 12oz' });
+  check('seller links: Google Shopping by name when no UPC', slNoUpc[0].url, 'https://www.google.com/search?tbm=shop&q=Blue%20Widget%2012oz');
+  check('seller links: no retailer link for unknown retailer', PA.sellerLinks({ storeId: 'amazon', upc: '012345678905', name: 'X' }).length, 1);
+  check('seller links: no buy language anywhere', JSON.stringify([].concat(slWm, slTg, slHdUpc)).toLowerCase().indexOf('buy') === -1, true);
+  check('rendered cards include Google Shopping links', dealHtml.indexOf('google.com/search?tbm=shop') !== -1, true);
+  const appText = fs.readFileSync('/home/hatch/workspace/penny-alerts/app.js', 'utf8');
+  const htmlText = fs.readFileSync('/home/hatch/workspace/penny-alerts/index.html', 'utf8');
+  const cssText = fs.readFileSync('/home/hatch/workspace/penny-alerts/styles.css', 'utf8');
+  check('no modal code in app.js', appText.toLowerCase().indexOf('modal') === -1, true);
+  check('no modal markup in index.html', htmlText.toLowerCase().indexOf('modal') === -1, true);
+  check('no modal styles in styles.css', cssText.toLowerCase().indexOf('modal') === -1, true);
 
   console.log(failures === 0 ? 'ALL PASS' : failures + ' FAILURES');
   process.exit(failures === 0 ? 0 : 1);

@@ -19,12 +19,15 @@
  * migration + workflow + secrets are in place, alerts stay honestly
  * labelled: "checked when you open the app."
  *
- * v4: automatic deal photos. The parser records an `image` URL per item
- * (list-page photos, Open Food Facts, optionally UPCitemdb — see
- * scripts/parse-lists.py and README.md). Cards show a lazy thumbnail;
- * items with no photo anywhere get a clean placeholder tile. The <img>
- * URLs come from the feed only — the app makes no new fetch()/XHR to any
- * retailer. A failed image hides itself and reveals the placeholder.
+ * v5: more deal photos — Open Products Facts enrichment and og:image
+ * from per-item pages (Slickdeals), and a nicer no-photo tile: a small
+ * generic product glyph plus the department name, instead of one big
+ * initial letter. Plus seller links on every card: Google Shopping
+ * search (by UPC, else by name) and a retailer search link where the
+ * retailer + UPC are known and the pattern was verified live — Walmart,
+ * Target, Home Depot (Dollar General's pattern could not be confirmed,
+ * so no DG link). Still no fabricated images — the tile is the honest
+ * "no photo anywhere" state.
  */
 
 var BRIEFING_URL = 'https://rocketshon.github.io/penny-finder-backend/briefings/latest.json';
@@ -339,6 +342,39 @@ function checkLinks(deal) {
   }
   return out;
 }
+/* Seller links (v5). Plain <a> links the USER taps — they open in the
+ * user's own browser; nothing is embedded (retailers block framing) and
+ * the app makes no fetch to any seller. Google Shopping is the primary
+ * search (by UPC when known, else by name). A retailer search link is
+ * added only when the retailer is known AND the item has a UPC, and only
+ * for patterns verified live 2026-11-22: Walmart (its own search form is
+ * action=/search with input name=q), Target (live results page, UPC in
+ * body), Home Depot (live results page). Dollar General is NOT included:
+ * its search URL could not be confirmed (403 on /search?query=, 404 on
+ * the Magento-style /catalogsearch/result/?q=), so no DG link is rendered.
+ * Labels say "search", never "buy" — a search link is not a verified
+ * price or a confirmed listing. */
+var SELLER_SEARCH = {
+  'wm-ct': { label: 'Walmart', base: 'https://www.walmart.com/search?q=' },
+  'walmart': { label: 'Walmart', base: 'https://www.walmart.com/search?q=' },
+  'target': { label: 'Target', base: 'https://www.target.com/s?searchTerm=' },
+  'home-depot': { label: 'Home Depot', base: 'https://www.homedepot.com/s/' }
+};
+function sellerLinks(deal) {
+  var out = [];
+  var q = deal.upc || deal.name || '';
+  out.push({ label: 'Google Shopping search', url: 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(q) });
+  if (deal.upc) {
+    var s = SELLER_SEARCH[deal.storeId];
+    if (s) out.push({ label: 'Search ' + s.label + ' for this UPC', url: s.base + encodeURIComponent(deal.upc) });
+  }
+  return out;
+}
+function sellerLinksHtml(d) {
+  return sellerLinks(d).map(function (l) {
+    return '<a class="btn small" href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>';
+  }).join(' ');
+}
 
 /* ---------------- background push (v3) ---------------- */
 function b64encode(bin) {
@@ -377,14 +413,16 @@ function pushSupported() {
 
 /* ---------------- rendering ---------------- */
 function $(id) { return (typeof document !== 'undefined') ? document.getElementById(id) : null; }
-/* Deal photo (v4). The placeholder tile sits underneath the <img>; if the
+/* Deal photo (v5). The placeholder tile sits underneath the <img>; if the
  * image fails to load, onerror removes it and the placeholder shows. The
- * letter is the department initial — an honest "no photo" state, never a
- * fabricated image. */
+ * placeholder is a small generic product glyph plus the department name —
+ * an honest "no photo" state, never a fabricated image. */
 function thumbHtml(d) {
-  var letter = ((d.dept || 'General').charAt(0) || 'P').toUpperCase();
+  var dept = d.dept || 'General';
   var img = d.image ? '<img src="' + esc(d.image) + '" alt="" loading="lazy" onerror="this.remove()">' : '';
-  return '<div class="deal-thumb"><span class="deal-thumb-ph">' + esc(letter) + '</span>' + img + '</div>';
+  return '<div class="deal-thumb"><span class="deal-thumb-ph">' +
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5V8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 8l9 5 9-5M12 13v8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>' +
+    '<span class="deal-thumb-ph-label">' + esc(dept) + '</span></span>' + img + '</div>';
 }
 function dealCard(d) {
   var isW = !!state.watch[d.id];
@@ -408,7 +446,7 @@ function dealCard(d) {
     '<div class="deal-actions">' +
       '<button type="button" class="btn" data-action="watch" data-id="' + esc(d.id) + '">' + (isW ? '✓ Watching' : '＋ Watch') + '</button>' +
       '<button type="button" class="btn quiet" data-action="ignore" data-id="' + esc(d.id) + '">Don’t show again</button>' +
-      links +
+      links + ' ' + sellerLinksHtml(d) +
     '</div></div></div></article>';
 }
 function renderDeals() {
@@ -474,7 +512,7 @@ function watchCard(d) {
       cb('shelf', 'Found it on the shelf') +
       cb('register', 'Register rang the deal price') +
       '<p class="hint">If the register rings full price or locks up, the deal isn’t real at this store. A manager can refuse a penny sale.</p></div>' +
-    '<div class="deal-actions">' + links +
+    '<div class="deal-actions">' + links + ' ' + sellerLinksHtml(d) +
       '<button type="button" class="btn quiet" data-action="unwatch" data-id="' + esc(d.id) + '">Stop watching</button></div>' +
     '</div></div></article>';
 }
@@ -874,6 +912,7 @@ if (typeof window !== 'undefined') {
     daysSince: daysSince,
     prettyStore: prettyStore,
     checkLinks: checkLinks,
+    sellerLinks: sellerLinks,
     thumbHtml: thumbHtml,
     STORES: STORES,
     SOURCE_LINKS: SOURCE_LINKS,

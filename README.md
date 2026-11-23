@@ -32,8 +32,15 @@ phone's home screen (it's a PWA).
   alerts off (the sender then prunes the dead subscription).
 - **Deal photos**: every home-page card shows a thumbnail of the item
   (lazy-loaded). Items with no photo anywhere get a clean placeholder
-  tile with the department initial — never a fabricated image. See
-  "Deal photos — where they come from" below.
+  tile — a small product glyph plus the department name — never a
+  fabricated image. See "Deal photos — where they come from" below.
+- **Seller links**: every card has a Google Shopping search for the
+  item (by UPC when known, else by name) and, where the retailer is
+  known and the item has a UPC, a search link for that retailer
+  (Walmart, Target, Home Depot — patterns verified live; Dollar
+  General's could not be confirmed, so no DG link). Labels say
+  "search", never "buy". Tapping one opens the seller in your browser;
+  nothing is embedded.
 
 ## Deal photos — where they come from
 
@@ -47,25 +54,41 @@ this priority order:
    Lady, PennyPinchinMom and FreeStuffFinder carry no per-item photos
    (KCL and FreeStuffFinder embed one generic store photo above their
    lists — the parser drops shared images like that on purpose).
-   Slickdeals frontpage RSS carries no thumbnails.
 2. **Previous-feed cache** — if a UPC already had a photo in the last
    feed, it is reused and never looked up again.
 3. **Open Food Facts** (free, no key) — food/grocery UPCs only, looked
    up at ~1/sec, capped at 150 UPCs per run (env
    `OFF_LOOKUPS_PER_RUN`); candidates rotate daily so every UPC gets
    a turn over successive runs.
-4. **UPCitemdb** — only if a paid key is set (see below).
+4. **Open Products Facts** (free, no key) — the general-products
+   sibling of Open Food Facts, same API shape, same caps (env
+   `OPF_LOOKUPS_PER_RUN`). Its hit rate on these lists is low
+   (4 of 353 UPCs on the 2026-11-22 sweep) but it costs nothing.
+   Open Beauty Facts was tested on the same sample and matched 0 of
+   15, so it is not used.
+5. **og:image from the item's own page** — for items that carry a
+   `url` but no UPC (Slickdeals deal pages: the RSS has no thumbnails,
+   but each deal page has an og:image). Capped at 40 pages per run
+   (env `OG_LOOKUPS_PER_RUN`), ~1/sec, one retry on transient errors.
+6. **UPCitemdb** — only if a paid key is set (see below).
 
-Coverage is partial by design — measured on the 2026-11-22 run
-(683 items): **280/683 (40%) have a photo**. Per source:
-PennyRecon 166/166, RetailShout 50/50, FreeStuffFinder 35/180,
-Krazy Coupon Lady 17/105, Freebie Guy 11/52, PennyPinchinMom 1/105,
-Slickdeals 0/25. The gaps are structural, not bugs: Slickdeals
-carries no thumbnails and no UPCs; the DG lists carry no per-item
-photos, so only their food UPCs get one (Open Food Facts is
-food-only — 64 of 442 UPCs matched); PennyPinchinMom's list is
-almost entirely non-food UPCs Open Food Facts doesn't know. The
-remaining 403 items show the placeholder tile.
+Coverage is partial by design — measured on the 2026-11-22 full sweep
+(683 items): **334/683 (48%) have a photo**. Per source:
+PennyRecon 166/166, RetailShout 50/50, Slickdeals 25/25,
+FreeStuffFinder 48/180, Krazy Coupon Lady 23/105, Freebie Guy 17/52,
+PennyPinchinMom 5/105. The gaps are structural, not bugs: the DG
+lists are text tables with no per-item photos and no per-item links,
+so only their UPCs that a free product database knows get a photo
+(Open Food Facts matched 89 of 442 UPCs in total, Open Products Facts
+4 more). The remaining 349 items show the placeholder tile.
+
+Diagnosis, verified 2026-11-22: the placeholders are **not** broken
+image loads. Every photo host in the feed was probed with a
+browser-like request (browser user agent + the app page as Referer):
+`images.thdstatic.com` 8/8 loaded, `images.openfoodfacts.org` 8/8,
+`retailshout.com` 8/8, `slickdeals.net` 3/3,
+`images.openproductsfacts.org` 3/3 — no hotlink protection anywhere.
+The 349 letter tiles are items with no image in the feed at all.
 
 One honest note: PennyRecon's product photos live on Home Depot's
 image CDN (`images.thdstatic.com`) — that is the URL PennyRecon
@@ -73,9 +96,33 @@ itself embeds on its own list pages, and the parser records exactly
 that URL. The app never fetches or scrapes any retailer site: it makes
 no `fetch()`/XHR call to any retailer domain, and the `<img>` tags
 only load URLs already recorded in the feed. The only hosts images
-come from are the list authors' own hosts (retailshout.com),
-`images.thdstatic.com` (via PennyRecon), `images.openfoodfacts.org`,
-and `f.wishabi.net` (Penny Hunter's briefing images).
+come from are the list authors' own hosts (retailshout.com,
+slickdeals.net), `images.thdstatic.com` (via PennyRecon),
+`images.openfoodfacts.org`, `images.openproductsfacts.org`, and
+`f.wishabi.net` (Penny Hunter's briefing images). Joseph decided
+2026-11-22 to keep the Home Depot photos: dropping them would cut
+coverage from 48% to ~24%.
+
+### Optional: eBay Browse API by GTIN (free — the best keyed option)
+
+The eBay Browse API is free (default 5,000 calls/day) and searches
+listings by GTIN, returning each result's photo. It needs a free eBay
+developer account (App ID / client ID + client secret) — no credit
+card, but production access may need eBay Partner Network signup and
+a Growth Check. It is NOT wired up yet: the parser has no eBay code,
+and no key exists. If Joseph ever wants it: create the app at
+developer.ebay.com, add GitHub Secrets `EBAY_CLIENT_ID` and
+`EBAY_CLIENT_SECRET`, and the parser would get an app token (client
+credentials grant) and search by GTIN for UPCs still imageless. Two
+honest caveats: results are live eBay listings, so the first photo
+may be a used item or a close variant rather than the exact product;
+and the 5,000/day cap is shared across the whole app. This is the
+only free keyed route worth doing — go-upc ($74.95/mo, key required)
+and Barcode Lookup ($99/mo, key required) are paid and not
+recommended, and UPCitemdb's free keyless trial is dead on shared IPs
+(see below).
+
+### Optional: UPCitemdb (paid, $99/mo — almost certainly not worth it)
 
 ### Optional: UPCitemdb (paid, $99/mo — almost certainly not worth it)
 
@@ -104,7 +151,33 @@ The parser caps UPCitemdb at 30 lookups per run (env
 `UPCITEMDB_LOOKUPS_PER_RUN`) and stops on a 429, so a bad key or an
 exhausted quota can never fail the feed job.
 
-## Background push — how it works + one-time setup
+## Seller links — where they go
+
+Every deal card carries seller links — plain `<a>` tags, no popup, no
+embedded page (retailers block framing, so the modal idea was dropped;
+tapping a link opens the seller in your browser):
+
+- **Google Shopping search** (every card): `google.com/search?tbm=shop&q=<UPC>`
+  when the item has a UPC, else `q=<item name, URL-encoded>`.
+- **Retailer search** (only when the retailer is known AND the item
+  has a UPC): Walmart `walmart.com/search?q=<UPC>`, Target
+  `target.com/s?searchTerm=<UPC>`, Home Depot `homedepot.com/s/<UPC>`.
+
+All three retailer patterns were verified live 2026-11-22: Walmart's
+own homepage search form is `action=/search` with input `name=q`
+(the results page itself is behind a PerimeterX wall for automated
+fetches, so results were confirmed by the form, not by reading them);
+Target returned a live results page with the UPC in it; Home Depot
+returned a live "Search Results for <UPC>" page. **Dollar General
+is not included**: its search URL could not be confirmed
+(`dollargeneral.com/search?query=` → 403, then 404 in a browser
+fetch; the Magento-style `/catalogsearch/result/?q=` → 404), so no
+DG link is rendered rather than a guessed one. Labels say "search",
+never "buy" — a search link is a starting point, not a verified price
+or a confirmed listing, and walmart.com search results in particular
+could not be read by any automated fetch (PerimeterX "Robot or
+human?" wall); a tap opens the page in your own browser, which is a
+different thing from our fetch.
 
 The app subscribes this phone with the Web Push API (VAPID public key in
 `app.js` — public, safe to commit) and stores the subscription in
@@ -194,8 +267,9 @@ previous good items; the Lists & Sources tab shows each source's status.
 ## Files
 
 `index.html`, `app.js`, `styles.css`, `manifest.json`, `sw.js`
-(service-worker cache `penny-alerts-v4`), `icon.svg`, `README.md`,
+(service-worker cache `penny-alerts-v5`), `icon.svg`, `README.md`,
 `scripts/parse-lists.py` + `scripts/send-push.py` +
+`scripts/test-parse-images.py` +
 `scripts/requirements.txt` (the weekly-feed parser and the push sender),
 `feed/weekly.json` (generated daily by the parser; committed when it
 changes), `supabase/migrations/20261122153000_push_subscriptions.sql`

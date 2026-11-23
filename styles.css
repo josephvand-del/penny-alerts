@@ -103,11 +103,25 @@ main { padding: 12px 12px 40px; max-width: 860px; margin: 0 auto; }
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  font-weight: 800;
-  color: #14532d;
+  gap: 3px;
+  color: #5b7a63;
+}
+.deal-thumb-ph svg {
+  width: 26px;
+  height: 26px;
+}
+.deal-thumb-ph-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: #6b7a6e;
+  text-align: center;
+  line-height: 1.15;
+  padding: 0 3px;
 }
 .deal-thumb img {
   position: absolute;

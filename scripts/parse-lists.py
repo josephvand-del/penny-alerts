@@ -161,6 +161,70 @@ def nearest_image(el, base_url: str = "") -> str:
     return ""
 
 
+def extract_og_image(html_text: str, base_url: str = "") -> str:
+    """og:image from a page (Slickdeals deal pages, any per-item page).
+    Fallback: the largest sensible <img> (>=200px on a side, by width/
+    height attrs or a WxH size in the URL), skipping logos/icons/pixels.
+    Returns a validated absolute URL or ''."""
+    try:
+        tree = HTMLParser(html_text)
+    except Exception:
+        return ""
+    for sel in ('meta[property="og:image"]', 'meta[property="og:image:url"]',
+                'meta[name="og:image"]'):
+        el = tree.css_first(sel)
+        if el is not None:
+            url = clean_image_url((el.attributes or {}).get("content", ""), base_url)
+            if url:
+                return url
+    skip = ("logo", "icon", "pixel", "spacer", "avatar", "1x1", "tracking")
+    best_url, best_area = "", 0
+    for img in tree.css("img"):
+        attrs = img.attributes or {}
+        src = attrs.get("src") or attrs.get("data-src") or attrs.get("data-lazy-src") or ""
+        if not src or src.startswith("data:"):
+            continue
+        low = src.lower()
+        if any(s in low for s in skip):
+            continue
+        w = h = 0
+        try:
+            w = int(attrs.get("width") or 0)
+            h = int(attrs.get("height") or 0)
+        except ValueError:
+            pass
+        if not (w and h):
+            m = re.search(r"(\d{3,4})x(\d{3,4})", src)
+            if m:
+                w, h = int(m.group(1)), int(m.group(2))
+        if w >= 200 and h >= 200 and w * h > best_area:
+            url = clean_image_url(src, base_url)
+            if url:
+                best_url, best_area = url, w * h
+    return best_url
+
+
+def og_image_for_url(client: httpx.Client, url: str) -> str:
+    """Fetch a per-item page and extract its og:image (or largest img).
+    One retry on transient transport errors; never raises."""
+    for attempt in range(2):
+        try:
+            resp = client.get(url, timeout=20.0, follow_redirects=True,
+                              headers={"Referer": urljoin(url, "/")})
+        except httpx.HTTPError:
+            if attempt == 0:
+                time.sleep(1.0)
+                continue
+            return ""
+        if resp.status_code != 200:
+            return ""
+        body = resp.text or ""
+        if any(m in body for m in CF_MARKERS):
+            return ""
+        return extract_og_image(body, url)
+    return ""
+
+
 def safe_get(client: httpx.Client, url: str, timeout: float = 25.0):
     """GET a URL. Returns (text_or_None, error_or_None)."""
     try:
@@ -514,6 +578,7 @@ def parse_slickdeals(raw: str):
 # ----------------------------------------------------------------- images
 # Image enrichment for items whose list page carries no photo.
 # Priority per item: list-page photo > previous-feed cache > Open Food Facts
+# > Open Products Facts > og:image from the item's own page (Slickdeals)
 # > UPCitemdb (paid key only). The previous feed is the image cache — no
 # new committed files, and a UPC is looked up at most once per rotation.
 OFF_BASE = "https://world.openfoodfacts.org/api/v2/product/"
@@ -560,6 +625,30 @@ def off_image(client: httpx.Client, upc: str) -> str:
         return ""
     img = ((data.get("product") or {}).get("image_url") or "").strip()
     return clean_image_url(img, OFF_BASE)
+
+
+def opf_image(client: httpx.Client, upc: str) -> str:
+    """Open Products Facts (free, no key, general products — the
+    non-food sibling of Open Food Facts). Same API shape as off_image.
+    Returns an image URL or ''. Never raises. Measured 2026-11-22: 3/15
+    on a beauty/household sample (all one Huggies product family);
+    Open Beauty Facts scored 0/15 on the same sample, so it is not used."""
+    try:
+        resp = client.get("https://world.openproductsfacts.org/api/v2/product/"
+                          + upc + ".json", timeout=15.0,
+                          headers={"User-Agent": OFF_UA})
+    except httpx.HTTPError:
+        return ""
+    if resp.status_code != 200:
+        return ""
+    try:
+        data = resp.json()
+    except Exception:
+        return ""
+    if data.get("status") != 1:
+        return ""
+    img = ((data.get("product") or {}).get("image_url") or "").strip()
+    return clean_image_url(img, "https://world.openproductsfacts.org/")
 
 
 def upcdb_image(client: httpx.Client, upc: str, key: str):
@@ -758,6 +847,39 @@ def main() -> int:
             if i < len(need) - 1:
                 time.sleep(1.0)
         print(f"openfoodfacts: {off_hits}/{len(need)} UPCs got an image")
+
+        # Open Products Facts enrichment (free, no key) for UPCs still
+        # imageless — the non-food sibling of Open Food Facts.
+        opf_cap = int(os.environ.get("OPF_LOOKUPS_PER_RUN", "150"))
+        need_opf = sorted({it["upc"] for it in deduped
+                           if it.get("upc") and not it.get("image")})
+        need_opf = rotate_candidates(need_opf, today)[:opf_cap]
+        opf_hits = 0
+        for i, upc in enumerate(need_opf):
+            img = opf_image(client, upc)
+            if img:
+                opf_hits += 1
+                for it in deduped:
+                    if it.get("upc") == upc and not it.get("image"):
+                        it["image"] = img
+            if i < len(need_opf) - 1:
+                time.sleep(1.0)
+        print(f"openproductsfacts: {opf_hits}/{len(need_opf)} UPCs got an image")
+
+        # og:image enrichment for items with a per-item page but no image
+        # (Slickdeals deal pages — RSS carries no thumbnails and the
+        # items have no UPCs, so this is their only photo source).
+        og_cap = int(os.environ.get("OG_LOOKUPS_PER_RUN", "40"))
+        need_og = [it for it in deduped if it.get("url") and not it.get("image")][:og_cap]
+        og_hits = 0
+        for i, it in enumerate(need_og):
+            img = og_image_for_url(client, it["url"])
+            if img:
+                og_hits += 1
+                it["image"] = img
+            if i < len(need_og) - 1:
+                time.sleep(1.0)
+        print(f"og:image: {og_hits}/{len(need_og)} linked items got an image")
 
         # UPCitemdb enrichment, paid key only. Without a key this is skipped
         # entirely (the keyless trial is unusable from shared IPs — see

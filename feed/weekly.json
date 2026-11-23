@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-11-22T23:32:52+00:00",
+  "generated_at": "2026-11-23T00:03:13+00:00",
   "items": [
     {
       "department": "Tools",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/2/9/8/1/5/7/1/1/450x450/22520421.thumb",
       "name": "1000-Pc The Magic Puzzle Company The Drippy Trip Series 5 Jigsaw Puzzle $12.50",
       "price": "$12.50",
       "retailer": "amazon",
@@ -15,9 +15,35 @@
       "was": ""
     },
     {
+      "department": "General",
+      "first_seen": "2026-11-22",
+      "image": "https://slickdeals.net/attachment/3/5/6/4/5/1/8/7/450x450/22514925.thumb",
+      "name": "12-Pk 10.5-Oz Pace Mild Nacho Cheese Sauce $11.30 w/ S&S",
+      "price": "$11.30",
+      "retailer": "amazon",
+      "source": "slickdeals.net",
+      "upc": "",
+      "url": "https://slickdeals.net/f/20366655-12-pack-10-5-oz-pace-mild-nacho-cheese-sauce-11-29-0-94-each-w-s-s-free-shipping-w-prime-or-on-35",
+      "valid_to": "2026-11-22",
+      "was": "$16.13"
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-22",
+      "image": "https://slickdeals.net/attachment/5/1/4/8/2/1/3/450x450/22527450.thumb",
+      "name": "2-Pk 1Kg eSUN PLA Basic 1.75mm 3D Printer Filament (Red + White) $17",
+      "price": "$16.99",
+      "retailer": "amazon",
+      "source": "slickdeals.net",
+      "upc": "",
+      "url": "https://slickdeals.net/f/20346468-2-pack-1kg-esun-pla-basic-1-75mm-3d-printer-filament-fire-engine-red-cold-white-16-99-free-shipping-w-prime-or-on-35",
+      "valid_to": "2026-11-22",
+      "was": ""
+    },
+    {
       "department": "Electronics",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/3/0/3/6/3/4/6/450x450/22526319.thumb",
       "name": "256GB Motorola Moto G Stylus 5G Smartphone (2025 Model, Unlocked) $200 + Free S&H",
       "price": "$199.99",
       "retailer": "amazon",
@@ -30,7 +56,7 @@
     {
       "department": "Household",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/1/1/7/1/5/2/7/450x450/22511487.thumb",
       "name": "51.5-Oz Dawn Platinum Plus PowerSuds Liquid Dish Soap Refill 3 for $22.40 w/ S&S",
       "price": "$22.36",
       "retailer": "amazon",
@@ -43,7 +69,7 @@
     {
       "department": "General",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/1/5/5/7/3/6/2/450x450/22524510.thumb",
       "name": "55-Pc BePuzzled Hedgehog Crystal 3D Brain Teaser Puzzle (Level 2) $4.65",
       "price": "$4.64",
       "retailer": "amazon",
@@ -54,22 +80,9 @@
       "was": "$35.00"
     },
     {
-      "department": "Toys & Games",
-      "first_seen": "2026-11-22",
-      "image": "",
-      "name": "701-Pc LEGO Star Wars: The Mandalorian & Grogu Anzellan Starship Building Toy $37.20 + Free S&H",
-      "price": "$37.19",
-      "retailer": "amazon",
-      "source": "slickdeals.net",
-      "upc": "",
-      "url": "https://slickdeals.net/f/20369160-701-pcs-lego-star-wars-anzellan-starship-75445-37-19-free-s-h-at-amazon",
-      "valid_to": "2026-11-22",
-      "was": ""
-    },
-    {
       "department": "General",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/8/6/7/1/9/450x450/22525119.thumb",
       "name": "8.5-Oz Maple Grove Farms Pure Maple Syrup $4.30 w/ S&S",
       "price": "$4.30",
       "retailer": "amazon",
@@ -82,7 +95,7 @@
     {
       "department": "General",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/2/9/8/1/5/7/1/1/450x450/22522125.thumb",
       "name": "BePuzzled Enigma Hanayama Metal Brainteaser Puzzle (Mensa Rated Level 6) $5.45",
       "price": "$5.44",
       "retailer": "amazon",
@@ -95,7 +108,20 @@
     {
       "department": "General",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/3/8/8/1/8/1/450x450/22527465.thumb",
+      "name": "DREAME D30 Ultra CE Robot Vacuum & Mop $350 + Free S&H",
+      "price": "$350.00",
+      "retailer": "amazon",
+      "source": "slickdeals.net",
+      "upc": "",
+      "url": "https://slickdeals.net/f/20336979-349-99-dreame-d30-ultra-ce-robot-vacuum-and-mop-25-000pa-powerful-suction-at-amazon",
+      "valid_to": "2026-11-22",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-22",
+      "image": "https://slickdeals.net/attachment/1/1/7/1/5/2/7/450x450/22517760.thumb",
       "name": "Final Fantasy VII Rebirth Exclusive Amazon Edition (PS5) $15",
       "price": "$14.99",
       "retailer": "amazon",
@@ -108,7 +134,7 @@
     {
       "department": "Toys & Games",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/2/9/8/1/5/7/1/1/450x450/22523073.thumb",
       "name": "Hasbro Connect 4 Game (2025 Edition) $5",
       "price": "$5.00",
       "retailer": "amazon",
@@ -121,7 +147,7 @@
     {
       "department": "Toys & Games",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/2/9/8/1/5/7/1/1/450x450/22520112.thumb",
       "name": "Hasbro Trouble Board Game $5",
       "price": "$5.00",
       "retailer": "amazon",
@@ -134,7 +160,20 @@
     {
       "department": "General",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/3/0/3/6/3/4/6/450x450/22527399.thumb",
+      "name": "MANSPOT Manscape Rechargeable Wet/Dry Body Hair Trimmer w/ Guards (Black) $20.40",
+      "price": "$20.37",
+      "retailer": "amazon",
+      "source": "slickdeals.net",
+      "upc": "",
+      "url": "https://slickdeals.net/f/20341371-manspot-manscape-rechargeable-wet-dry-body-hair-trimmer-w-guards-black-20-40",
+      "valid_to": "2026-11-22",
+      "was": "$31.34"
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-22",
+      "image": "https://slickdeals.net/attachment/2/9/8/1/5/7/1/1/450x450/22521489.thumb",
       "name": "Metal Gear Solid: Master Collection Vol. 2 (Switch 2) $30",
       "price": "$29.99",
       "retailer": "amazon",
@@ -147,7 +186,7 @@
     {
       "department": "General",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/1/0/6/6/9/4/450x450/22526172.thumb",
       "name": "Olight iMini 2 50-Lumen Rechargeable EDC Keychain Flashlight (Various) $12",
       "price": "$11.99",
       "retailer": "amazon",
@@ -155,38 +194,12 @@
       "upc": "",
       "url": "https://slickdeals.net/f/20340264-olight-imini-2-50-lumen-rechargeable-edc-keychain-flashlight-dream-blue-11-99-free-shipping-w-prime-or-on-35",
       "valid_to": "2026-11-22",
-      "was": "$35.00"
+      "was": ""
     },
     {
       "department": "General",
       "first_seen": "2026-11-22",
-      "image": "",
-      "name": "Prime Members: ORICO 3-Port USB 3.0 Type-C to 1x USB-C + 2x USB-A Hub $4.75 & More + Free S&H",
-      "price": "$4.74",
-      "retailer": "amazon",
-      "source": "slickdeals.net",
-      "upc": "",
-      "url": "https://slickdeals.net/f/20351940-orico-3-port-usb-3-1-type-c-to-usb-3-0-hub-adapter-4-74-amazon",
-      "valid_to": "2026-11-22",
-      "was": "$35.00"
-    },
-    {
-      "department": "Clothing",
-      "first_seen": "2026-11-22",
-      "image": "",
-      "name": "Steve Madden Men's Fenta Casual Lightweight Walking Shoes (Various) from $18.35 [Limited Sizes]",
-      "price": "$18.35",
-      "retailer": "amazon",
-      "source": "slickdeals.net",
-      "upc": "",
-      "url": "https://slickdeals.net/f/20370084-steve-madden-fenta-men-s-lightweight-casual-sneakers-walking-shoes-black-size-10-16-at-amazon",
-      "valid_to": "2026-11-22",
-      "was": "$35.00"
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/3/8/8/1/8/1/450x450/22526214.thumb",
       "name": "VIOFO Dash Cams: A229 Plus Dual STARVIS 2 Sensors & Voice Control $160 & More + Free S&H",
       "price": "$160.00",
       "retailer": "amazon",
@@ -199,20 +212,7 @@
     {
       "department": "Clothing",
       "first_seen": "2026-11-22",
-      "image": "",
-      "name": "Nike Women's Sportswear Mid-Rise Skort (Linen) $11.05 + Free S&H on $49+",
-      "price": "$11.03",
-      "retailer": "dicks",
-      "source": "slickdeals.net",
-      "upc": "",
-      "url": "https://slickdeals.net/f/20356983-nike-women-s-sportswear-mid-rise-skort-linen-11-03-free-shipping-on-49",
-      "valid_to": "2026-11-22",
-      "was": "$49.00"
-    },
-    {
-      "department": "Clothing",
-      "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/1/9/1/2/6/8/2/450x450/22491357.thumb",
       "name": "VRST Men's Golf Pivot Printed Polo (Coffee Blooms White) $9.10 + Free S&H",
       "price": "$9.08",
       "retailer": "dicks",
@@ -381,7 +381,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/007/060/246/9000/front_en.21.400.jpg",
       "name": "Annabelle’s Rocky Road Candy Bar 1 ct",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -485,7 +485,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/005/220/001/0310/front_en.4.400.jpg",
       "name": "Beech-Nut Pouch Veggie Car Zucc Pear",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -628,7 +628,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/005/480/042/6133/front_en.10.400.jpg",
       "name": "Ben's Original Jasmine Rice Cup 2.2 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -667,7 +667,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openproductsfacts.org/images/products/089/154/911/0394/front_en.3.400.jpg",
       "name": "Black Flag DISPOSABLE FLY TRAP",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -876,7 +876,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/007/105/400/0070/front_en.3.400.jpg",
       "name": "Camellia Great Northern Beans, 16 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -1156,7 +1156,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/085/895/900/5597/front_en.3.400.jpg",
       "name": "Chef’s Cut Teriyaki Snack Stick 1 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -1793,7 +1793,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/081/649/301/0019/front_en.20.400.jpg",
       "name": "El Yucateco Hot Sauce, Green & Red Habanero, 4 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -2118,7 +2118,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/001/600/028/9048/front_en.3.400.jpg",
       "name": "Fruit Roll-Up Mini Rolls Tropical Tie-Dye 0.37 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -2131,7 +2131,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/004/142/005/4617/front_en.3.400.jpg",
       "name": "Fun Apples Strawberry Gelatin, 22 ct",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -2673,7 +2673,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/085/659/000/5068/front_en.3.400.jpg",
       "name": "Hatchimals Apple Flavored Water With Surprise Attached, 10 fl oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -2821,7 +2821,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/001/070/008/8130/front_en.22.400.jpg",
       "name": "Hersheys Good N Plenty Theater Box 6oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -2899,7 +2899,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openproductsfacts.org/images/products/003/600/018/3399/front_en.23.400.jpg",
       "name": "Huggies Little Swimmers Disposable Swim Diapers, Size 3 (16-26 lbs), 12 Ct",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -2912,7 +2912,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openproductsfacts.org/images/products/003/600/018/3429/front_en.4.400.jpg",
       "name": "Huggies Little Swimmers Disposable Swim Diapers, Size 4 (24-34 lbs), 11 Ct",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -2925,7 +2925,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openproductsfacts.org/images/products/003/600/018/3450/front_en.4.400.jpg",
       "name": "Huggies Little Swimmers Disposable Swim Diapers, Size 5-6 (32+ lbs), 10 Ct",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -3335,7 +3335,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/081/010/703/0585/front_en.3.400.jpg",
       "name": "Kathy Kaye Baseball Popcorn Ball 1 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -3453,7 +3453,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/004/100/000/9396/front_en.17.400.jpg",
       "name": "Knorr Fried Rice Side Meal Chicken 2.6 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -3701,7 +3701,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/003/915/600/0077/front_en.7.400.jpg",
       "name": "Louisiana Gumbo Base Original, 5 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -3809,7 +3809,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/004/000/064/2022/front_fr.5.400.jpg",
       "name": "M&M’S Bakery Collection Lemon Meringue Pie White Chocolate Candy",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -3861,7 +3861,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/004/000/058/1215/front_en.3.400.jpg",
       "name": "M&M’s Minis Milk Chocolate Candy 4.6 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -3887,7 +3887,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/004/000/058/8924/front_en.20.400.jpg",
       "name": "M&M’s Peanut Butter Minis 8.6 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -3926,7 +3926,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/007/339/000/6891/front_en.4.400.jpg",
       "name": "Mentos Rainbow Mints",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -4492,7 +4492,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/001/530/020/0135/front_en.4.400.jpg",
       "name": "Pasta Roni Corkscrew Butter & Garlic 2.15 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -4623,7 +4623,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/007/239/270/0806/front_en.3.400.jpg",
       "name": "Pop Ice Assorted Freezer Pops 80ct",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -5121,7 +5121,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/007/942/623/1008/front_en.11.400.jpg",
       "name": "Rico’s Premium Cheddar Cheese Sauce, 15 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -5655,7 +5655,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/007/046/200/2041/front_en.4.400.jpg",
       "name": "Sour Patch Kids Watermelon King Size 3.4 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -5682,7 +5682,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/007/046/201/3719/front_en.25.400.jpg",
       "name": "Sour Patch Peg Bag Glow Up 6.7oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -5734,7 +5734,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/001/657/195/5144/front_en.13.400.jpg",
       "name": "Sparkling ICE Can Cherry Vanilla 16oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -6021,7 +6021,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/007/488/007/0033/front_en.4.400.jpg",
       "name": "Sun-Bird Fried Rice Seasoning Mix, 0.74 oz",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -6567,7 +6567,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/007/239/294/8048/front_en.3.400.jpg",
       "name": "Wyler's Italian Ice Tropical 8ct",
       "price": "$0.01",
       "retailer": "dollar-general",
@@ -8995,7 +8995,7 @@
     {
       "department": "General",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/3/8/8/1/8/1/450x450/22527210.thumb",
       "name": "DEWALT 10-Compartment Pro Shallow Small Parts Organizer $15 + Free S&H",
       "price": "$14.98",
       "retailer": "lowes",
@@ -9008,20 +9008,7 @@
     {
       "department": "General",
       "first_seen": "2026-11-22",
-      "image": "",
-      "name": "24-Pk Quilted Northern Ultra Soft 2-Ply Toilet Paper Mega Rolls $18.20 w/ S&S",
-      "price": "$18.20",
-      "retailer": "online",
-      "source": "slickdeals.net",
-      "upc": "",
-      "url": "https://slickdeals.net/f/20363841-quilted-northern-ultra-soft-toilet-paper-24-mega-rolls-96-regular-rolls-18-22-with-s-s-amazon",
-      "valid_to": "2026-11-22",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/1/1/3/3/7/6/8/450x450/22523103.thumb",
       "name": "5-Pc Bosch Impact Tough 2\" Phillips/Square #2 Power Bits $3.85",
       "price": "$3.85",
       "retailer": "online",
@@ -9034,7 +9021,7 @@
     {
       "department": "General",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/1/8/2/8/3/4/450x450/22519212.thumb",
       "name": "INIU 20000mAh Up to 45W Power Bank w/ Built-in USB C Cable $28 + Free S&H",
       "price": "$28.00",
       "retailer": "online",
@@ -9047,7 +9034,7 @@
     {
       "department": "Baby & Kids",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/3/8/0/3/8/5/8/450x450/22525959.thumb",
       "name": "Nike: Select Men's, Women's or Kids' Shoes, Apparel, & Accessories Extra 25% Off + Free S&H on $50+",
       "price": "$50.00",
       "retailer": "online",
@@ -9060,7 +9047,7 @@
     {
       "department": "Clothing",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/1/7/4/4/2/6/0/450x450/22525596.thumb",
       "name": "Reef Men's Rover Sandal (Black, Limited Sizes) from $14.70 + Free S&H w/ Prime",
       "price": "$14.70",
       "retailer": "online",
@@ -9073,7 +9060,7 @@
     {
       "department": "Clothing",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/2/3/8/5/4/6/4/0/450x450/22517409.thumb",
       "name": "Under Armour Men's UA Tech Team 1/4 Zip Pullover Shirt (2 Colors) $12.95 + Free S&H",
       "price": "$12.94",
       "retailer": "online",
@@ -9086,13 +9073,26 @@
     {
       "department": "Auto",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://slickdeals.net/attachment/1/7/4/0/4/0/0/9/450x450/22519056.thumb",
       "name": "WEOLULI Cordless 150PSI 6000 mAh 12V Tire Inflator / Air Compressor $16.65 + Free S&H",
       "price": "$16.65",
       "retailer": "online",
       "source": "slickdeals.net",
       "upc": "",
       "url": "https://slickdeals.net/f/20368404-black-friday-deal-extra-50-off-coupon-code-portable-tire-inflator-air-compressor-16-62",
+      "valid_to": "2026-11-22",
+      "was": ""
+    },
+    {
+      "department": "Electronics",
+      "first_seen": "2026-11-22",
+      "image": "https://slickdeals.net/attachment/1/3/0/6/8/2/0/7/450x450/22522371.thumb",
+      "name": "15.3\" HP HyperX OMEN Laptop: FHD+ IPS 165Hz, Ryzen 7 8745HX, RTX 5060, 16GB, 1TB $1199 + Free S&H",
+      "price": "$1199.00",
+      "retailer": "wm-ct",
+      "source": "slickdeals.net",
+      "upc": "",
+      "url": "https://slickdeals.net/f/20369919-hyperx-omen-15-3-gaming-laptop-2k-ips-165hz-amd-ryzen-7-8745hx-nvidia-geforce-rtx-5060-16gb-ram-1tb-ssd-windows-11-iridescent-black-1199-99",
       "valid_to": "2026-11-22",
       "was": ""
     }
