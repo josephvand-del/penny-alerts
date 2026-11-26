@@ -799,6 +799,42 @@ RETAILER_MAP = {
     "dollar tree": "dollar-tree", "belk": "belk", "lululemon": "lululemon",
     "nike": "nike", "publix": "publix", "under armour": "under-armour",
     "bj's": "bjs", "macy's": "macys",
+    # v16 fast-food chains (also used by the generic fast-food /
+    # restaurant searches to resolve the chain as the store).
+    "mcdonald's": "mcdonalds", "mcdonalds": "mcdonalds",
+    "burger king": "burger-king", "wendy's": "wendys", "wendys": "wendys",
+    "taco bell": "taco-bell", "chick-fil-a": "chick-fil-a",
+    "chick fil a": "chick-fil-a", "subway": "subway", "kfc": "kfc",
+    "domino's": "dominos", "dominos": "dominos",
+    "domino's pizza": "dominos", "pizza hut": "pizza-hut",
+    "little caesars": "little-caesars", "little caesar's": "little-caesars",
+    "sonic": "sonic", "sonic drive-in": "sonic", "arby's": "arbys",
+    "arbys": "arbys", "dairy queen": "dairy-queen",
+    "panda express": "panda-express", "chipotle": "chipotle",
+    "jimmy john's": "jimmy-johns", "jimmy johns": "jimmy-johns",
+    "jersey mike's": "jersey-mikes", "jersey mikes": "jersey-mikes",
+    "panera": "panera", "panera bread": "panera", "starbucks": "starbucks",
+    "dunkin'": "dunkin", "dunkin": "dunkin", "dunkin' donuts": "dunkin",
+    "popeyes": "popeyes", "five guys": "five-guys", "wingstop": "wingstop",
+    "raising cane's": "raising-canes", "raising canes": "raising-canes",
+    "papa john's": "papa-johns", "papa johns": "papa-johns",
+    "jack in the box": "jack-in-the-box", "hardee's": "hardees",
+    "hardees": "hardees", "carl's jr": "carls-jr", "carls jr": "carls-jr",
+    "culver's": "culvers", "culvers": "culvers",
+    "whataburger": "whataburger", "del taco": "del-taco",
+    "zaxby's": "zaxbys", "zaxbys": "zaxbys",
+    "firehouse subs": "firehouse-subs", "qdoba": "qdoba",
+    "shake shack": "shake-shack", "tim hortons": "tim-hortons",
+    "krispy kreme": "krispy-kreme", "baskin robbins": "baskin-robbins",
+    "baskin-robbins": "baskin-robbins", "smoothie king": "smoothie-king",
+    "jamba": "jamba", "el pollo loco": "el-pollo-loco",
+    "bojangles": "bojangles", "church's chicken": "churchs-chicken",
+    "churchs chicken": "churchs-chicken",
+    "church's texas chicken": "churchs-chicken",
+    "white castle": "white-castle",
+    "long john silver's": "long-john-silvers",
+    "long john silvers": "long-john-silvers", "moe's": "moes",
+    "moe's southwest grill": "moes",
 }
 PRICE_RE = re.compile(r"\$([\d,]+(?:\.\d{2})?)")
 RETAILER_TAIL_RE = re.compile(r"\b(?:at|via|from|on)\s+([A-Z][\w&'.-]*(?:\s+[A-Z][\w&'.-]*){0,3})", re.I)
@@ -874,8 +910,11 @@ def parse_slickdeals(raw: str, force_retailer: str = "", require_title: str = ""
         if require_title and require_title.lower() not in title.lower():
             continue
         summary = clean(TAG_STRIP.sub("", html.unescape(getattr(entry, "summary", "") or "")))
-        if require_text and require_text.lower() not in f"{title} {summary}".lower():
-            continue
+        if require_text:
+            phrases = require_text if isinstance(require_text, (list, tuple)) else [require_text]
+            hay = f"{title} {summary}".lower()
+            if not any(p.lower() in hay for p in phrases):
+                continue
         list_date = _entry_date(entry)
         if max_age_days is not None:
             if not list_date:
@@ -2208,6 +2247,81 @@ def _mark_food(items, dept):
     return items
 
 
+# v16: one Slickdeals RSS search per common fast-food chain (Joseph:
+# every common chain on the Food tab). (slug, display name, search
+# query, require-text phrases — any phrase must appear in title or
+# summary, which is what keeps the relevance-ranked search honest:
+# the 'dominos' search's top hit is a Festool Domino joiner, the
+# 'jack in the box' search is all Jack Link's jerky, the 'sonic'
+# search is Sonic the Hedgehog games.) Store id == slug. Verified
+# 2026-11-26: every chain below returned 25 RSS entries; KCL
+# /coupons-for/<chain> pages are NOT usable (same 11 generic items
+# for every chain — a template shell, no chain deals); Hip2Save WP
+# search is too fuzzy per chain (taco-bell returned 0 relevant posts
+# out of 5); DealNews has no food RSS (404/403).
+CHAIN_SEARCHES = [
+    ("mcdonalds", "McDonald's", "mcdonalds", ["mcdonald"]),
+    ("burger-king", "Burger King", "burger+king", ["burger king"]),
+    ("wendys", "Wendy's", "wendys", ["wendy"]),
+    ("taco-bell", "Taco Bell", "taco+bell", ["taco bell"]),
+    ("chick-fil-a", "Chick-fil-A", "chick-fil-a", ["chick-fil-a", "chick fil a"]),
+    ("subway", "Subway", "subway", ["subway"]),
+    ("kfc", "KFC", "kfc", ["kfc"]),
+    ("dominos", "Domino's", "dominos", ["dominos", "domino's"]),
+    ("pizza-hut", "Pizza Hut", "pizza+hut", ["pizza hut"]),
+    ("little-caesars", "Little Caesars", "little+caesars", ["little caesars", "little caesar's"]),
+    ("sonic", "Sonic", "sonic+drive-in", ["sonic drive-in"]),
+    ("arbys", "Arby's", "arbys", ["arby"]),
+    ("dairy-queen", "Dairy Queen", "dairy+queen", ["dairy queen"]),
+    ("panda-express", "Panda Express", "panda+express", ["panda express"]),
+    ("chipotle", "Chipotle", "chipotle", ["chipotle"]),
+    ("jimmy-johns", "Jimmy John's", "jimmy+johns", ["jimmy john's", "jimmy johns"]),
+    ("jersey-mikes", "Jersey Mike's", "jersey+mikes", ["jersey mike's", "jersey mikes"]),
+    ("panera", "Panera", "panera", ["panera"]),
+    ("starbucks", "Starbucks", "starbucks", ["starbucks"]),
+    ("dunkin", "Dunkin'", "dunkin", ["dunkin"]),
+    ("popeyes", "Popeyes", "popeyes", ["popeyes"]),
+    ("five-guys", "Five Guys", "five+guys", ["five guys"]),
+    ("wingstop", "Wingstop", "wingstop", ["wingstop"]),
+    ("raising-canes", "Raising Cane's", "raising+canes", ["raising cane's", "raising canes"]),
+    ("papa-johns", "Papa John's", "papa+johns", ["papa john's", "papa johns"]),
+    ("jack-in-the-box", "Jack in the Box", "jack+in+the+box", ["jack in the box"]),
+    ("hardees", "Hardee's", "hardees", ["hardee"]),
+    ("carls-jr", "Carl's Jr.", "carls+jr", ["carl's jr", "carls jr"]),
+    ("culvers", "Culver's", "culvers", ["culver"]),
+    ("whataburger", "Whataburger", "whataburger", ["whataburger"]),
+    ("del-taco", "Del Taco", "del+taco", ["del taco"]),
+    ("zaxbys", "Zaxby's", "zaxbys", ["zaxby"]),
+    ("firehouse-subs", "Firehouse Subs", "firehouse+subs", ["firehouse"]),
+    ("qdoba", "Qdoba", "qdoba", ["qdoba"]),
+    ("shake-shack", "Shake Shack", "shake+shack", ["shake shack"]),
+    ("tim-hortons", "Tim Hortons", "tim+hortons", ["tim hortons"]),
+    ("krispy-kreme", "Krispy Kreme", "krispy+kreme", ["krispy kreme"]),
+    ("baskin-robbins", "Baskin-Robbins", "baskin+robbins", ["baskin robbins", "baskin-robbins"]),
+    ("smoothie-king", "Smoothie King", "smoothie+king", ["smoothie king"]),
+    ("jamba", "Jamba", "jamba", ["jamba"]),
+    ("el-pollo-loco", "El Pollo Loco", "el+pollo+loco", ["el pollo loco"]),
+    ("bojangles", "Bojangles", "bojangles", ["bojangles"]),
+    ("churchs-chicken", "Church's Chicken", "churchs+chicken", ["church's", "churchs"]),
+    ("white-castle", "White Castle", "white+castle", ["white castle"]),
+    ("long-john-silvers", "Long John Silver's", "long+john+silvers", ["long john silver"]),
+    ("moes", "Moe's", "moes", ["moe's"]),
+]
+# Checkers is deliberately NOT in the table: the 'checkers' search is
+# dominated by the board game, and the restaurant is regional.
+# A&W is skipped: the ampersand breaks the Slickdeals search query.
+
+# App-only food deals (v16): threads that only work in the chain's
+# app get their own labeled section on the Food tab, never mixed into
+# the main Food list. Conservative patterns only — explicit "app
+# only / exclusive / required" wording, so "order in-app or in-store"
+# threads stay in the main list.
+_APP_ONLY_RE = re.compile(
+    r"app[- ]only|app[- ]exclusive|app required|app members|"
+    r"in[- ]app only|app sign[- ]?up|app deal|download the \w+ app|"
+    r"download the app", re.I)
+
+
 SOURCES = [
     ("freebie-guy-dg", "Freebie Guy — DG penny list",
      "https://THEFREEBIEGUY.COM/DOLLAR-GENERAL-PENNY-SHOPPING-MASTER-LIST/", "fetch"),
@@ -2341,6 +2455,15 @@ SOURCES = [
      "https://www.bradsdeals.com/", "fetch"),
     ("pennypuss", "Penny Puss — DG penny list",
      "https://pennypuss.com/", "link-only"),
+]
+
+# v16: one Slickdeals RSS search per chain in CHAIN_SEARCHES (see the
+# table — it is the single source of truth for slug/display/query).
+SOURCES += [
+    (f"slickdeals-search-chain-{slug}", f"Slickdeals — {display} search",
+     f"https://slickdeals.net/newsearch.php?firstonly=1&q={q}"
+     f"&searcharea=deals&searchin=first&rss=1", "fetch")
+    for slug, display, q, _phrases in CHAIN_SEARCHES
 ]
 
 LINK_ONLY_NOTES = {
@@ -2513,6 +2636,19 @@ def run_source(client: httpx.Client, key: str, name: str, url: str, kind: str):
             items = parse_slickdeals(body, force_retailer="dollar-tree",
                                      require_text="dollar tree",
                                      max_age_days=14, no_stack=True)
+        elif key.startswith("slickdeals-search-chain-"):
+            slug = key[len("slickdeals-search-chain-"):]
+            chain = next((c for c in CHAIN_SEARCHES if c[0] == slug), None)
+            if chain is None:
+                items = []
+            else:
+                # Per-chain search: require the chain's name in title or
+                # summary, fresh threads only, Food tab (Restaurant).
+                items = _mark_food(
+                    parse_slickdeals(body, force_retailer=slug,
+                                     require_text=chain[3],
+                                     max_age_days=14, no_stack=True),
+                    "Restaurant")
         elif key in ("slickdeals-search-free-food",
                      "slickdeals-search-fast-food",
                      "slickdeals-search-restaurant"):
@@ -2741,6 +2877,15 @@ def main() -> int:
         for it in deduped:
             if it["kind"] != "penny" and it.get("department") == "Grocery":
                 it["food"] = True
+
+        # App-only food deals (v16): a food deal that only works in
+        # the chain's app is flagged here; the app renders it in its
+        # own labeled section on the Food tab, never in the main list.
+        for it in deduped:
+            if it.get("food") and _APP_ONLY_RE.search(
+                    it.get("name", "") + " "
+                    + " ".join(it.get("steps") or [])):
+                it["app_only"] = True
 
         # Shared decorative images (page header photos) are not product
         # photos — drop them before enrichment.

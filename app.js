@@ -84,7 +84,54 @@ var STORE_NAMES = {
   'marshalls': 'Marshalls',
   'petsmart': 'PetSmart',
   'amazon': 'Amazon',
-  'online': 'Online'
+  'online': 'Online',
+  /* v16 fast-food chains (Food tab store filter). */
+  'mcdonalds': "McDonald's",
+  'burger-king': 'Burger King',
+  'wendys': "Wendy's",
+  'taco-bell': 'Taco Bell',
+  'chick-fil-a': 'Chick-fil-A',
+  'subway': 'Subway',
+  'kfc': 'KFC',
+  'dominos': "Domino's",
+  'pizza-hut': 'Pizza Hut',
+  'little-caesars': 'Little Caesars',
+  'sonic': 'Sonic',
+  'arbys': "Arby's",
+  'dairy-queen': 'Dairy Queen',
+  'panda-express': 'Panda Express',
+  'chipotle': 'Chipotle',
+  'jimmy-johns': "Jimmy John's",
+  'jersey-mikes': "Jersey Mike's",
+  'panera': 'Panera',
+  'starbucks': 'Starbucks',
+  'dunkin': "Dunkin'",
+  'popeyes': 'Popeyes',
+  'five-guys': 'Five Guys',
+  'wingstop': 'Wingstop',
+  'raising-canes': "Raising Cane's",
+  'papa-johns': "Papa John's",
+  'jack-in-the-box': 'Jack in the Box',
+  'hardees': "Hardee's",
+  'carls-jr': "Carl's Jr.",
+  'culvers': "Culver's",
+  'whataburger': 'Whataburger',
+  'del-taco': 'Del Taco',
+  'zaxbys': "Zaxby's",
+  'firehouse-subs': 'Firehouse Subs',
+  'qdoba': 'Qdoba',
+  'shake-shack': 'Shake Shack',
+  'tim-hortons': 'Tim Hortons',
+  'krispy-kreme': 'Krispy Kreme',
+  'baskin-robbins': 'Baskin-Robbins',
+  'smoothie-king': 'Smoothie King',
+  'jamba': 'Jamba',
+  'el-pollo-loco': 'El Pollo Loco',
+  'bojangles': 'Bojangles',
+  'churchs-chicken': "Church's Chicken",
+  'white-castle': 'White Castle',
+  'long-john-silvers': "Long John Silver's",
+  'moes': "Moe's"
 };
 
 /* Weekly lists + source pages. Every URL below returned HTTP 200 on 2026-11-22. */
@@ -112,6 +159,7 @@ var SOURCE_LINKS = [
   { name: 'Slickdeals — free food search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=free+food&searcharea=deals&searchin=first&rss=1', note: 'Free-food threads — Food-tab material. Free means $0 after coupons and rebates.' },
   { name: 'Slickdeals — fast food search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=fast+food&searcharea=deals&searchin=first&rss=1', note: 'Fast-food deal threads — Food-tab material.' },
   { name: 'Slickdeals — restaurant search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=restaurant&searcharea=deals&searchin=first&rss=1', note: 'Restaurant deal threads — Food-tab material.' },
+  { name: 'Slickdeals — fast-food chain searches (46 chains)', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=fast+food&searcharea=deals&searchin=first&rss=1', note: 'One Slickdeals search per common fast-food chain — McDonald\u2019s, Burger King, Wendy\u2019s, Taco Bell, Chick-fil-A, Subway, KFC, Domino\u2019s, Pizza Hut, Little Caesars, Sonic, Arby\u2019s, Dairy Queen, Panda Express, Chipotle, Jimmy John\u2019s, Jersey Mike\u2019s, Panera, Starbucks, Dunkin\u2019, Popeyes, Five Guys, Wingstop, Raising Cane\u2019s, Papa John\u2019s, Jack in the Box, Hardee\u2019s, Carl\u2019s Jr., Culver\u2019s, Whataburger, Del Taco, Zaxby\u2019s, Firehouse Subs, Qdoba, Shake Shack, Tim Hortons, Krispy Kreme, Baskin-Robbins, Smoothie King, Jamba, El Pollo Loco, Bojangles, Church\u2019s Chicken, White Castle, Long John Silver\u2019s, Moe\u2019s. Each search is filtered to threads that actually name the chain. Deals that only work in the chain\u2019s app sit in their own labeled section on the Food tab, never in the main list.' },
   { name: 'Slickdeals — Kroger search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=kroger&searcharea=deals&searchin=first&rss=1', note: 'Kroger threads — Kroger is King Soopers in Colorado. Food-tab material.' },
   { name: 'Slickdeals — Dollar Tree search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=dollar+tree&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals Dollar Tree threads, filtered to posts that actually name Dollar Tree.' },
   { name: 'Slickdeals — Hobby Lobby search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=hobby+lobby&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals Hobby Lobby threads, fresh ones only (≤7 days).' },
@@ -326,6 +374,10 @@ function normalizeWeekly(data) {
        * The parser sets it from food sources + Grocery department;
        * pennies are never food (they stay on the Deals tab). */
       food: !!it.food,
+      /* App-only food deal (v16): only works in the chain's app.
+       * Rendered in its own labeled section on the Food tab, never
+       * in the main Food list. */
+      appOnly: !!it.app_only,
       steps: Array.isArray(it.steps) ? it.steps : []
     });
   });
@@ -566,7 +618,7 @@ function visibleStacks() {
  * utm, or redirector parameters in any link. Labels say "app" /
  * "search", never "buy" — a search link is not a verified price or a
  * confirmed listing. */
-var APP_VERSION = 'v15';
+var APP_VERSION = 'v16';
 var SELLER_SEARCH = {
   'wm-ct': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
   'walmart': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
@@ -843,8 +895,22 @@ function renderFood() {
     el.innerHTML = '<p class="empty">No food deals right now. New grocery, fast-food and restaurant deals appear here when the morning feed finds one — free means $0 after coupons and rebates.</p>';
     return;
   }
-  el.innerHTML = list.slice(0, 400).map(function (d) { return dealCard(d, state.foodFilters.sort); }).join('') +
-    (list.length > 400 ? '<p class="hint">Showing the first 400 of ' + list.length + ' food deals — narrow the search to see more.</p>' : '');
+  /* v16: app-only deals (need the chain's app) render in their own
+   * labeled section below the main Food list, never mixed in. Both
+   * halves already passed the same sort / store / dept / Future
+   * filters in visibleFood(); the badge above still counts all
+   * visible food deals. */
+  var main = list.filter(function (d) { return !d.appOnly; });
+  var appOnly = list.filter(function (d) { return d.appOnly; });
+  var html = main.slice(0, 400).map(function (d) { return dealCard(d, state.foodFilters.sort); }).join('');
+  if (main.length > 400) html += '<p class="hint">Showing the first 400 of ' + main.length + ' food deals — narrow the search to see more.</p>';
+  if (appOnly.length) {
+    html += '<h3 class="app-only-head">App-only deals (' + appOnly.length + ') — these need the chain&rsquo;s app</h3>' +
+      '<p class="hint">No download or signup needed for the deals above. These ones only work inside the restaurant&rsquo;s own app.</p>' +
+      appOnly.slice(0, 100).map(function (d) { return dealCard(d, state.foodFilters.sort); }).join('');
+    if (appOnly.length > 100) html += '<p class="hint">Showing the first 100 of ' + appOnly.length + ' app-only deals.</p>';
+  }
+  el.innerHTML = html;
 }
 /* Store filter options (v9): only stores that have deals in the given
  * feed, with a deal count after each name. Returns [{value, label}]

@@ -237,7 +237,7 @@ const PA = sandbox.window.PennyAlerts;
   check('pushSupported false in stub env (no serviceWorker)', PA.pushSupported(), false);
   check('supabase URL is the shared bulk-finder project', PA.SUPABASE_URL, 'https://xwekulsnfarjibawqqih.supabase.co');
   const swText = fs.readFileSync('/home/hatch/workspace/penny-alerts/sw.js', 'utf8');
-  check('sw cache bumped to v15', swText.indexOf("penny-alerts-v15") !== -1, true);
+  check('sw cache bumped to v16', swText.indexOf("penny-alerts-v16") !== -1, true);
   check('sw has push handler', swText.indexOf("addEventListener('push'") !== -1, true);
   check('sw push shows a notification', swText.indexOf('showNotification') !== -1, true);
   check('sw push uses the 512 PNG icon (v14)', swText.indexOf("icon: 'icon-512.png'") !== -1, true);
@@ -535,11 +535,11 @@ const PA = sandbox.window.PennyAlerts;
   check('watchlist cards carry a Copy button', watchHtml.indexOf('data-action="copy"') !== -1, true);
   check('watchlist Copy button carries the raw name', watchHtml.indexOf('data-name="' + pennies[1].name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;') + '"') !== -1, true);
   PA._handleAction('unwatch', firstPenny);
-  /* Version footer: APP_VERSION is v15, the page footer reads
-   * "Penny Alerts v15", and init() set the rendered element. */
-  check('APP_VERSION is v15', PA.APP_VERSION, 'v15');
-  check('index.html footer reads Penny Alerts v15', htmlText.indexOf('Penny Alerts v15') !== -1, true);
-  check('rendered version footer reads Penny Alerts v15', els['appVersion'].textContent, 'Penny Alerts v15');
+  /* Version footer: APP_VERSION is v16, the page footer reads
+   * "Penny Alerts v16", and init() set the rendered element. */
+  check('APP_VERSION is v16', PA.APP_VERSION, 'v16');
+  check('index.html footer reads Penny Alerts v16', htmlText.indexOf('Penny Alerts v16') !== -1, true);
+  check('rendered version footer reads Penny Alerts v16', els['appVersion'].textContent, 'Penny Alerts v16');
 
   /* 16. sort dropdown + Future toggle + source count (v12). The search
    * bar and the Stores tab are deleted; the Deals tab sorts Most recent
@@ -637,32 +637,36 @@ const PA = sandbox.window.PennyAlerts;
   check('briefing penny gets source_count 1', bsrc.deals[0].sourceCount, 1);
   check('briefing penny listDate is confirmed_on', bsrc.deals[0].listDate, '2026-10-20');
 
-  /* 18. regenerated real feed (v15, run Nov 25, 2026 evening): first-wins
-   * attribution, no UPC duplicates, every item carries sources +
-   * list_date. Freebie Guy is 0 tonight — the site blocked the parser
-   * (HTTP 403 on all three FG pages, confirmed twice); the DG penny
-   * list is still covered by seven other sources. Kart.deals is 429
-   * (rate-limited). The pinned counts below are this run's actuals. */
+  /* 18. regenerated real feed (v16, run Nov 25, 2026 evening — parser
+   * run 2026-11-26T01:59Z): first-wins attribution, no UPC duplicates,
+   * every item carries sources + list_date. Freebie Guy is 0 tonight —
+   * the site blocked the parser (HTTP 403 on all three FG pages,
+   * confirmed twice); the DG penny list is still covered by seven
+   * other sources. Kart.deals is 429 (rate-limited). The pinned
+   * counts below are this run's actuals. v16 adds 46 Slickdeals
+   * per-chain searches: 215 food items (was 135), 80 of them for the
+   * chains, 30 of 46 chains with food items; 1 app-only food deal
+   * (McDonald's App Exclusive). */
   check('real feed Freebie Guy count is 0 (site blocked the parser, HTTP 403, Nov 25)', realWeekly.items.filter(function (it) { return it.source === 'thefreebieguy.com'; }).length, 0);
   const normUpc = function (u) { return (u && u.length === 11) ? '0' + u : u; };
   const seenU = {};
   const dupU = realWeekly.items.filter(function (it) { if (!it.upc) return false; const u = normUpc(it.upc); if (seenU[u]) return true; seenU[u] = 1; return false; });
   check('real feed has no duplicate normalized UPCs', dupU.length, 0);
-  check('real feed total is 2084', realWeekly.items.length, 2084);
+  check('real feed total is 2176', realWeekly.items.length, 2176);
   check('real feed every item has a sources array', realWeekly.items.every(function (it) { return Array.isArray(it.sources) && it.sources.length >= 1; }), true);
   check('real feed source_count equals sources.length', realWeekly.items.every(function (it) { return it.source_count === it.sources.length; }), true);
   check('real feed every item has a list_date string ("" or YYYY-MM-DD)', realWeekly.items.every(function (it) { return typeof it.list_date === 'string' && (it.list_date.length === 0 || it.list_date.length === 10); }), true);
   check('real feed multi-source items number 249', realWeekly.items.filter(function (it) { return it.source_count >= 2; }).length, 249);
   /* Future items are the RSS posts published after midnight UTC (still
-   * Nov 25 evening in Denver): 65, all dated 2026-11-26 — Slickdeals
-   * 21, DealNews 18, Hip2Save 13, GlitchNDealz 8, Fabulessly Frugal 4,
+   * Nov 25 evening in Denver): 85, all dated 2026-11-26 — Slickdeals
+   * 28, DealNews 23, Hip2Save 17, GlitchNDealz 11, Fabulessly Frugal 5,
    * Passionate Penny Pincher 1. They roll into "today" tomorrow; the
    * Denver-today fix (v15) is what puts them under Future tonight
    * instead of misreading them as today's deals. */
-  check('real feed future items are 65, all dated 2026-11-26', realWeekly.items.filter(function (it) { return it.list_date > '2026-11-25'; }).length, 65);
+  check('real feed future items are 85, all dated 2026-11-26', realWeekly.items.filter(function (it) { return it.list_date > '2026-11-25'; }).length, 85);
   check('real feed PennyRecon note says 169 of 313', (realWeekly.sources.filter(function (s) { return s.name.indexOf('PennyRecon') !== -1; })[0].note || '').indexOf('169 of 313') !== -1, true);
   check('real feed has no Freebie Guy HD source', realWeekly.sources.some(function (s) { return s.name.indexOf('Freebie Guy — Home Depot') !== -1; }), false);
-  check('real feed image coverage is 1208/2084', realWeekly.items.filter(function (it) { return !!it.image; }).length, 1208);
+  check('real feed image coverage is 1227/2176', realWeekly.items.filter(function (it) { return !!it.image; }).length, 1227);
   /* v13: unknown list dates stay unknown — a string of length 0 or 10,
    * never the run date stamped in by the parser. */
   check('real feed no KCL penny item carries the run date', realWeekly.items.filter(function (it) { return it.source === 'krazycouponlady.com' && !it.is_stack && it.list_date === '2026-11-26'; }).length, 0);
@@ -814,6 +818,40 @@ const PA = sandbox.window.PennyAlerts;
     }
   });
   check('feed source table has Slickdeals — Hobby Lobby search', !!sourceStatus('Slickdeals — Hobby Lobby search'), true);
+  /* v16: one Slickdeals search per fast-food chain. Items are optional
+   * (a chain can have no fresh threads in a given week — Jack in the
+   * Box and Firehouse Subs returned 0 on the Nov 26 probe), but the
+   * source must exist in the feed table and have run ok. */
+  var chainSources = [
+    'Slickdeals — McDonald\'s search', 'Slickdeals — Burger King search',
+    'Slickdeals — Wendy\'s search', 'Slickdeals — Taco Bell search',
+    'Slickdeals — Chick-fil-A search', 'Slickdeals — Subway search',
+    'Slickdeals — KFC search', 'Slickdeals — Domino\'s search',
+    'Slickdeals — Pizza Hut search', 'Slickdeals — Little Caesars search',
+    'Slickdeals — Sonic search', 'Slickdeals — Arby\'s search',
+    'Slickdeals — Dairy Queen search', 'Slickdeals — Panda Express search',
+    'Slickdeals — Chipotle search', 'Slickdeals — Jimmy John\'s search',
+    'Slickdeals — Jersey Mike\'s search', 'Slickdeals — Panera search',
+    'Slickdeals — Starbucks search', 'Slickdeals — Dunkin\' search',
+    'Slickdeals — Popeyes search', 'Slickdeals — Five Guys search',
+    'Slickdeals — Wingstop search', 'Slickdeals — Raising Cane\'s search',
+    'Slickdeals — Papa John\'s search', 'Slickdeals — Jack in the Box search',
+    'Slickdeals — Hardee\'s search', 'Slickdeals — Carl\'s Jr. search',
+    'Slickdeals — Culver\'s search', 'Slickdeals — Whataburger search',
+    'Slickdeals — Del Taco search', 'Slickdeals — Zaxby\'s search',
+    'Slickdeals — Firehouse Subs search', 'Slickdeals — Qdoba search',
+    'Slickdeals — Shake Shack search', 'Slickdeals — Tim Hortons search',
+    'Slickdeals — Krispy Kreme search', 'Slickdeals — Baskin-Robbins search',
+    'Slickdeals — Smoothie King search', 'Slickdeals — Jamba search',
+    'Slickdeals — El Pollo Loco search', 'Slickdeals — Bojangles search',
+    'Slickdeals — Church\'s Chicken search', 'Slickdeals — White Castle search',
+    'Slickdeals — Long John Silver\'s search', 'Slickdeals — Moe\'s search'
+  ];
+  chainSources.forEach(function (nm) {
+    var st = sourceStatus(nm);
+    check('feed source table has ' + nm, !!st, true);
+    if (st) check(nm + ' ran ok', st.status, 'ok');
+  });
   check('Hobby Lobby search ran ok', (sourceStatus('Slickdeals — Hobby Lobby search') || {}).status, 'ok');
   check('feed source table marks Freebie Guy — CVS deals link-only', (sourceStatus('Freebie Guy — CVS deals') || {}).status, 'link-only');
   check('feed source table marks Penny Puss link-only', (sourceStatus('Penny Puss — DG penny list') || {}).status, 'link-only');
@@ -860,6 +898,15 @@ const PA = sandbox.window.PennyAlerts;
   check('smoke: KCL Kroger items', realWeekly.items.filter(function (it) { return it.source === 'krazycouponlady.com' && it.retailer === 'kroger'; }).length >= 1, true);
   check('smoke: Hip2Save restaurant food items', realWeekly.items.filter(function (it) { return it.source === 'hip2save.com' && it.food === true; }).length >= 1, true);
   check('smoke: Slickdeals food-search items', realWeekly.items.filter(function (it) { return it.source === 'slickdeals.net' && it.food === true; }).length >= 1, true);
+  /* v16: fast-food chain coverage + app-only split. */
+  var chainIds = ['mcdonalds', 'burger-king', 'wendys', 'taco-bell', 'chick-fil-a', 'subway', 'kfc', 'dominos', 'pizza-hut', 'little-caesars', 'sonic', 'arbys', 'dairy-queen', 'panda-express', 'chipotle', 'jimmy-johns', 'jersey-mikes', 'panera', 'starbucks', 'dunkin', 'popeyes', 'five-guys', 'wingstop', 'raising-canes', 'papa-johns', 'jack-in-the-box', 'hardees', 'carls-jr', 'culvers', 'whataburger', 'del-taco', 'zaxbys', 'firehouse-subs', 'qdoba', 'shake-shack', 'tim-hortons', 'krispy-kreme', 'baskin-robbins', 'smoothie-king', 'jamba', 'el-pollo-loco', 'bojangles', 'churchs-chicken', 'white-castle', 'long-john-silvers', 'moes'];
+  var chainFood = realWeekly.items.filter(function (it) { return it.food === true && chainIds.indexOf(it.retailer) !== -1; });
+  var chainRetailers = {};
+  chainFood.forEach(function (it) { chainRetailers[it.retailer] = 1; });
+  check('Food tab covers many fast-food chains', Object.keys(chainRetailers).length >= 15, true);
+  check('Slickdeals chain-search food items exist', chainFood.filter(function (it) { return it.source === 'slickdeals.net'; }).length >= 10, true);
+  check('real feed app_only flag is boolean when present', realWeekly.items.filter(function (it) { return 'app_only' in it; }).every(function (it) { return typeof it.app_only === 'boolean'; }), true);
+  check('Food tab has app-only deals', realWeekly.items.filter(function (it) { return it.food === true && it.app_only === true; }).length >= 1, true);
   /* v15: stop-date rule — every non-penny item with a list_date carries
    * a valid_to (list_date + 7 days when the source gave no end date);
    * penny items never carry one. */
@@ -1197,12 +1244,14 @@ const PA = sandbox.window.PennyAlerts;
   check('denverToday() matches the Denver date', PA.denverToday(), denverToday);
   /* normalizeWeekly carries the food flag (parser sets it). */
   const wfood = PA.normalizeWeekly({ generated_at: '', sources: [], items: [
-    { name: 'Free Fries Friday', upc: '', price: '$0.00', was: '$3.99', retailer: 'online', department: 'Restaurant', source: 'slickdeals.net', first_seen: '2026-11-25', valid_to: '', url: '', image: '', list_date: '2026-11-25', food: true },
+    { name: 'Free Fries Friday', upc: '', price: '$0.00', was: '$3.99', retailer: 'online', department: 'Restaurant', source: 'slickdeals.net', first_seen: '2026-11-25', valid_to: '', url: '', image: '', list_date: '2026-11-25', food: true, app_only: true },
     { name: 'Plain Screw', upc: '', price: '$1.99', was: '', retailer: 'home-depot', department: 'Tools', source: 'slickdeals.net', first_seen: '2026-11-25', valid_to: '', url: '', image: '', list_date: '2026-11-25' }
   ] });
   check('normalizeWeekly carries food flag', wfood.deals[0].food, true);
   check('normalizeWeekly defaults food to false', wfood.deals[1].food, false);
   check('normalizeWeekly keeps Restaurant dept', wfood.deals[0].dept, 'Restaurant');
+  check('normalizeWeekly carries appOnly flag', wfood.deals[0].appOnly, true);
+  check('normalizeWeekly defaults appOnly to false', wfood.deals[1].appOnly, false);
   const foodDeals = [
     { id: 'f-a', kind: 'deal', name: 'Free Fries Friday', upc: '', storeId: 'online', source: 'slickdeals.net', sources: ['slickdeals.net'], sourceCount: 1, price: '$0.00', originalPrice: '$3.99', dept: 'Restaurant', confirmedOn: '2026-11-25', listDate: '2026-11-25', validTo: '', image: '', food: true },
     { id: 'f-b', kind: 'deal', name: 'Kroger Butter $1.99', upc: '', storeId: 'kroger', source: 'slickdeals.net', sources: ['slickdeals.net'], sourceCount: 1, price: '$1.99', originalPrice: '', dept: 'Grocery', confirmedOn: '2026-11-24', listDate: '2026-11-24', validTo: '', image: '', food: true },
@@ -1211,7 +1260,8 @@ const PA = sandbox.window.PennyAlerts;
     { id: 'f-e', kind: 'deal', name: 'Future Taco Deal $2.00', upc: '', storeId: 'online', source: 'slickdeals.net', sources: ['slickdeals.net'], sourceCount: 1, price: '$2.00', originalPrice: '', dept: 'Restaurant', confirmedOn: '2099-01-01', listDate: '2099-01-01', validTo: '', image: '', food: true },
     { id: 'f-f', kind: 'deal', name: 'Kroger Stack $5.00', upc: '', storeId: 'kroger', source: 'krazycouponlady.com', sources: ['krazycouponlady.com'], sourceCount: 1, price: '$5.00', originalPrice: '$12.00', dept: 'Grocery', confirmedOn: '2026-11-25', listDate: '2026-11-25', validTo: '2026-11-30', image: '', food: true, stack: true },
     { id: 'f-g', kind: 'penny', name: 'Candy Bar Penny', upc: '012345678907', storeId: 'dollar-general', source: 'retailshout.com', sources: ['retailshout.com'], sourceCount: 1, price: '$0.01', originalPrice: '', dept: 'Grocery', confirmedOn: '2026-11-24', listDate: '2026-11-24', validTo: '', image: '', food: true },
-    { id: 'f-h', kind: 'deal', name: 'Plain Screw $1.99', upc: '', storeId: 'home-depot', source: 'slickdeals.net', sources: ['slickdeals.net'], sourceCount: 1, price: '$1.99', originalPrice: '', dept: 'Tools', confirmedOn: '2026-11-25', listDate: '2026-11-25', validTo: '', image: '' }
+    { id: 'f-h', kind: 'deal', name: 'Plain Screw $1.99', upc: '', storeId: 'home-depot', source: 'slickdeals.net', sources: ['slickdeals.net'], sourceCount: 1, price: '$1.99', originalPrice: '', dept: 'Tools', confirmedOn: '2026-11-25', listDate: '2026-11-25', validTo: '', image: '', food: false },
+    { id: 'f-i', kind: 'deal', name: 'McDonald\'s App Exclusive Big Mac $3.50', upc: '', storeId: 'mcdonalds', source: 'slickdeals.net', sources: ['slickdeals.net'], sourceCount: 1, price: '$3.50', originalPrice: '$5.00', dept: 'Restaurant', confirmedOn: '2026-11-25', listDate: '2026-11-25', validTo: '', image: '', food: true, appOnly: true }
   ];
   const savedDealsV15 = st.deals;
   st.deals = foodDeals;
@@ -1220,15 +1270,15 @@ const PA = sandbox.window.PennyAlerts;
   check('Food default sort is Price: Low to High', st.foodFilters.sort, 'price');
   /* Food tab, price sort: free first, then cheapest, no-price last;
    * expired + future + stacks + pennies + non-food never appear. */
-  check('Food tab is food deals only, cheapest first', PA.visibleFood().map(function (d) { return d.id; }), ['f-a', 'f-b', 'f-c']);
+  check('Food tab is food deals only, cheapest first', PA.visibleFood().map(function (d) { return d.id; }), ['f-a', 'f-b', 'f-i', 'f-c']);
   /* Deals tab excludes food deals but keeps food pennies. */
   check('Deals tab excludes food deals, keeps food pennies', PA._visibleDeals().map(function (d) { return d.id; }), ['f-h', 'f-g']);
   /* Price sort as a pure sort: $0.00, $0.01, $1.99 ties by recency,
    * then $2.00, $4.00, $5.00, no-price last. */
-  check('Price sort orders cheapest first, no-price last', PA.sortDeals(foodDeals, 'price').map(function (d) { return d.id; }), ['f-a', 'f-g', 'f-h', 'f-b', 'f-e', 'f-d', 'f-f', 'f-c']);
+  check('Price sort orders cheapest first, no-price last', PA.sortDeals(foodDeals, 'price').map(function (d) { return d.id; }), ['f-a', 'f-g', 'f-h', 'f-b', 'f-e', 'f-i', 'f-d', 'f-f', 'f-c']);
   /* Biggest deals as a pure sort: $7.00, $4.00, $3.99, then the
    * no-saving items by recency (2099 first). */
-  check('Biggest sort orders by dollars saved', PA.sortDeals(foodDeals, 'biggest').map(function (d) { return d.id; }), ['f-f', 'f-d', 'f-a', 'f-e', 'f-c', 'f-h', 'f-g', 'f-b']);
+  check('Biggest sort orders by dollars saved', PA.sortDeals(foodDeals, 'biggest').map(function (d) { return d.id; }), ['f-f', 'f-d', 'f-a', 'f-i', 'f-e', 'f-c', 'f-h', 'f-g', 'f-b']);
   /* Food Future toggle: only the 2099-dated food deal survives. */
   st.foodFilters.futureOnly = true;
   check('Food Future shows only future-dated food deals', PA.visibleFood().map(function (d) { return d.id; }), ['f-e']);
@@ -1242,7 +1292,14 @@ const PA = sandbox.window.PennyAlerts;
   check('Food renders the food deal cards', els['foodList'].innerHTML.indexOf('Free Fries Friday') !== -1 && els['foodList'].innerHTML.indexOf('Kroger Butter') !== -1, true);
   check('Food does not render non-food deals', els['foodList'].innerHTML.indexOf('Plain Screw') === -1, true);
   check('Food does not render food pennies', els['foodList'].innerHTML.indexOf('Candy Bar Penny') === -1, true);
-  check('Food badge counts visible food deals', els['foodCount'].textContent, '(3)');
+  check('Food badge counts visible food deals', els['foodCount'].textContent, '(4)');
+  /* v16: app-only deals render in their own labeled section below the
+   * main Food list, never mixed in. */
+  var foodHtml = els['foodList'].innerHTML;
+  check('Food has an App-only section head', foodHtml.indexOf('App-only deals') !== -1, true);
+  check('Food renders the app-only deal card', foodHtml.indexOf('App Exclusive Big Mac') !== -1, true);
+  check('Food app-only card sits after the section head', foodHtml.indexOf('App Exclusive Big Mac') > foodHtml.indexOf('App-only deals'), true);
+  check('Food main list ends before the app-only section', foodHtml.indexOf('Free Fries Friday') < foodHtml.indexOf('App-only deals'), true);
   /* Food card source count follows the Food sort (verified mode only). */
   st.foodFilters.sort = 'verified';
   const foodCard = PA.dealCard(foodDeals[0], 'verified');

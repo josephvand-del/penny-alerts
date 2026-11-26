@@ -6,8 +6,9 @@
  * v4: new cache name for the thumbnail layout change. v14: real PNG
  * icons in the shell (the push icon/badge), and a richer push
  * notification — deal names + prices from the payload, a View deals
- * action, and vibration. v15: cache bump for the Food tab + drawer. */
-var CACHE = 'penny-alerts-v15';
+ * action, and vibration. v15: cache bump for the Food tab + drawer.
+ * v16: cache bump for the per-chain Food searches + app-only section. */
+var CACHE = 'penny-alerts-v16';
 var SHELL = ['index.html', 'styles.css', 'app.js', 'manifest.json', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-512-maskable.png'];
 var BRIEFING = 'rocketshon.github.io/penny-finder-backend/briefings/latest.json';
 var WEEKLY = 'feed/weekly.json';

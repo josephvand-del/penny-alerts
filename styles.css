@@ -259,6 +259,8 @@ main { padding: 12px 12px 40px; max-width: 860px; margin: 0 auto; }
 }
 .check { display: flex; align-items: center; gap: 6px; font-size: 14px; }
 .hint { font-size: 13px; color: #555; margin: 6px 0 12px; }
+/* v16: the App-only deals section head on the Food tab. */
+.app-only-head { font-size: 15px; margin: 18px 0 2px; padding-top: 14px; border-top: 1px solid #ddd; }
 
 .deal-list { display: grid; gap: 10px; }
 .deal {

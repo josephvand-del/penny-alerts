@@ -25,16 +25,18 @@ phone's home screen (it's a PWA).
   after 5pm MST the app already treated tomorrow's deals as today's.
   Future items roll into "today" as the calendar advances, because the
   comparison happens at render time, not at parse time.
-- **Food tab (v15)**: a third tab next to Deals and Bundles, for
+- **Food tab (v15, per-chain searches v16)**: a third tab next to Deals and Bundles, for
   grocery / food / restaurant deals — especially local fast food and
   restaurant deals near Aurora/Denver (80017). Free means $0 after
   coupons/rebates, and the tab defaults to **Price: Low to High** so
   the free deals sit at the top. Pennies stay on the Deals tab even
   when they are food (the penny hunt is the Deals tab's job); food
   stacks stay on Bundles (stack wins over food). Sources: Slickdeals
-  free-food / fast-food / restaurant / Kroger searches, Hip2Save
+  free-food / fast-food / restaurant / Kroger searches, one Slickdeals
+  search per common fast-food chain (46 chains, v16), Hip2Save
   restaurant deals, KCL Kroger stacks, plus any deal whose department
-  is Grocery.
+  is Grocery. Deals that only work in the chain's app sit in their own
+  labeled section on the Food tab, never in the main list.
 - **Hamburger drawer (v15):** the top-left three-line button opens a
   drawer with Watchlist and Lists & Sources. The Deals / Bundles /
   Food tabs stay visible on top — nothing else crowds the header.
@@ -466,11 +468,12 @@ WP search is fuzzy); Freebie Guy's Dollar Tree pages (403
 Cloudflare); Yo! Free Samples (Cloudflare-blocked). Facebook/TikTok
 DT lists are group-gated, not parseable.
 
-### Food / restaurant deals (Food tab — v15)
+### Food / restaurant deals (Food tab — v15, per-chain searches v16)
 
 | Source | What happens |
 | --- | --- |
 | Slickdeals — free food / fast food / restaurant searches | Parsed — 25 / 20 / 25 items (RSS search, ≤14 days old, marked `food`, department Restaurant) |
+| Slickdeals — one search per fast-food chain (v16, 46 chains) | Parsed — each search is an RSS search filtered to threads that actually name the chain (≤14 days old, marked `food`, department Restaurant). McDonald's, Burger King, Wendy's, Taco Bell, Chick-fil-A, Subway, KFC, Domino's, Pizza Hut, Little Caesars, Sonic, Arby's, Dairy Queen, Panda Express, Chipotle, Jimmy John's, Jersey Mike's, Panera, Starbucks, Dunkin', Popeyes, Five Guys, Wingstop, Raising Cane's, Papa John's, Jack in the Box, Hardee's, Carl's Jr., Culver's, Whataburger, Del Taco, Zaxby's, Firehouse Subs, Qdoba, Shake Shack, Tim Hortons, Krispy Kreme, Baskin-Robbins, Smoothie King, Jamba, El Pollo Loco, Bojangles, Church's Chicken, White Castle, Long John Silver's, Moe's. Threads that only work in the chain's app are flagged `app_only` and render in their own labeled section on the Food tab, never in the main list. |
 | Slickdeals — Kroger search | Parsed — 4 items (marked `food`, department Grocery) |
 | Hip2Save — restaurant deals (WP API) | Parsed — 5 items (marked `food`) |
 | Krazy Coupon Lady — Kroger stacks | Parsed — 11 stack cards (marked `food`, department Grocery; they live on Bundles, not Food — stack wins over food) |
@@ -479,9 +482,13 @@ DT lists are group-gated, not parseable.
 Not wired: Freebie Guy food pages (403 Cloudflare); Yo! Free Samples
 (Cloudflare-blocked); KCL `/deals/restaurants` (404); RetailShout's
 Kroger / Dollar Tree weekly-ad hubs (landing pages, no ad dates, no
-priced items); Southern Savers has no Kroger ad series. A Slickdeals
-McDonald's search was skipped — covered by the fast-food / restaurant
-searches. Slickdeals threads about future deals are dated by post date,
+priced items); Southern Savers has no Kroger ad series. Per-chain
+Hip2Save WP searches were tried and dropped (the search is too fuzzy —
+a taco-bell search returned 0 relevant posts out of 5); KCL
+`/coupons-for/<chain>` pages are template shells with the same 11
+generic items for every chain, no chain deals. DealNews has no food RSS
+(404 / 403). Checkers was skipped — the 'checkers' search is dominated
+by the board game. Slickdeals threads about future deals are dated by post date,
 so a deal starting in the future but posted today is not recognised as
 future (known limitation).
 

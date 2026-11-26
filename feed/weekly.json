@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-26T01:22:41+00:00",
+  "generated_at": "2026-11-26T01:59:47+00:00",
   "items": [
     {
       "department": "General",
@@ -223,7 +223,7 @@
     {
       "department": "General",
       "first_seen": "2026-11-26",
-      "image": "",
+      "image": "https://fabulesslyfrugal.com/wp-content/uploads/2026/11/10FT-USB-C-Cable-Fast-Charging-240W-USB-C-to-USB-C-Cable-Cord.png",
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-25",
@@ -289,12 +289,12 @@
     {
       "department": "General",
       "first_seen": "2026-11-26",
-      "image": "https://slickdeals.net/attachment/1/1/7/1/5/2/7/450x450/22576095.thumb",
+      "image": "https://slickdeals.net/attachment/1/1/7/1/5/2/7/450x450/22580385.thumb",
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-26",
-      "name": "12-Pk 14-Ct Trident Sugar Free Gum (Cinnamon) $7.35 w/ S&S",
-      "price": "$7.35",
+      "name": "20-Ct 0.8-Oz Jack Link's Classics Original Jerky Sticks $11.80 w/ S&S",
+      "price": "$11.80",
       "retailer": "amazon",
       "source": "slickdeals.net",
       "source_count": 1,
@@ -302,35 +302,33 @@
         "slickdeals.net"
       ],
       "steps": [
-        "Amazon [amazon.com] has 12-Pack 14-Count Trident Sugar Free Gum (Cinnamon) for $12.23 - 35% at checkout - 5% when you check out via Subscribe & Save = $7.34."
+        "Amazon [amazon.com] has 20-ct 0.8-oz Jack Link's Classics Original Jerky Sticks for $20.01 - 35% when you 'clip' the coupon on product page - 5% when you check out via Subscribe & Save = $12.01...."
       ],
       "upc": "",
-      "url": "https://slickdeals.net/f/20391720-sns-ac-7-34-or-6-12-12-pack-14-count-trident-sugar-free-gum-cinnamon-at-amazon",
+      "url": "https://slickdeals.net/f/20393343-sns-ac-12-01-or-10-01-20-ct-0-8-oz-jack-link-s-classics-original-jerky-sticks-at-amazon",
       "valid_to": "2026-12-03",
       "was": ""
     },
     {
-      "department": "Restaurant",
+      "department": "Grocery",
       "first_seen": "2026-11-26",
       "food": true,
-      "image": "https://slickdeals.net/attachment/2/0/3/1/1/5/0/450x450/22568112.thumb",
+      "image": "https://slickdeals.net/attachment/1/1/7/1/5/2/7/450x450/22575858.thumb",
       "is_stack": false,
       "kind": "deal",
-      "list_date": "2026-11-24",
-      "name": "18L Everfun Hydration Backpack w/ 2L Water Bladder & Rain Cover (Blue or Orange) $19.99 + Free Shipping w/ Prime or on $35+",
-      "price": "$19.99",
+      "list_date": "2026-11-26",
+      "name": "24-Oz Contigo Cortland Chill 2.0 Stainless Steel Vacuum Insulated Water Bottle $13",
+      "price": "$13.00",
       "retailer": "amazon",
       "source": "slickdeals.net",
       "source_count": 1,
       "sources": [
         "slickdeals.net"
       ],
-      "steps": [
-        "Gmt bags us via Amazon [amazon.com] has 18L Everfun Hydration Backpack w/ 2L Water Bladder & Rain Cover (Blue or Orange) on sale for $19.99 when you apply promo code YJW0FEID at checkout...."
-      ],
+      "steps": [],
       "upc": "",
-      "url": "https://slickdeals.net/f/20388522-18l-everfun-hydration-backpack-w-2l-water-bladder-rain-cover-blue-or-orange-19-99-free-shipping-w-prime-or-on-35",
-      "valid_to": "2026-12-01",
+      "url": "https://slickdeals.net/f/20391621-12-99-24-oz-contigo-cortland-chill-2-0-vacuum-insulated-water-bottle-at-amazon",
+      "valid_to": "2026-12-03",
       "was": ""
     },
     {
@@ -354,6 +352,27 @@
       "url": "https://slickdeals.net/f/20398872-24-pack-5-5-oz-hill-s-prescription-diet-c-d-multicare-urinary-care-wet-cat-food-53-94-0-409-oz-w-s-s",
       "valid_to": "2026-12-02",
       "was": ""
+    },
+    {
+      "department": "Toys & Games",
+      "first_seen": "2026-11-26",
+      "image": "https://fabulesslyfrugal.com/wp-content/uploads/2026/11/3-in-1-Game-Table-with-Benches-1.png",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "3-in-1 Game Table with Benches $1,059 Shipped Free (Reg. $1,450)",
+      "price": "$1059.00",
+      "retailer": "amazon",
+      "source": "fabulesslyfrugal.com",
+      "source_count": 1,
+      "sources": [
+        "fabulesslyfrugal.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://fabulesslyfrugal.com/deals/3-in-1-game-table-with-benches/",
+      "valid_to": "2026-12-03",
+      "was": "$1450.00"
     },
     {
       "department": "General",
@@ -582,9 +601,33 @@
       "was": ""
     },
     {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "https://slickdeals.net/attachment/3/5/9/4/0/2/8/450x450/22482804.thumb",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "[SnS, AC] $13.98 or $11.98 | 12-Pack 6.5-Oz Starbucks RTD Coffee Espresso And Cream at Amazon ($1.17 each)",
+      "price": "$13.98",
+      "retailer": "amazon",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Amazon [amazon.com] has 12-Pack 6.5-Oz Starbucks RTD Coffee Espresso And Cream for $19.98 - 25% when you 'clip' the coupon on product page - 5% when you check out via Subscribe & Save = $13.98...."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20336742-sns-ac-13-98-or-11-98-12-pack-6-5-oz-starbucks-rtd-coffee-espresso-and-cream-at-amazon-1-17-each",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
       "department": "General",
       "first_seen": "2026-11-26",
-      "image": "https://fabulesslyfrugal.com/wp-content/uploads/2026/11/Acrylic-Paint-Markers-36-Count.png",
+      "image": "",
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-26",
@@ -1006,27 +1049,6 @@
     {
       "department": "General",
       "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795599312-71zz0tskfhl.jpg?h=250&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Bella Fits-Anywhere 2-Slice Slim Toaster for $15 + free shipping w/ Prime",
-      "price": "$15.00",
-      "retailer": "amazon",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://www.dealnews.com/Bella-Fits-Anywhere-2-Slice-Slim-Toaster-for-15-free-shipping-w-Prime/22430540.html",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
       "image": "https://fabulesslyfrugal.com/wp-content/uploads/2026/11/BIC-Ocean-Themed-Gel-Pens.png",
       "is_stack": false,
       "kind": "deal",
@@ -1044,27 +1066,6 @@
       "url": "https://fabulesslyfrugal.com/deals/bic-gelocity-quick-dry-assorted-colors-gel-pens/",
       "valid_to": "2026-12-02",
       "was": "$13.29"
-    },
-    {
-      "department": "Auto",
-      "first_seen": "2026-11-26",
-      "image": "https://slickdeals.net/attachment/1/1/7/1/5/2/7/450x450/22593681.thumb",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-26",
-      "name": "Bicycle Playing Cards (Colors May Vary: Red, Blue or Black) $2 + Free S&H w/ Prime",
-      "price": "$2.00",
-      "retailer": "amazon",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20398368-1-99-bicycle-playing-cards-colors-may-vary-red-blue-or-black-at-woot",
-      "valid_to": "2026-12-03",
-      "was": ""
     },
     {
       "department": "General",
@@ -1131,6 +1132,27 @@
       "was": ""
     },
     {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://d.dlnws.com/64599/1795655322-71jzx_rfzul.jpg?h=250&w=250",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "BOSS TU-3 Chromatic Floor Tuner Pedal for $87 + free shipping",
+      "price": "$87.00",
+      "retailer": "amazon",
+      "source": "dealnews.com",
+      "source_count": 1,
+      "sources": [
+        "dealnews.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.dealnews.com/products/Boss/BOSS-TU-3-Chromatic-Floor-Tuner-Pedal/563986.html",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
       "department": "Baby & Kids",
       "first_seen": "2026-11-26",
       "image": "https://slickdeals.net/attachment/3/0/4/6/9/4/2/0/450x450/22590066.thumb",
@@ -1148,29 +1170,6 @@
       "steps": [],
       "upc": "",
       "url": "https://slickdeals.net/f/20396931-bright-starts-5-in-1-your-way-ball-play-baby-gym-ball-pit-play-mat-totally-tropical-25-free-shipping-w-prime-or-on-35",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "https://slickdeals.net/attachment/9/3/0/4/6/1/9/450x450/22587981.thumb",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "CAKRNPS LED 10X Dimmable Magnifying Goose-Neck Glass Lamp w/ Clamp $10.90",
-      "price": "$10.90",
-      "retailer": "amazon",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [
-        "WM Health Store via Amazon [amazon.com] has 6.7\" CAKRNPS LED 10X Dimmable Magnifying Goose-Neck Glass Lamp w/ Clamp on sale for $21.83 - 50% off when you enter the coupon code JOJWU7OL =$10.91...."
-      ],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20396112-6-7-cakrnps-10x-dimmable-magnifying-goose-neck-led-lamp-10-91-free-shipping-w-prime-or-on-35",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -1242,29 +1241,6 @@
       "was": ""
     },
     {
-      "department": "Home & Seasonal",
-      "first_seen": "2026-11-26",
-      "image": "https://fabulesslyfrugal.com/wp-content/uploads/2026/11/Christmas-Tree-Skirt.png",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Christmas Tree Skirt, 24 Inch $4.99 After Code + Prime Shipped Free (Reg. $15)",
-      "price": "$4.99",
-      "retailer": "amazon",
-      "source": "fabulesslyfrugal.com",
-      "source_count": 1,
-      "sources": [
-        "fabulesslyfrugal.com"
-      ],
-      "steps": [
-        "Made from soft polyester with a textured front and nonwoven backing, it provides a cozy appearance and has neatlyThe post Christmas Tree Skirt, 24 Inch $4.99 After Code + Prime Shipped Free (Reg."
-      ],
-      "upc": "",
-      "url": "https://fabulesslyfrugal.com/deals/christmas-tree-skirt/",
-      "valid_to": "2026-12-02",
-      "was": "$15.00"
-    },
-    {
       "department": "Grocery",
       "first_seen": "2026-11-26",
       "food": true,
@@ -1289,7 +1265,7 @@
     {
       "department": "Clothing",
       "first_seen": "2026-11-26",
-      "image": "https://fabulesslyfrugal.com/wp-content/uploads/2026/11/Columbia-Mens-Glennaker-Lake-II-Rain-Jacket.jpg",
+      "image": "",
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-25",
@@ -1543,27 +1519,6 @@
       "was": "$99.99"
     },
     {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795537638-draftworks_img_rp2tmbua2nmefhnlhoh.jpeg?h=250&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "DJI Mavic 4 Pro Drone with DJI RC 2 for $1,979.10 + free shipping",
-      "price": "$1979.10",
-      "retailer": "amazon",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://www.dealnews.com/products/DJI/DJI-Mavic-4-Pro-Drone-with-DJI-RC-2/563423.html",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
       "department": "Home & Seasonal",
       "first_seen": "2026-11-26",
       "image": "https://fabulesslyfrugal.com/wp-content/uploads/2026/11/9ft-Unlit-Dunhill-Fir-Full-Artificial-Christmas-Tree.png",
@@ -1585,6 +1540,28 @@
       "was": "$609.99"
     },
     {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "https://slickdeals.net/attachment/3/2/2/1/3/6/9/5/450x450/22407657.thumb",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-17",
+      "name": "Dunkin’ Original Blend Medium Roast Ground Coffee, 18 Oz. Bags (Pack of 6) $52.02",
+      "price": "$52.02",
+      "retailer": "amazon",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20330013-dunkin-original-blend-medium-roast-ground-coffee-18-oz-bags-pack-of-6-52-02",
+      "valid_to": "2026-11-24",
+      "was": ""
+    },
+    {
       "department": "General",
       "first_seen": "2026-11-26",
       "image": "",
@@ -1602,27 +1579,6 @@
       "steps": [],
       "upc": "",
       "url": "https://hip2save.com/deals/emotional-support-pals-nfl/",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "Electronics",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795514330-61lnpbt7kml.jpg?h=250&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Eucos 62\" Phone Tripod & Selfie Stick for $19 w/ Prime + free shipping w/ Prime",
-      "price": "$19.00",
-      "retailer": "amazon",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://www.dealnews.com/products/Eucos/Eucos-62-Phone-Tripod-Selfie-Stick/563277.html",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -1933,6 +1889,48 @@
       "was": "$20.00"
     },
     {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Initial Rings Only $4.79 Shipped on Amazon (Regularly $10)",
+      "price": "$4.79",
+      "retailer": "amazon",
+      "source": "hip2save.com",
+      "source_count": 1,
+      "sources": [
+        "hip2save.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://hip2save.com/deals/initial-ring/",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://d.dlnws.com/64599/1791332253-71mlaytmfol.jpg?h=250&w=245",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Instant Pot Duo 6-Qt. 7-in-1 Electric Pressure Cooker for $60 + free shipping",
+      "price": "$60.00",
+      "retailer": "amazon",
+      "source": "dealnews.com",
+      "source_count": 1,
+      "sources": [
+        "dealnews.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.dealnews.com/products/Instant-Pot/Instant-Pot-Duo-6-Qt-7-in-1-Electric-Pressure-Cooker/541233.html",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
       "department": "Grocery",
       "first_seen": "2026-11-26",
       "food": true,
@@ -1973,6 +1971,27 @@
       "upc": "",
       "url": "https://fabulesslyfrugal.com/deals/johnsons-9-oz-cornstarch-baby-powder-with-aloe-vitamin-e-2-pack/",
       "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Tools",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Kershaw Recap Keychain Multi-Tool w/ Bottle Opener, Pry Bar & Flathead Screwdriver $8",
+      "price": "$8.00",
+      "retailer": "amazon",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20398692-7-99-kershaw-recap-keychain-multi-tool-w-bottle-opener-pry-bar-flathead-screwdriver-at-amazon",
+      "valid_to": "2026-12-03",
       "was": ""
     },
     {
@@ -2101,27 +2120,6 @@
       "upc": "",
       "url": "https://slickdeals.net/f/20383017-lego-one-piece-the-baratie-floating-restaurant-building-set-75640-296-99-free-shipping",
       "valid_to": "2026-12-01",
-      "was": ""
-    },
-    {
-      "department": "Toys & Games",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795601390-product-trimmed.jpg?h=215&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "LEGO Pokemon Iconic Trainer Moments Poke Ball Building Set for $225 + free shipping",
-      "price": "$225.00",
-      "retailer": "amazon",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://www.dealnews.com/LEGO-Pokemon-Iconic-Trainer-Moments-Poke-Ball-Building-Set-for-225-free-shipping/22430561.html",
-      "valid_to": "2026-12-02",
       "was": ""
     },
     {
@@ -2409,27 +2407,6 @@
       "was": ""
     },
     {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "https://glitchndealz.com/wp-content/uploads/2026/11/Nike-Air-Trainer-1-in-Teal-Nebula.jpg",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Nike Air Trainer 1 Sneakers Spotted for $38.01 on Amazon",
-      "price": "$38.01",
-      "retailer": "amazon",
-      "source": "glitchndealz.com",
-      "source_count": 1,
-      "sources": [
-        "glitchndealz.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://glitchndealz.com/2026/11/nike-air-trainer-1-amazon-38.html",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
       "department": "Restaurant",
       "first_seen": "2026-11-26",
       "food": true,
@@ -2560,27 +2537,6 @@
       "was": ""
     },
     {
-      "department": "Electronics",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795079267-f7lc7zp.png?h=250&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Prime Video Black Friday Apple TV Subscription Deal for $6.99/mo. for 6 months + free shipping",
-      "price": "$6.99",
-      "retailer": "amazon",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://www.dealnews.com/Prime-Video-Black-Friday-Apple-TV-Subscription-Deal-for-6-99-mo-for-6-months-free-shipping/22430593.html",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
       "department": "Grocery",
       "first_seen": "2026-11-26",
       "food": true,
@@ -2626,27 +2582,6 @@
       "was": ""
     },
     {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Queen Bed Pillow 2-Pack w/ 100% Cotton Covers Only $20 Shipped on Amazon (Reg. $45)",
-      "price": "$20.00",
-      "retailer": "amazon",
-      "source": "hip2save.com",
-      "source_count": 1,
-      "sources": [
-        "hip2save.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://hip2save.com/deals/amazon-cgk-pillows/",
-      "valid_to": "2026-12-02",
-      "was": "$45.00"
-    },
-    {
       "department": "Restaurant",
       "first_seen": "2026-11-26",
       "food": true,
@@ -2666,6 +2601,27 @@
       "upc": "",
       "url": "https://slickdeals.net/f/20397192-rachael-ray-cook-create-10-5-nonstick-stir-fry-pan-wok-19-99-free-shipping-w-prime-or-on-35",
       "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Rainbow Colored Pencils 12-Pack Only $2.99 Shipped on Amazon | Includes Toppers + Sharpener",
+      "price": "$2.99",
+      "retailer": "amazon",
+      "source": "hip2save.com",
+      "source_count": 1,
+      "sources": [
+        "hip2save.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://hip2save.com/deals/rainbow-colored-pencils/",
+      "valid_to": "2026-12-03",
       "was": ""
     },
     {
@@ -2780,29 +2736,6 @@
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-25",
-      "name": "Satin Sheet Sets from $10 Shipped for Amazon Prime Members",
-      "price": "$10.00",
-      "retailer": "amazon",
-      "source": "hip2save.com",
-      "source_count": 1,
-      "sources": [
-        "hip2save.com"
-      ],
-      "steps": [
-        "Through November 30th, head over to Amazon where Prime members can grab BEDELITE Satin Sheet Sets for as low as $10.31 shipped (regularly $19.99) when you use promo code I9NI1FG5 at checkout!"
-      ],
-      "upc": "",
-      "url": "https://hip2save.com/deals/bedelite-satin-sheets/",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
       "name": "Scrubbing Bubbles Drop-Ins 5-Pack Only $4 Shipped on Amazon",
       "price": "$4.00",
       "retailer": "amazon",
@@ -2817,29 +2750,6 @@
       ],
       "upc": "",
       "url": "https://hip2save.com/deals/scrubbing-bubbles-drop-ins/",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Select Accounts: 12-Pk 14-Ct Trident Sugar Free Gum (Original) $6.25 w/ S&S",
-      "price": "$6.25",
-      "retailer": "amazon",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [
-        "Amazon [amazon.com] has 12-Pack 14-Piece Trident Original Sugar Free Gum for $10.39 - 35% off when you 'clip' the coupon on product page [amazon.com] - 5% off when you checkout via Subscribe & Save..."
-      ],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20391600-12-pack-14-piece-trident-original-sugar-free-gum-6-23-0-52-per-pack-w-s-s-free-shipping-w-prime-or-on-35",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -2929,6 +2839,28 @@
       "steps": [],
       "upc": "",
       "url": "https://slickdeals.net/f/20397597-bounty-quick-size-paper-towels-8-family-triple-rolls-27-regular-rolls-19-98-free-shipping-w-s-s-amazon",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Seventh Generation Power+ Dishwasher Detergent, Fresh Citrus, 70-Count $13.79 Each w/ Subscribe & Save and Buy 2, Save 25% at Amazon",
+      "price": "$13.79",
+      "retailer": "amazon",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20399880-seventh-generation-power-dishwasher-detergent-fresh-citrus-70-count-13-79-each-w-subscribe-save-and-buy-2-save-25-at-amazon",
       "valid_to": "2026-12-03",
       "was": ""
     },
@@ -3579,6 +3511,80 @@
       "was": "$36.69"
     },
     {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-16",
+      "name": "Arby's Free Sandwich with $5 purchase YMMV",
+      "price": "$5.00",
+      "retailer": "arbys",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "It looks like it's an offer for people who redeemed the BOGO weekend offer.",
+        "Great work redeeming BOGO weekends."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20319660-arby-s-free-sandwich-with-5-purchase-ymmv",
+      "valid_to": "2026-11-23",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-12",
+      "name": "BOGO Free Sandwich for Arby's rewards members",
+      "price": "",
+      "retailer": "arbys",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Offer BOGO Sandwich Expires 11/15/2026 More meat.",
+        "BOGO Sandwich ends Sunday."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20298303-bogo-free-sandwich-for-arby-s-rewards-members",
+      "valid_to": "2026-11-19",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "BOGO Sandwiches at Arby's",
+      "price": "",
+      "retailer": "arbys",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Arby's has another BOGO sandwich offer."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20338338-bogo-sandwiches-at-arby-s",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
       "department": "Home & Seasonal",
       "first_seen": "2026-11-26",
       "image": "https://d.dlnws.com/64599/1795633760-belk.webp?h=250&w=176",
@@ -3663,6 +3669,27 @@
       "was": "$100.00"
     },
     {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "10000mAh 20W Energizer PD Magnetic Wireless MagSafe Portable Power Bank $16 + Free S&H",
+      "price": "$16.00",
+      "retailer": "best-buy",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20394666-energizer-10-000mah-slim-metal-20w-magnetic-wireless-qi-qi2-0-magsafe-powerbank-portable-charger-2-outputs-led-display-usb-c-black-15-99",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
       "department": "Restaurant",
       "first_seen": "2026-11-26",
       "food": true,
@@ -3682,27 +3709,6 @@
       "upc": "",
       "url": "https://slickdeals.net/f/20312307-26-cu-ft-kitchenaid-36-wide-multi-door-french-door-refrigerator-1649-99-40-delivery-w-installation",
       "valid_to": "2026-11-22",
-      "was": ""
-    },
-    {
-      "department": "Auto",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795635497-b5de0a6c-b8c7-4348-8d93-4e4b334385d7.webp?h=166&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Best Buy Black Friday Discounted Gift Card Deals: Up to 20% + free shipping",
-      "price": "$100.00",
-      "retailer": "best-buy",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://www.dealnews.com/Best-Buy-Black-Friday-Discounted-Gift-Card-Deals-Up-to-20-free-shipping/22431513.html",
-      "valid_to": "2026-12-02",
       "was": ""
     },
     {
@@ -3787,6 +3793,302 @@
       "upc": "",
       "url": "https://slickdeals.net/f/20383923-samsung-30-in-wide-5-burner-6-0-cu-ft-freestanding-gas-range-with-18k-btu-dual-power-burner-self-clean-stainless-steel-699-99-bestbuy-com",
       "valid_to": "2026-12-01",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-16",
+      "name": "BOGO Whopper Offer (ymmv)",
+      "price": "",
+      "retailer": "burger-king",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Nov 15, I have an in-store BOGO Whopper deal in my Burger King app."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20317680-bogo-whopper-offer-ymmv",
+      "valid_to": "2026-11-23",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-18",
+      "name": "Burger King 100 Free Crowns",
+      "price": "",
+      "retailer": "burger-king",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20330490-burger-king-100-free-crowns",
+      "valid_to": "2026-11-25",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-15",
+      "name": "Free Famous Star At Carl's Jr W/Large Drink Purchase. SoCal Only.",
+      "price": "",
+      "retailer": "carls-jr",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20315898-free-famous-star-at-carl-s-jr-w-large-drink-purchase-socal-only",
+      "valid_to": "2026-11-22",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-16",
+      "name": "Free famous star w/ cheese at Carl's Jr",
+      "price": "",
+      "retailer": "carls-jr",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20317488-free-famous-star-w-cheese-at-carl-s-jr",
+      "valid_to": "2026-11-23",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-24",
+      "name": "Gobble Up These Savings! $5 Off $15 Orders For My Rewards Members @ Carl's Jr",
+      "price": "$15.00",
+      "retailer": "carls-jr",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "My Rewards members save $5 off any $15+ order."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20387085-gobble-up-these-savings-5-off-15-orders-for-my-rewards-members-carl-s-jr",
+      "valid_to": "2026-12-01",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-17",
+      "name": "$11 2027 Chick-Fil-A Calendar with 12 months of 'freebie' coupons Limit 5 per account",
+      "price": "$11.00",
+      "retailer": "chick-fil-a",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20327421-11-2027-chick-fil-a-calendar-with-12-months-of-freebie-coupons-limit-5-per-account",
+      "valid_to": "2026-11-24",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Capital One Shopping, spend $20 at Amazon online or in-app, get $5 credit till 12/2 targeted offer, YMMV",
+      "price": "$20.00",
+      "retailer": "chick-fil-a",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20399832-capital-one-shopping-spend-20-at-amazon-online-or-in-app-get-5-credit-till-12-2-targeted-offer-ymmv",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "$42, Chipotle $50 Gift Card (Email Delivery), Newegg",
+      "price": "$42.00",
+      "retailer": "chipotle",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Newegg has Chipotle $50 Gift Card (Email Delivery) for $42 with promo code BFEF114."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20344740-42-chipotle-50-gift-card-email-delivery-newegg",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "** Upcoming 11/27 ** Chipotle: $0 Delivery Fee on Orders $10+",
+      "price": "$0.00",
+      "retailer": "chipotle",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Chipotle [chipotle.com] is offering $0 Delivery Fee on Orders $10+ when you enter coupon code CYBER26 at checkout."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20397711-upcoming-11-27-chipotle-0-delivery-fee-on-orders-10",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "BOGO Chipotle Nov 25",
+      "price": "",
+      "retailer": "chipotle",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Details: BOGO exclusive to Chipotle Rewards members who scan for Rewards at point of sale at time of purchase."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20350587-bogo-chipotle-nov-25",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "https://hip2save.com/wp-content/uploads/2021/03/Chipotle-quesadilla.jpg?w=912&#038;resize=912%2C479&#038;strip=all",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Chipotle BOGO FREE Entrées Today from 5-9 PM",
+      "price": "$0.00",
+      "retailer": "chipotle",
+      "source": "hip2save.com",
+      "source_count": 1,
+      "sources": [
+        "hip2save.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://hip2save.com/deals/chipotle-bogo/",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-16",
+      "name": "Chipotle Sneak it in Hoodie Sweepstakes (Rewards members) (points or mail-in) 11/22/26",
+      "price": "",
+      "retailer": "chipotle",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20319180-chipotle-sneak-it-in-hoodie-sweepstakes-rewards-members-points-or-mail-in-11-22-26",
+      "valid_to": "2026-11-23",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-18",
+      "name": "Chipotle Sneak-it-in Hoodie + Free Entree Card (Drops at 11/18 12PM ET) - $53",
+      "price": "$53.00",
+      "retailer": "chipotle",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20330820-chipotle-sneak-it-in-hoodie-free-entree-card-drops-at-11-18-12pm-et-53",
+      "valid_to": "2026-11-25",
       "was": ""
     },
     {
@@ -4274,6 +4576,30 @@
       "url": "https://thekrazycouponlady.com/coupons-for/cvs",
       "valid_to": "2026-11-28",
       "was": "$16.49"
+    },
+    {
+      "department": "Electronics",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/07/total-home.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "ALL Total Home Trash Bags BOGO Free at CVS! Just Use Your Phone",
+      "price": "",
+      "retailer": "cvs",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [
+        "We have a deal on ALL Total Home Trash Bags or food storage, all on sale BOGO Free!",
+        "Plus check your CVS account: I have a $2 off $10 CRT coupon, other values are also out there!"
+      ],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/all-total-home-trash-bags-bogo-free-at-cvs-just-use-your-phone-2.html",
+      "valid_to": "2026-12-02",
+      "was": ""
     },
     {
       "department": "General",
@@ -4849,6 +5175,30 @@
       "was": ""
     },
     {
+      "department": "Electronics",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/cvs-trip-3.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "CVS Shopping Trip | Get $45 worth of Old Spice, Axe & General Mills for $1! Just Use Your Phone {Ibotta}",
+      "price": "$1.00",
+      "retailer": "cvs",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [
+        "This trip combines digital coupons and ExtraBucks rewards to score $45.04 worth of products for $1.64 after stacked offers!",
+        "Then you can clip the offers and they will redeem once you pickup your..."
+      ],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/cvs-shopping-trip-get-45-worth-of-old-spice-axe-general-mills-for-1-just-use-your-phone-ibotta.html",
+      "valid_to": "2026-12-02",
+      "was": "$45.00"
+    },
+    {
       "department": "General",
       "first_seen": "2026-11-23",
       "image": "",
@@ -4958,14 +5308,105 @@
       "was": ""
     },
     {
-      "department": "Clothing",
+      "department": "Restaurant",
       "first_seen": "2026-11-26",
+      "food": true,
       "image": "",
       "is_stack": false,
       "kind": "deal",
-      "list_date": "2026-11-26",
-      "name": "VRST Men's Full-Zip Knit Jacket w/ Zippered Pockets (Pure White) $18 + Free S&H",
-      "price": "$18.00",
+      "list_date": "2026-11-15",
+      "name": "Dairy Queen- 2 for $6 cupcakes",
+      "price": "$6.00",
+      "retailer": "dairy-queen",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20314230-dairy-queen-2-for-6-cupcakes",
+      "valid_to": "2026-11-22",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-16",
+      "name": "Dairy Queen- BOGO$0.99 large Sundae",
+      "price": "$0.99",
+      "retailer": "dairy-queen",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20318529-dairy-queen-bogo-0-99-large-sundae",
+      "valid_to": "2026-11-23",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Dairy Queen- Free 25 rewards points (click in email)",
+      "price": "",
+      "retailer": "dairy-queen",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Click an email sent out by Dairy Queen Make sure that you are signed into your account I find it easier to do it on mobile and you have a tab already signed into your rewards account or the app..."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20396376-dairy-queen-free-25-rewards-points-click-in-email",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-23",
+      "name": "Dairy Queen- Free large fries with order",
+      "price": "",
+      "retailer": "dairy-queen",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20375748-dairy-queen-free-large-fries-with-order",
+      "valid_to": "2026-11-30",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "Market Basket -20% Select Physical Gift Cards November 27, 2026 only",
+      "price": "",
       "retailer": "dicks",
       "source": "slickdeals.net",
       "source_count": 1,
@@ -4974,8 +5415,8 @@
       ],
       "steps": [],
       "upc": "",
-      "url": "https://slickdeals.net/f/20396190-vrst-men-s-knit-jacket-white-17-98-free-shipping",
-      "valid_to": "2026-12-03",
+      "url": "https://slickdeals.net/f/20347728-market-basket-20-select-physical-gift-cards-november-27-2026-only",
+      "valid_to": "2026-11-26",
       "was": ""
     },
     {
@@ -6638,7 +7079,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/007/105/400/0018/front_en.10.400.jpg",
       "is_stack": false,
       "kind": "penny",
       "list_date": "2026-11-17",
@@ -8297,6 +8738,7 @@
     {
       "department": "Toys & Games",
       "first_seen": "2026-11-23",
+      "food": true,
       "image": "",
       "is_stack": false,
       "kind": "deal",
@@ -8341,6 +8783,7 @@
     {
       "department": "Toys & Games",
       "first_seen": "2026-11-23",
+      "food": true,
       "image": "",
       "is_stack": false,
       "kind": "deal",
@@ -8491,7 +8934,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-26",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/088/589/833/0251/front_en.3.400.jpg",
       "is_stack": false,
       "kind": "penny",
       "list_date": "2026-11-24",
@@ -13828,7 +14271,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/085/402/500/8455/front_en.3.400.jpg",
       "is_stack": false,
       "kind": "penny",
       "list_date": "2026-09-29",
@@ -21051,7 +21494,7 @@
     {
       "department": "Penny",
       "first_seen": "2026-11-22",
-      "image": "",
+      "image": "https://images.openfoodfacts.org/images/products/002/200/002/0680/front_en.18.400.jpg",
       "is_stack": false,
       "kind": "penny",
       "list_date": "2026-10-27",
@@ -26341,6 +26784,194 @@
       "was": "$4.00"
     },
     {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-21",
+      "name": "Dominos Pizza: Pay with PAZE, get 35% off your order, ends 11/29",
+      "price": "",
+      "retailer": "dominos",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20364693-dominos-pizza-pay-with-paze-get-35-off-your-order-ends-11-29",
+      "valid_to": "2026-11-28",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "40-Count Dunkin' Refreshers Green Tea Drink Mix Packets (Variety Pack) $7.50 w/ S&S + Free Shipping w/ Prime or on $35+",
+      "price": "$7.50",
+      "retailer": "dunkin",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Amazon [amazon.com] has 40-Count Dunkin' Refreshers Green Tea Drink Mix Packets (Variety Pack) on sale for $7.89 - 5% off when you checkout via Subscribe & Save = $7.50."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20340471-40-count-dunkin-refreshers-green-tea-drink-mix-packets-variety-pack-7-50-w-s-s-free-shipping-w-prime-or-on-35",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "6-Pack 12-Oz Dunkin' Original Blend Medium Roast Whole Bean Coffee $30.88 ($5.15 each bag) w/ S&S + Free Shipping w/ Prime or on $35+",
+      "price": "$30.88",
+      "retailer": "dunkin",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Amazon [amazon.com] has 6-Pack 12-Oz Dunkin' Original Blend Medium Roast Whole Bean Coffee on sale for $41.17 - 20% off when you 'clip' the coupon on product page [amazon.com] - 5% off when you..."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20338722-6-pack-12-oz-dunkin-original-blend-medium-roast-whole-bean-coffee-30-88-5-15-each-bag-w-s-s-free-shipping-w-prime-or-on-35",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "Dunkin' at Home Extras - discounted reward promo codes through 11/23",
+      "price": "$5.00",
+      "retailer": "dunkin",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Get a $5 Promo eCard or only 400 points or a $10 Promo eCard for only 900 points!"
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20346564-dunkin-at-home-extras-discounted-reward-promo-codes-through-11-23",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-18",
+      "name": "Dunkin' Donuts Rewards Offer: Dunkin' Donuts Hot or Iced Coffee Drink (Any Size) Free to Claim (While Offer Last)",
+      "price": "",
+      "retailer": "dunkin",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Free Hot or iced coffee at Dunkin (any size) using code: DUNKINRUNSONDOOM Claim before they run out"
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20336529-dunkin-donuts-rewards-offer-dunkin-donuts-hot-or-iced-coffee-drink-any-size-free-to-claim-while-offer-last",
+      "valid_to": "2026-11-25",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-23",
+      "name": "Dunkin' One Million Free Coffee codes 11/30",
+      "price": "",
+      "retailer": "dunkin",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20375220-dunkin-one-million-free-coffee-codes-11-30",
+      "valid_to": "2026-11-30",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "FREE Any Size Hot or Iced Coffee at Dunkin - Expires November 23",
+      "price": "",
+      "retailer": "dunkin",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Add DUNKINRUNSONDOOM to your Dunkin Rewards account to claim a FREE hot or iced coffee in any size.",
+        "Redeem your reward by November 23, 2026,"
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20338260-free-any-size-hot-or-iced-coffee-at-dunkin-expires-november-23",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-24",
+      "name": "FREE Donut Fridays at Dunkin’ Starts 11/27",
+      "price": "$0.00",
+      "retailer": "dunkin",
+      "source": "southernsavers.com",
+      "source_count": 1,
+      "sources": [
+        "southernsavers.com"
+      ],
+      "steps": [
+        "Starting this Black Friday, 11/27, Dunkin’ Rewards members (free to join) can enjoy a free Classic Donut with any beverage purchase every Friday thru 12/11."
+      ],
+      "upc": "",
+      "url": "https://www.southernsavers.com/free-donut-fridays-at-dunkin-starts-11-27/",
+      "valid_to": "2026-12-01",
+      "was": ""
+    },
+    {
       "department": "General",
       "first_seen": "2026-11-26",
       "image": "https://d.dlnws.com/64599/1795361495-product-trimmed.png?h=131&w=250",
@@ -26413,6 +27044,29 @@
       "was": ""
     },
     {
+      "department": "Clothing",
+      "first_seen": "2026-11-26",
+      "image": "https://d.dlnws.com/64599/1795656711-s-l1600.jpg?h=250&w=250",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Crocs Men's or Women's Classic Cozzzy Slippers for $20 + free shipping",
+      "price": "$20.00",
+      "retailer": "ebay",
+      "source": "dealnews.com",
+      "source_count": 1,
+      "sources": [
+        "dealnews.com"
+      ],
+      "steps": [
+        "Use promo code \"CYBERFINDS20\" to drop the price on these Crocs slippers to $20."
+      ],
+      "upc": "",
+      "url": "https://www.dealnews.com/Crocs-Mens-or-Womens-Classic-Cozzzy-Slippers-for-20-free-shipping/22431992.html",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
       "department": "General",
       "first_seen": "2026-11-23",
       "image": "https://d.dlnws.com/64599/1701448376-dn-image-6644956.png?h=100&w=250",
@@ -26464,8 +27118,8 @@
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-26",
-      "name": "Refurb: Sony WF-1000XM6 Noise Cancelling Wireless Earbuds $148 + Free S&H",
-      "price": "$148.00",
+      "name": "Refurb: 100' eufy Permanent Outdoor Smart Light Strip E22 $90 + Free S&H",
+      "price": "$90.00",
       "retailer": "ebay",
       "source": "slickdeals.net",
       "source_count": 1,
@@ -26473,11 +27127,33 @@
         "slickdeals.net"
       ],
       "steps": [
-        "Secondipity via eBay has Sony WF-1000XM6 Noise Cancelling Wireless Earbuds (Silver, WF-1000XM6/S, Certified - Refurbished) on sale for $185 - 20% coupon code CYBERFINDS20 at checkout = $148...."
+        "Anker Outlet Store via eBay [ebay.com] has Certified Refurbished - eufy Permanent Outdoor Smart Light Strip E22 (100ft, IP67) on sale for $112.49 - 20% off when you apply promo code CYBERFINDS20 at..."
       ],
       "upc": "",
-      "url": "https://slickdeals.net/f/20380206-sony-wf-1000xm6-148-refurbished-secondipity",
+      "url": "https://slickdeals.net/f/20389884-refurb-eufy-permanent-outdoor-smart-light-strip-e22-100ft-ip67-89-99-free-shipping",
       "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-13",
+      "name": "Amazon Prime + Uber Eats offering \"4\" Five guys Cheeseburgers Burgers for $9.00",
+      "price": "$9.00",
+      "retailer": "five-guys",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20304924-amazon-prime-uber-eats-offering-4-five-guys-cheeseburgers-burgers-for-9-00",
+      "valid_to": "2026-11-20",
       "was": ""
     },
     {
@@ -26499,6 +27175,28 @@
       "upc": "",
       "url": "https://www.dealnews.com/Harbor-Freight-Black-Friday-Deals-Up-to-40-off-shipping-varies/22431055.html",
       "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-23",
+      "name": "$5 OFF ANY $15 PURCHASE | Hardee's",
+      "price": "$15.00",
+      "retailer": "hardees",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20379894-5-off-any-15-purchase-hardee-s",
+      "valid_to": "2026-11-30",
       "was": ""
     },
     {
@@ -28676,6 +29374,29 @@
       "was": "$19.88"
     },
     {
+      "department": "Pet",
+      "first_seen": "2026-11-26",
+      "image": "https://hip2save.com/wp-content/uploads/2026/11/Ace-Hardware-Holiday-Mini-Bucket-and-Core-Home-20oz-Clear-Dog-Tumbler.jpg?w=912&#038;resize=912%2C479&#038;strip=all",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Ace Hardware Black Friday Flash Deals | Grab Their Mini Bucket, Dog Tumbler, & More!",
+      "price": "$12.99",
+      "retailer": "home-depot",
+      "source": "hip2save.com",
+      "source_count": 1,
+      "sources": [
+        "hip2save.com"
+      ],
+      "steps": [
+        "up to $129.99)Delivery is free for Rewards MembersFinal cost $89.99 delivered!Blackstone Iron Forged 2-Burner Griddle $249.99 (reg."
+      ],
+      "upc": "",
+      "url": "https://hip2save.com/deals/ace-hardware-black-friday/",
+      "valid_to": "2026-12-02",
+      "was": "$23.99"
+    },
+    {
       "department": "Penny",
       "first_seen": "2026-11-22",
       "image": "https://images.thdstatic.com/productImages/bf551d3b-694d-47b8-a5f9-6876c6163555/svn/artika-ceiling-fans-with-lights-fan-air-hd2bl-64_400.jpg",
@@ -28916,27 +29637,6 @@
       "url": "https://www.pennyrecon.com/item/1009749973/",
       "valid_to": "",
       "was": "$29.98"
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1794947052-2026-11-17_15-23-20.png?h=243&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Bestier 38\" Power Lift Recliner Chair for $287 + free shipping",
-      "price": "$287.00",
-      "retailer": "home-depot",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://www.dealnews.com/Bestier-38-Power-Lift-Recliner-Chair-for-287-free-shipping/22406581.html",
-      "valid_to": "2026-12-02",
-      "was": ""
     },
     {
       "department": "Penny",
@@ -32066,6 +32766,50 @@
       "was": "$74.98"
     },
     {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-21",
+      "name": "Kfc- $20 create your own bucket",
+      "price": "$20.00",
+      "retailer": "kfc",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20363571-kfc-20-create-your-own-bucket",
+      "valid_to": "2026-11-28",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-21",
+      "name": "Kfc-$20 Friendsgiving feast",
+      "price": "$20.00",
+      "retailer": "kfc",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20363589-kfc-20-friendsgiving-feast",
+      "valid_to": "2026-11-28",
+      "was": ""
+    },
+    {
       "department": "General",
       "first_seen": "2026-11-26",
       "image": "https://cs-images.bradsdeals.com/v3/assets/blt36da8807b5700e24/blt712ee895bff8fff7/68dac6b6217a5616dd55e638/Untitled_design_-_2025-09-29T124925.214.png?width=250&height=250&auto=webp&disable=upscale&quality=80&fit=crop",
@@ -32674,6 +33418,127 @@
       "was": "$39.99"
     },
     {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-18",
+      "name": "Buy a dozen Krispy Kreme Doughnuts, get another dozen for $1",
+      "price": "$1.00",
+      "retailer": "krispy-kreme",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "For rewards members."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20333499-buy-a-dozen-krispy-kreme-doughnuts-get-another-dozen-for-1",
+      "valid_to": "2026-11-25",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-18",
+      "name": "Free Krispy Kreme Thanksgiving doughnut with purchase",
+      "price": "",
+      "retailer": "krispy-kreme",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "For rewards members.",
+        "Krispy Kreme Rewards members can score a FREE Thanksgiving Collection Doughnut with any purchase through..."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20331048-free-krispy-kreme-thanksgiving-doughnut-with-purchase",
+      "valid_to": "2026-11-25",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-12",
+      "name": "Krispy Kreme Restaurant Offer: Buy Any Dozen Krispy Kreme Donuts & Get One Original Glazed Dozen for $0.13 (Valid 11/13 Only)",
+      "price": "$0.13",
+      "retailer": "krispy-kreme",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Login to your account for shop with barcode/promo code[LIST][]Krispy..."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20299650-krispy-kreme-restaurant-offer-buy-any-dozen-krispy-kreme-donuts-get-one-original-glazed-dozen-for-0-13-valid-11-13-only",
+      "valid_to": "2026-11-19",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-20",
+      "name": "Krispy Kreme- $5 Pumpkin Spice Original Glazed Dozen with any dozen purchase",
+      "price": "$5.00",
+      "retailer": "krispy-kreme",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "In app or online Code BOGO5 Regular price of Pumpkin spice is $18.49 in my area The price of the Pumpkin Spice dozen is more than 50% off on this deal when bought with this deal."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20355921-krispy-kreme-5-pumpkin-spice-original-glazed-dozen-with-any-dozen-purchase",
+      "valid_to": "2026-11-27",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-12",
+      "name": "Krispy Kreme- $9.99 original glazed dozen with a dozen purchase YMMV",
+      "price": "$9.99",
+      "retailer": "krispy-kreme",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "In app or online (located on menu screen) Hot deals Code Dozen"
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20299833-krispy-kreme-9-99-original-glazed-dozen-with-a-dozen-purchase-ymmv",
+      "valid_to": "2026-11-19",
+      "was": ""
+    },
+    {
       "department": "General",
       "first_seen": "2026-11-26",
       "image": "",
@@ -33006,6 +33871,52 @@
       "url": "https://thekrazycouponlady.com/coupons-for/kroger",
       "valid_to": "2026-12-01",
       "was": "$7.79"
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-13",
+      "name": "T-Mobile Customers T Life App * Starts 11/17/26 * Little Caesars Free Large Classic Pizza, more",
+      "price": "$10.00",
+      "retailer": "little-caesars",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20303772-t-mobile-customers-t-life-app-starts-11-17-26-little-caesars-free-large-classic-pizza-more",
+      "valid_to": "2026-11-20",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-12",
+      "name": "Long john silver's- $3.99 2 piece chicken basket with one side",
+      "price": "$3.99",
+      "retailer": "long-john-silvers",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "In app or online Code:thursckn Value has more than $7.98 for more than 50% off 2 piece of chicken in my area go for $3.09 each, side is like 2.89"
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20297331-long-john-silver-s-3-99-2-piece-chicken-basket-with-one-side",
+      "valid_to": "2026-11-19",
+      "was": ""
     },
     {
       "department": "General",
@@ -34177,7 +35088,7 @@
     {
       "department": "General",
       "first_seen": "2026-11-26",
-      "image": "https://hip2save.com/wp-content/uploads/2026/03/lowes-project-source-27-gallon-tote-1.jpg?w=912&#038;resize=912%2C479&#038;strip=all",
+      "image": "",
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-25",
@@ -34239,29 +35150,6 @@
       "upc": "",
       "url": "https://clearancefinds.com/alerts/lowes-penny-list-november-2026/",
       "valid_to": "",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1701448364-dn-image-6649657.png?h=115&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Lowe's Black Friday Sale 2026: Up to 60% off + free shipping",
-      "price": "",
-      "retailer": "lowes",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [
-        "MyLowe's Rewards members get free shipping on most items."
-      ],
-      "upc": "",
-      "url": "https://www.dealnews.com/Lowes-Black-Friday-Sale-2026-Up-to-60-off-free-shipping/22360324.html",
-      "valid_to": "2026-12-02",
       "was": ""
     },
     {
@@ -35986,6 +36874,163 @@
       "was": ""
     },
     {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-17",
+      "name": "[Amex Offers] McDonalds - Spend $15 or more, earn $5 back, up to 3x YMMV",
+      "price": "$5.00",
+      "retailer": "mcdonalds",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20325816-amex-offers-mcdonalds-spend-15-or-more-earn-5-back-up-to-3x-ymmv",
+      "valid_to": "2026-11-24",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-23",
+      "name": "Free Medium Fries with $1 purchase at McDonald's",
+      "price": "$1.00",
+      "retailer": "mcdonalds",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20377032-free-medium-fries-with-1-purchase-at-mcdonald-s",
+      "valid_to": "2026-11-30",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "McDonald's $2.50 Big Mac in DMV area 11/19/26 only",
+      "price": "$2.50",
+      "retailer": "mcdonalds",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "The last time they won, McDonalds were still running the Monopoly promo."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20343438-mcdonald-s-2-50-big-mac-in-dmv-area-11-19-26-only",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-21",
+      "name": "McDonald's $2.50 Big Mac in DMV area 11/21/26 only",
+      "price": "$2.50",
+      "retailer": "mcdonalds",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20365056-mcdonald-s-2-50-big-mac-in-dmv-area-11-21-26-only",
+      "valid_to": "2026-11-28",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-21",
+      "name": "McDonald's - 2 for $3 Mix and Match Select Value Items (Stacks with deals)",
+      "price": "$3.00",
+      "retailer": "mcdonalds",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20362740-mcdonald-s-2-for-3-mix-and-match-select-value-items-stacks-with-deals",
+      "valid_to": "2026-11-28",
+      "was": ""
+    },
+    {
+      "app_only": true,
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-23",
+      "name": "McDonald's App Exclusive Offer: McDonald's Breakfast Sandwiches $2 (Valid 1x/Week thru 12/31)",
+      "price": "$2.00",
+      "retailer": "mcdonalds",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20376990-mcdonald-s-app-exclusive-offer-mcdonald-s-breakfast-sandwiches-2-valid-1x-week-thru-12-31",
+      "valid_to": "2026-11-30",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-16",
+      "name": "Northeast Area: Free Big Mac with any $2 purchase @ McDonalds on 11/21/26",
+      "price": "$2.00",
+      "retailer": "mcdonalds",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20320047-northeast-area-free-big-mac-with-any-2-purchase-mcdonalds-on-11-21-26",
+      "valid_to": "2026-11-23",
+      "was": ""
+    },
+    {
       "department": "General",
       "first_seen": "2026-11-26",
       "image": "https://content-images.thekrazycouponlady.com/nie44ndm9bqr/3trTsPfY1SNGxLoKG474Jz/ce2d119731e4cfdf9aed21645ca07521/image?w=150&fit=max&auto=format",
@@ -36130,6 +37175,29 @@
       "was": "$28.64"
     },
     {
+      "department": "Household",
+      "first_seen": "2026-11-26",
+      "image": "https://content-images.thekrazycouponlady.com/nie44ndm9bqr/78E9ROf8hmEuVgKZB3K0GO/648e7518b289a04438a9c39b571ceae1/image?w=150&fit=max&auto=format",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Steam Mop Cleaner — $49.99 (was $348.99)",
+      "price": "$49.99",
+      "retailer": "michaels",
+      "source": "krazycouponlady.com",
+      "source_count": 1,
+      "sources": [
+        "krazycouponlady.com"
+      ],
+      "steps": [
+        "For 29% off (limit 1),"
+      ],
+      "upc": "",
+      "url": "https://www.thekrazycouponlady.com/coupons-for/michaels",
+      "valid_to": "2026-12-09",
+      "was": "$348.99"
+    },
+    {
       "department": "Grocery",
       "first_seen": "2026-11-26",
       "food": true,
@@ -36220,25 +37288,50 @@
       "was": "$99.95"
     },
     {
-      "department": "Clothing",
+      "department": "Restaurant",
       "first_seen": "2026-11-26",
-      "image": "https://content-images.thekrazycouponlady.com/nie44ndm9bqr/2wBFcs0BZOlbZy3933MCqC/2507ad061dbea8a177b0e5c136f6882e/image?w=150&fit=max&auto=format",
-      "is_stack": true,
+      "food": true,
+      "image": "",
+      "is_stack": false,
       "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "UGG Women's Classic Micro Boot — $98.00 (was $139.95)",
-      "price": "$98.00",
-      "retailer": "michaels",
-      "source": "krazycouponlady.com",
+      "list_date": "2026-11-21",
+      "name": "BOGO burrito or entree at Moe's 11/27 - 11/29",
+      "price": "",
+      "retailer": "moes",
+      "source": "slickdeals.net",
       "source_count": 1,
       "sources": [
-        "krazycouponlady.com"
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Moe's will have an offer for Rewards members for BOGO entrées 11/27 - 11/29"
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20363952-bogo-burrito-or-entree-at-moe-s-11-27-11-29",
+      "valid_to": "2026-11-28",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-21",
+      "name": "Get $15 in bonus cards at Moe's when you buy a $25 gift card from 11/22 through 11/30",
+      "price": "$15.00",
+      "retailer": "moes",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
       ],
       "steps": [],
       "upc": "",
-      "url": "https://www.thekrazycouponlady.com/coupons-for/michaels",
-      "valid_to": "2026-12-09",
-      "was": "$139.95"
+      "url": "https://slickdeals.net/f/20363994-get-15-in-bonus-cards-at-moe-s-when-you-buy-a-25-gift-card-from-11-22-through-11-30",
+      "valid_to": "2026-11-28",
+      "was": ""
     },
     {
       "department": "General",
@@ -36259,52 +37352,6 @@
       "upc": "",
       "url": "https://glitchndealz.com/2026/11/nike-black-friday-sneaker-hoodie-deals.html",
       "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "Clothing",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795597997-product-trimmed.jpg?h=248&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Nike Men's Air Max Alpha Trainer 6 Premium Shoes for $55 + free shipping",
-      "price": "$55.00",
-      "retailer": "nike",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [
-        "At Nike, use promo code \"BFRIDAY\" to get these Nike Men's Air Max Alpha Trainer 6 Premium Shoes for $55."
-      ],
-      "upc": "",
-      "url": "https://www.dealnews.com/Nike-Mens-Air-Max-Alpha-Trainer-6-Premium-Shoes-for-55-free-shipping/22430503.html",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "Clothing",
-      "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-26",
-      "name": "Nike Men's MC Trainer 3 Workout Shoes (Platinum Tint/Wolf Grey/White/Comet Blue) $36 + Free S&H on $50+",
-      "price": "$36.00",
-      "retailer": "nike",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [
-        "Nike Men's MC Trainer 3 Workout Shoes (Platinum Tint/Wolf Grey/White/Comet Blue) $35.98 Apply code BFRIDAY at checkout."
-      ],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20398008-nike-men-s-mc-trainer-3-workout-shoes-platinum-tint-wolf-grey-white-comet-blue-35-98",
-      "valid_to": "2026-12-03",
       "was": ""
     },
     {
@@ -36442,14 +37489,14 @@
       "was": ""
     },
     {
-      "department": "General",
+      "department": "Home & Seasonal",
       "first_seen": "2026-11-26",
       "image": "",
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-26",
-      "name": "10000mAh 20W Energizer PD Magnetic Wireless MagSafe Portable Power Bank $16 + Free S&H",
-      "price": "$16.00",
+      "name": "24-Ct WISELIFE 2.36\" Red Christmas Ball Ornaments w/ 3 Finishes $6",
+      "price": "$6.00",
       "retailer": "online",
       "source": "slickdeals.net",
       "source_count": 1,
@@ -36458,7 +37505,7 @@
       ],
       "steps": [],
       "upc": "",
-      "url": "https://slickdeals.net/f/20394666-energizer-10-000mah-slim-metal-20w-magnetic-wireless-qi-qi2-0-magsafe-powerbank-portable-charger-2-outputs-led-display-usb-c-black-15-99",
+      "url": "https://slickdeals.net/f/20378547-wiselife-24pcs-2-36-red-shatterproof-christmas-ball-ornaments-w-3-finishes-5-99-ac",
       "valid_to": "2026-12-03",
       "was": ""
     },
@@ -36504,31 +37551,6 @@
       "steps": [],
       "upc": "",
       "url": "https://www.bradsdeals.com/deals/2pc-washable-kitchen-mat-set-12-2026-11-24-blt48c38edb0979ab98",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "Grocery",
-      "first_seen": "2026-11-26",
-      "food": true,
-      "image": "https://d.dlnws.com/64599/1795531752-s86a45cae3e904510b7174c32d3b2d5e28.avif?h=250&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "3,500W Instant Electric Water Heater w/ LCD for $27 + free shipping",
-      "price": "$27.00",
-      "retailer": "online",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [
-        "With promo code \"USBF3\", this instant electric water heater at AliExpress drops to $27, down from $86.",
-        "This coupon expires December 3."
-      ],
-      "upc": "",
-      "url": "https://www.dealnews.com/3-500-W-Instant-Electric-Water-Heater-w-LCD-for-27-free-shipping/22430562.html",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -36669,6 +37691,27 @@
       "was": ""
     },
     {
+      "department": "Electronics",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "75\" Insignia F50 Series 4K UHD LED Smart Fire TV $300 + Free Delivery",
+      "price": "$300.00",
+      "retailer": "online",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20398308-75-insignia-f50-series-4k-uhd-led-smart-fire-tv-300-free-delivery",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
       "department": "General",
       "first_seen": "2026-11-26",
       "image": "",
@@ -36711,14 +37754,14 @@
       "was": ""
     },
     {
-      "department": "Clothing",
+      "department": "General",
       "first_seen": "2026-11-26",
       "image": "",
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-26",
-      "name": "adidas Men's Essentials 3-Stripes Fleece Sweatshirt (Olive Strata / Black) $16 + Free S&H",
-      "price": "$16.00",
+      "name": "adidas Unisex Trefoil Beanie (2 Colors) from $9.50 + Free S&H",
+      "price": "$9.50",
       "retailer": "online",
       "source": "slickdeals.net",
       "source_count": 1,
@@ -36726,34 +37769,11 @@
         "slickdeals.net"
       ],
       "steps": [
-        "adidas men Essentials 3-Stripes Fleece Sweatshirt (Olive Strata / Black) $17.50 Apply code EXTRA50SALE at checkout."
+        "adidas men Unisex Trefoil Beanie (2 Colors) from $9.50 Apply code EXTRA50SALE at checkout."
       ],
       "upc": "",
-      "url": "https://slickdeals.net/f/20351460-adidas-men-essentials-3-stripes-fleece-sweatshirt-olive-strata-black-17-50",
+      "url": "https://slickdeals.net/f/20388699-adidas-men-unisex-trefoil-beanie-2-colors-from-9-50",
       "valid_to": "2026-12-03",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1701448464-dn-image-6650158.png?h=52&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Adorama Black Friday Sale: Up to 97% off + free shipping w/ $50",
-      "price": "",
-      "retailer": "online",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [
-        "Additional codes may apply as indicated on individual products."
-      ],
-      "upc": "",
-      "url": "https://www.dealnews.com/Adorama-Black-Friday-Sale-Up-to-97-off-free-shipping-w-50/22431742.html",
-      "valid_to": "2026-12-02",
       "was": ""
     },
     {
@@ -36845,52 +37865,6 @@
       "was": ""
     },
     {
-      "department": "Restaurant",
-      "first_seen": "2026-11-26",
-      "food": true,
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-16",
-      "name": "Arby's Free Sandwich with $5 purchase YMMV",
-      "price": "$5.00",
-      "retailer": "online",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [
-        "It looks like it's an offer for people who redeemed the BOGO weekend offer.",
-        "Great work redeeming BOGO weekends."
-      ],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20319660-arby-s-free-sandwich-with-5-purchase-ymmv",
-      "valid_to": "2026-11-23",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795644426-athleta-logo-2009.png?h=141&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Athleta Black Friday Sale: 40% off + free shipping w/ $50",
-      "price": "",
-      "retailer": "online",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://www.dealnews.com/Athleta-Black-Friday-Sale-40-off-free-shipping-w-50/22431725.html",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
       "department": "General",
       "first_seen": "2026-11-26",
       "image": "https://d.dlnws.com/64599/1795615839-10-212228.jpg?h=250&w=167",
@@ -36961,27 +37935,6 @@
     {
       "department": "General",
       "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1793094002-br-factory-logo-2000.png?h=44&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Banana Republic Factory Black Friday Sale: 60% off + extra 25% off + free shipping w/ $35",
-      "price": "$35.00",
-      "retailer": "online",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://www.dealnews.com/Banana-Republic-Factory-Black-Friday-Sale-60-off-extra-25-off-free-shipping-w-35/22431741.html",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
       "image": "",
       "is_stack": false,
       "kind": "deal",
@@ -37041,27 +37994,6 @@
       "steps": [],
       "upc": "",
       "url": "https://www.southernsavers.com/bath-body-works-buy-3-get-4-free-3-wick-candles-just-9-84-each/",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "https://glitchndealz.com/wp-content/uploads/2026/11/BaubleBar-custom-gifts-event-editorial-illustration-1024x683.jpg",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "BaubleBar 30% off sitewide and 20% off custom items for Black Friday",
-      "price": "$35.00",
-      "retailer": "online",
-      "source": "glitchndealz.com",
-      "source_count": 1,
-      "sources": [
-        "glitchndealz.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://glitchndealz.com/2026/11/baublebar-30-off-sitewide-and-20-off-custom-items-for-black-friday-nov-2026.html",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -37309,30 +38241,6 @@
       "was": "$120.00"
     },
     {
-      "department": "Clothing",
-      "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-26",
-      "name": "Crocs Baya Men's or Women's Holiday Graphic or Classic Confetti Clog $17.60 & More + Free S&H on $49+",
-      "price": "$17.60",
-      "retailer": "online",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [
-        "Save 20% w/ code COZY20 .",
-        "Shipping is free on $49 (after coupon) Price after COZY20[LIST][]Men's or Women's[LIST][]Crocs Baya Holiday Graphic..."
-      ],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20392629-crocs-baya-men-s-or-women-s-holiday-graphic-clog-17-60-confetti-clog-17-60-men-s-saturday-sandal-15-99-toddler-lined-clog-14-40-fs-on-49",
-      "valid_to": "2026-12-03",
-      "was": ""
-    },
-    {
       "department": "General",
       "first_seen": "2026-11-26",
       "image": "https://cs-images.bradsdeals.com/v3/assets/blt36da8807b5700e24/bltab88ee2214fdc65a/6aff657d506dd77fe1723d36/67657eff7c4c6e6402178100dc79bae04239aeda.png?width=250&height=250&auto=webp&disable=upscale&quality=80&fit=crop",
@@ -37445,6 +38353,69 @@
       "was": ""
     },
     {
+      "department": "Clothing",
+      "first_seen": "2026-11-26",
+      "image": "https://d.dlnws.com/64599/1795655794-product-trimmed.png?h=250&w=161",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Eddie Bauer Men's Mountain Flex Classic Fit Canvas 5-Pocket Pants for $28 + free shipping w/ $99",
+      "price": "$28.00",
+      "retailer": "online",
+      "source": "dealnews.com",
+      "source_count": 1,
+      "sources": [
+        "dealnews.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.dealnews.com/Eddie-Bauer-Mens-Mountain-Flex-Classic-Fit-Canvas-5-Pocket-Pants-for-28-free-shipping-w-99/22431968.html",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
+      "department": "Clothing",
+      "first_seen": "2026-11-26",
+      "image": "https://d.dlnws.com/64599/1795656242-product-trimmed.png?h=250&w=177",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Eddie Bauer Men's Radius Hybrid Jacket for $40 + free shipping w/ $99",
+      "price": "$40.00",
+      "retailer": "online",
+      "source": "dealnews.com",
+      "source_count": 1,
+      "sources": [
+        "dealnews.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.dealnews.com/Eddie-Bauer-Mens-Radius-Hybrid-Jacket-for-40-free-shipping-w-99/22431974.html",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
+      "department": "Clothing",
+      "first_seen": "2026-11-26",
+      "image": "https://d.dlnws.com/64599/1795656023-product-trimmed.png?h=250&w=155",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Eddie Bauer Men's Zephyr Wind Anorak for $35 + free shipping w/ $99",
+      "price": "$35.00",
+      "retailer": "online",
+      "source": "dealnews.com",
+      "source_count": 1,
+      "sources": [
+        "dealnews.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.dealnews.com/Eddie-Bauer-Mens-Zephyr-Wind-Anorak-for-35-free-shipping-w-99/22431973.html",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
       "department": "General",
       "first_seen": "2026-11-26",
       "image": "https://glitchndealz.com/wp-content/uploads/2026/11/Illustrated-Black-Friday-eyewear-offer-1024x683.jpg",
@@ -37492,27 +38463,6 @@
     {
       "department": "General",
       "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795600525-product-trimmed.jpg?h=117&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Fairfield Collectibles Diecast & Collectibles Black Friday Sale for Up to 43% off + 15% off $75 + shipping varies",
-      "price": "",
-      "retailer": "online",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://www.dealnews.com/Fairfield-Collectibles-Diecast-Collectibles-Black-Friday-Sale-for-Up-to-43-off-15-off-75-shipping-varies/22430571.html",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
       "image": "https://d.dlnws.com/64599/1795609353-navy-new-york-yankees-block-9forty-a-frame-adjustable-hat_ss5_p-204281757_pv-1_u-ks0mf3r1phqicggmkzz.avif?h=250&w=250",
       "is_stack": false,
       "kind": "deal",
@@ -37529,72 +38479,6 @@
       "upc": "",
       "url": "https://www.dealnews.com/Fanatics-Early-Black-Friday-Hats-Daily-Deals-for-Up-to-57-off-From-15-shipping-varies/22430770.html",
       "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795640807-0378400585_sqr_ins_frt_1_rr.png?h=84&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Fender Black Friday Sale: Up to 30% off + free shipping",
-      "price": "$175.00",
-      "retailer": "online",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://www.dealnews.com/Fender-Black-Friday-Sale-Up-to-30-off-free-shipping/22431642.html",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-24",
-      "name": "FREE Donut Fridays at Dunkin’ Starts 11/27",
-      "price": "$0.00",
-      "retailer": "online",
-      "source": "southernsavers.com",
-      "source_count": 1,
-      "sources": [
-        "southernsavers.com"
-      ],
-      "steps": [
-        "Starting this Black Friday, 11/27, Dunkin’ Rewards members (free to join) can enjoy a free Classic Donut with any beverage purchase every Friday thru 12/11."
-      ],
-      "upc": "",
-      "url": "https://www.southernsavers.com/free-donut-fridays-at-dunkin-starts-11-27/",
-      "valid_to": "2026-12-01",
-      "was": ""
-    },
-    {
-      "department": "Restaurant",
-      "first_seen": "2026-11-26",
-      "food": true,
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-23",
-      "name": "Free Medium Fries with $1 purchase at McDonald's",
-      "price": "$1.00",
-      "retailer": "online",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20377032-free-medium-fries-with-1-purchase-at-mcdonald-s",
-      "valid_to": "2026-11-30",
       "was": ""
     },
     {
@@ -37706,30 +38590,6 @@
       "was": ""
     },
     {
-      "department": "Restaurant",
-      "first_seen": "2026-11-26",
-      "food": true,
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-24",
-      "name": "Gobble Up These Savings! $5 Off $15 Orders For My Rewards Members @ Carl's Jr",
-      "price": "$15.00",
-      "retailer": "online",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [
-        "My Rewards members save $5 off any $15+ order."
-      ],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20387085-gobble-up-these-savings-5-off-15-orders-for-my-rewards-members-carl-s-jr",
-      "valid_to": "2026-12-01",
-      "was": ""
-    },
-    {
       "department": "Clothing",
       "first_seen": "2026-11-26",
       "image": "https://d.dlnws.com/64599/1795648214-goinggoinggone_homepage_marchwk1_2025_stores_m.avif?h=200&w=250",
@@ -37768,27 +38628,6 @@
       "steps": [],
       "upc": "",
       "url": "https://glitchndealz.com/2026/11/gourmet-gift-baskets-black-friday-basket-discounts-by-quantity-and-a-20-christmas-code-nov-2026.html",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Govee Smart 900 Lumen Adjustable Brightness RGBICW Floor Lamp $49 + Free S&H",
-      "price": "$49.00",
-      "retailer": "online",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20375607-govee-smart-rgbicw-floor-lamp-49-walmart",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -37879,25 +38718,27 @@
       "was": ""
     },
     {
-      "department": "General",
+      "department": "Clothing",
       "first_seen": "2026-11-26",
-      "image": "https://glitchndealz.com/wp-content/uploads/2026/11/Michael-Kors-Signature-Logo-Wristlet-in-Vanilla-760x1024.jpg",
+      "image": "",
       "is_stack": false,
       "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "HUGE Michael Kors Black Friday Sale! $258 Handbags ONLY $44.25 & More!",
-      "price": "$44.25",
+      "list_date": "2026-11-26",
+      "name": "HYSEYY Metal Double Rod Rolling Clothing Rack (Black) $20 + Free S&H",
+      "price": "$20.00",
       "retailer": "online",
-      "source": "glitchndealz.com",
+      "source": "slickdeals.net",
       "source_count": 1,
       "sources": [
-        "glitchndealz.com"
+        "slickdeals.net"
       ],
-      "steps": [],
+      "steps": [
+        "deal [amazon.com] $20 + Free S/H w/ code G1DUURIC 16.5\"D x 44.3\"W x 63\"H"
+      ],
       "upc": "",
-      "url": "https://glitchndealz.com/2026/11/huge-michael-kors-black-friday-sale-258-handbags-only-44-25-more.html",
-      "valid_to": "2026-12-02",
-      "was": "$258.00"
+      "url": "https://slickdeals.net/f/20395521-63-hyseyy-double-rod-clothes-rack-on-wheels-20-free-s-h",
+      "valid_to": "2026-12-03",
+      "was": ""
     },
     {
       "department": "General",
@@ -38070,6 +38911,27 @@
       "url": "https://fabulesslyfrugal.com/deals/brilliance-silver-plated-cubic-zirconia-snowflake-necklace-earrings-set/",
       "valid_to": "2026-12-02",
       "was": "$50.00"
+    },
+    {
+      "department": "Clothing",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "L.L. Bean: Savings on Select Clothing, Apparel & More 15% Off + Free S&H on $75+",
+      "price": "$75.00",
+      "retailer": "online",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20394993-l-l-bean-15-off-cyber-deal-sale-ends-12-1-33-14",
+      "valid_to": "2026-12-03",
+      "was": ""
     },
     {
       "department": "General",
@@ -38267,29 +39129,6 @@
       "was": "$1200.00"
     },
     {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795514039-product-trimmed.png?h=203&w=250",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Lensmart Affordable Prescription Glasses Black Friday Sale for From $15 + extra 20% off + BOGO 50% off + free shipping w/ $65",
-      "price": "$15.00",
-      "retailer": "online",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [
-        "Plus, get an extra 20% off all orders with coupon code \"DNVIP\" at checkout as well as 50% off every second frame you buy."
-      ],
-      "upc": "",
-      "url": "https://www.dealnews.com/Lensmart-Affordable-Prescription-Glasses-Black-Friday-Sale-for-From-15-extra-20-off-BOGO-50-off-free-shipping-w-65/22427574.html",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
       "department": "Restaurant",
       "first_seen": "2026-11-26",
       "food": true,
@@ -38376,78 +39215,13 @@
       "was": ""
     },
     {
-      "department": "Toys & Games",
+      "department": "Electronics",
       "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-26",
-      "name": "Mattel Games UNO Card Game w/ 2 Add On Packs & Storage Tin $11.50",
-      "price": "$11.50",
-      "retailer": "online",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20387217-uno-card-game-with-2-add-on-packs-with-storage-tin-11-49",
-      "valid_to": "2026-12-03",
-      "was": ""
-    },
-    {
-      "department": "Restaurant",
-      "first_seen": "2026-11-26",
-      "food": true,
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-21",
-      "name": "McDonald's - 2 for $3 Mix and Match Select Value Items (Stacks with deals)",
-      "price": "$3.00",
-      "retailer": "online",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20362740-mcdonald-s-2-for-3-mix-and-match-select-value-items-stacks-with-deals",
-      "valid_to": "2026-11-28",
-      "was": ""
-    },
-    {
-      "department": "Restaurant",
-      "first_seen": "2026-11-26",
-      "food": true,
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-23",
-      "name": "McDonald's App Exclusive Offer: McDonald's Breakfast Sandwiches $2 (Valid 1x/Week thru 12/31)",
-      "price": "$2.00",
-      "retailer": "online",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20376990-mcdonald-s-app-exclusive-offer-mcdonald-s-breakfast-sandwiches-2-valid-1x-week-thru-12-31",
-      "valid_to": "2026-11-30",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795432271-product_346057_product_shots1.jpg?h=188&w=250",
+      "image": "https://d.dlnws.com/64599/1795594632-samsung_galaxy-a17-5g_black_fr-bk-fr.webp?h=250&w=186",
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-25",
-      "name": "Microsoft Office 2024 Professional Plus for Windows Lifetime License for $40 + digital download",
+      "name": "Metro by T-Mobile 5G Phones For All: Free w/ new line + shipping varies",
       "price": "$40.00",
       "retailer": "online",
       "source": "dealnews.com",
@@ -38457,7 +39231,7 @@
       ],
       "steps": [],
       "upc": "",
-      "url": "https://www.dealnews.com/Microsoft-Office-2024-Professional-Plus-for-Windows-Lifetime-License-for-40-digital-download/22424427.html",
+      "url": "https://www.dealnews.com/Metro-by-T-Mobile-5-G-Phones-For-All-Free-w-new-line-shipping-varies/22430438.html",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -38506,6 +39280,48 @@
       "was": ""
     },
     {
+      "department": "Electronics",
+      "first_seen": "2026-11-26",
+      "image": "https://d.dlnws.com/64599/1794318335-product-trimmed.jpg?h=47&w=250",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Mint Mobile 5G Home MINTernet & Unlimited Phone Plan Bundle Deal for $40 per month + free shipping",
+      "price": "$25.00",
+      "retailer": "online",
+      "source": "dealnews.com",
+      "source_count": 1,
+      "sources": [
+        "dealnews.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.dealnews.com/Mint-Mobile-5-G-Home-MINTernet-Unlimited-Phone-Plan-Bundle-Deal-for-40-per-month-free-shipping/22430751.html",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Home & Seasonal",
+      "first_seen": "2026-11-26",
+      "image": "https://glitchndealz.com/wp-content/uploads/2026/11/Illustrative-early-Black-Friday-printing-deals-desk-1024x683.jpg",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Mixbook Calendar and photo-book holiday coupon codes",
+      "price": "$18.00",
+      "retailer": "online",
+      "source": "glitchndealz.com",
+      "source_count": 1,
+      "sources": [
+        "glitchndealz.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://glitchndealz.com/2026/11/mixbook-calendar-and-photo-book-holiday-coupon-codes-nov-2026.html",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
       "department": "General",
       "first_seen": "2026-11-23",
       "image": "",
@@ -38524,6 +39340,27 @@
       "upc": "",
       "url": "https://slickdeals.net/f/20368611-muji-online-exclusive-this-weekend-only-clearance-up-to-50-off",
       "valid_to": "2026-11-29",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://d.dlnws.com/64599/1701448489-dn-image-6657841.jpg?h=250&w=250",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Nautica Black Friday Sale: Up to 60% off + free shipping w/ $60",
+      "price": "$100.00",
+      "retailer": "online",
+      "source": "dealnews.com",
+      "source_count": 1,
+      "sources": [
+        "dealnews.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.dealnews.com/Nautica-Black-Friday-Sale-Up-to-60-off-free-shipping-w-60/22431681.html",
+      "valid_to": "2026-12-02",
       "was": ""
     },
     {
@@ -38687,6 +39524,27 @@
     {
       "department": "General",
       "first_seen": "2026-11-26",
+      "image": "https://glitchndealz.com/wp-content/uploads/2026/11/Old-Navy-Early-Black-Friday-deal-editorial-illustration-1024x683.jpg",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Old Navy Matching pajamas from $8 and upcoming sale dates",
+      "price": "$8.00",
+      "retailer": "online",
+      "source": "glitchndealz.com",
+      "source_count": 1,
+      "sources": [
+        "glitchndealz.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://glitchndealz.com/2026/11/old-navy-matching-pajamas-from-8-and-upcoming-sale-dates-nov-2026.html",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
       "image": "",
       "is_stack": false,
       "kind": "deal",
@@ -38835,6 +39693,27 @@
       "upc": "",
       "url": "https://www.bradsdeals.com/deals/over-70-off-favorite-bamboo-sheet-sets-2026-11-25-bltd1ad71cfab3a3caf",
       "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://glitchndealz.com/wp-content/uploads/2026/11/Illustrated-holiday-apparel-offer-1024x683.jpg",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "O’Neill Extra 30% off sale styles with FALL30",
+      "price": "",
+      "retailer": "online",
+      "source": "glitchndealz.com",
+      "source_count": 1,
+      "sources": [
+        "glitchndealz.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://glitchndealz.com/2026/11/oneill-extra-30-off-sale-styles-with-fall30-nov-2026.html",
+      "valid_to": "2026-12-03",
       "was": ""
     },
     {
@@ -39015,28 +39894,45 @@
       "was": ""
     },
     {
-      "department": "Restaurant",
+      "department": "Clothing",
       "first_seen": "2026-11-26",
-      "food": true,
       "image": "",
       "is_stack": false,
       "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Qdoba - $10 bonus card when you buy $45 of gift cards",
-      "price": "$10.00",
+      "list_date": "2026-11-26",
+      "name": "Refurb: 37mm Citizen Women's Promaster Dive Sea Date Eco-Drive Blue Watch $140 + Free S&H",
+      "price": "$140.00",
       "retailer": "online",
       "source": "slickdeals.net",
       "source_count": 1,
       "sources": [
         "slickdeals.net"
       ],
-      "steps": [
-        "Purchase a $45 gift card (online only) and receive an eGift bonus reward of $10.",
-        "After you order the qualifying gift card, you will receive an email with a $10 eGift reward for each gift card..."
-      ],
+      "steps": [],
       "upc": "",
-      "url": "https://slickdeals.net/f/20395785-qdoba-10-bonus-card-when-you-buy-45-of-gift-cards",
-      "valid_to": "2026-12-02",
+      "url": "https://slickdeals.net/f/20392815-refurbished-unisex-citizen-promaster-dive-sea-date-eco-drive-blue-watch-37-mm-139-99",
+      "valid_to": "2026-12-03",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Refurb: Sony WF-1000XM6 Noise Cancelling Wireless Earbuds $148 + Free S&H",
+      "price": "$148.00",
+      "retailer": "online",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20380206-sony-wf-1000xm6-148-refurbished-secondipity",
+      "valid_to": "2026-12-03",
       "was": ""
     },
     {
@@ -39219,29 +40115,6 @@
     {
       "department": "General",
       "first_seen": "2026-11-26",
-      "image": "https://cs-images.bradsdeals.com/v3/assets/blt36da8807b5700e24/bltd9f91ef146747338/6b056fcd46647850c4b72ad8/9b470e6ec53ad4ea277c7756450986d1549f6a09.png?width=250&height=250&auto=webp&disable=upscale&quality=80&fit=crop",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "",
-      "name": "Sonic Electric Toothbrush $10 Shipped",
-      "price": "$10.00",
-      "retailer": "online",
-      "source": "bradsdeals.com",
-      "source_count": 1,
-      "sources": [
-        "bradsdeals.com"
-      ],
-      "steps": [
-        "Shipping is free when you sign into or create a free account, select the $8.99 membership or $9.99 shipping option, and use code BDFREE at checkout."
-      ],
-      "upc": "",
-      "url": "https://www.bradsdeals.com/deals/sonic-electric-toothbrush-10-shipped-2026-11-24-bltea036af97fa507bd",
-      "valid_to": "",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
       "image": "https://d.dlnws.com/64599/1795648822-aewl9nuiosrtgizz6vqbealk4cnu61dw9vqall_upma.png?h=250&w=250",
       "is_stack": false,
       "kind": "deal",
@@ -39279,6 +40152,27 @@
       "upc": "",
       "url": "https://glitchndealz.com/2026/11/stanley-1913-50-off-select-quencher-colors-through-november-30-nov-2026.html",
       "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Electronics",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Star Wars The Black Series Scout Trooper Electronic Helmet $70 + Free S&H",
+      "price": "$70.00",
+      "retailer": "online",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20396847-star-wars-the-black-series-scout-trooper-electronic-helmet-70-free-s-h",
+      "valid_to": "2026-12-03",
       "was": ""
     },
     {
@@ -39321,6 +40215,27 @@
       "upc": "",
       "url": "https://www.dealnews.com/Teak-Warehouse-Black-Friday-Sale-15-off-sitewide-Up-to-65-off-shipping-varies/22431793.html",
       "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Tekken 8 (PS5) $15 + Free Pickup",
+      "price": "$15.00",
+      "retailer": "online",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20397420-tekken-8-ps5-15-free-pickup",
+      "valid_to": "2026-12-03",
       "was": ""
     },
     {
@@ -39410,6 +40325,29 @@
       "upc": "",
       "url": "https://slickdeals.net/f/20369760-threads-men-s-undershirt-ultra-soft-tank-moisture-wicking-anti-odor-2-pack-classic-white-4-75-fs",
       "valid_to": "2026-11-29",
+      "was": ""
+    },
+    {
+      "department": "Clothing",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "UA HB Runner Men's Running Shoes (3 Colors) $68 + Free S&H",
+      "price": "$68.00",
+      "retailer": "online",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "On sale for $125.97 - extra 40% off with promo code: BLACKFRIDAY + extra 10% off + free shipping (no minimum) with promo code: EXTRA10."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20367531-ua-hb-runner-men-s-running-shoes-3-options-68-02-fs",
+      "valid_to": "2026-12-03",
       "was": ""
     },
     {
@@ -39525,6 +40463,27 @@
       "upc": "",
       "url": "https://slickdeals.net/f/20325186-viking-artisan-3-ply-stainless-steel-11-piece-cookware-set-with-vented-glass-lids-fry-pans-saucepans-saute-pan-stock-pot-with-strainer-insert-oven-safe-up-to-600f",
       "valid_to": "2026-11-24",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Viral Ninja Fireside360 Fire Pit & Heater From $299",
+      "price": "$299.00",
+      "retailer": "online",
+      "source": "hip2save.com",
+      "source_count": 1,
+      "sources": [
+        "hip2save.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://hip2save.com/deals/ninja-fire-pit-heater/",
+      "valid_to": "2026-12-03",
       "was": ""
     },
     {
@@ -39698,6 +40657,72 @@
       "was": "$85.00"
     },
     {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-12",
+      "name": "Panera Bread Sip Club $5.99 per month-For 5 Months",
+      "price": "$5.99",
+      "retailer": "panera",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20299863-panera-bread-sip-club-5-99-per-month-for-5-months",
+      "valid_to": "2026-11-19",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-22",
+      "name": "Panera- Free Baguette with any purchase via cashier",
+      "price": "",
+      "retailer": "panera",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20371797-panera-free-baguette-with-any-purchase-via-cashier",
+      "valid_to": "2026-11-29",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-13",
+      "name": "papa johns large 1 topping carryout $8.99",
+      "price": "$8.99",
+      "retailer": "papa-johns",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20306076-papa-johns-large-1-topping-carryout-8-99",
+      "valid_to": "2026-11-20",
+      "was": ""
+    },
+    {
       "department": "Pet",
       "first_seen": "2026-11-26",
       "image": "https://glitchndealz.com/wp-content/uploads/2026/10/petco-deals-ai-editorial-20261030-1024x576.webp",
@@ -39722,21 +40747,114 @@
       "department": "Restaurant",
       "first_seen": "2026-11-26",
       "food": true,
-      "image": "https://hip2save.com/wp-content/uploads/2021/03/Chipotle-quesadilla.jpg?w=912&#038;resize=912%2C479&#038;strip=all",
+      "image": "",
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-25",
-      "name": "Chipotle BOGO FREE Entrées Today from 5-9 PM",
-      "price": "$0.00",
-      "retailer": "restaurant",
-      "source": "hip2save.com",
+      "name": "New Popeyes Rewards Members: Free Choice of Small Drink, Regular Side, or Cinnamon Apple Pie With Orders $5+",
+      "price": "$5.00",
+      "retailer": "popeyes",
+      "source": "slickdeals.net",
       "source_count": 1,
       "sources": [
-        "hip2save.com"
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Popeyes [popeyes.com] is offering New Rewards Members a Free Choice of a Small Drink, Regular Side, or Cinnamon Apple Pie with orders $5+ (before taxes and fees)."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20399055-new-popeyes-rewards-members-free-choice-of-small-drink-regular-side-or-cinnamon-apple-pie-with-orders-5",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "Popeyes Double Chicken Sandwich (Spice City) to Celebrate the Release of GTA VI 11/19-11/22 Only $6",
+      "price": "$6.00",
+      "retailer": "popeyes",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
       ],
       "steps": [],
       "upc": "",
-      "url": "https://hip2save.com/deals/chipotle-bogo/",
+      "url": "https://slickdeals.net/f/20347725-popeyes-double-chicken-sandwich-spice-city-to-celebrate-the-release-of-gta-vi-11-19-11-22-only-6",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-18",
+      "name": "T-Mobile Customers T Life App * Starts 11/24/26 * Popeyes Free 3-pc Tenders, 7-Eleven/Speedway Free roller grill item, more",
+      "price": "$5.00",
+      "retailer": "popeyes",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20332686-t-mobile-customers-t-life-app-starts-11-24-26-popeyes-free-3-pc-tenders-7-eleven-speedway-free-roller-grill-item-more",
+      "valid_to": "2026-11-25",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-24",
+      "name": "T-Mobile Tuesdays: Win free Popeyes® for a year! ~ 12/1/26",
+      "price": "",
+      "retailer": "popeyes",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20387496-t-mobile-tuesdays-win-free-popeyes-for-a-year-12-1-26",
+      "valid_to": "2026-12-01",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Qdoba - $10 bonus card when you buy $45 of gift cards",
+      "price": "$10.00",
+      "retailer": "qdoba",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Purchase a $45 gift card (online only) and receive an eGift bonus reward of $10.",
+        "After you order the qualifying gift card, you will receive an email with a $10 eGift reward for each gift card..."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20395785-qdoba-10-bonus-card-when-you-buy-45-of-gift-cards",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -39768,22 +40886,114 @@
       "department": "Restaurant",
       "first_seen": "2026-11-26",
       "food": true,
-      "image": "https://hip2save.com/wp-content/uploads/2026/11/Subway.jpg?w=912&#038;resize=912%2C532&#038;strip=all",
+      "image": "",
       "is_stack": false,
       "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "WOW! Subway’s Black Friday Bundle Includes 2 Footlongs, Drinks & SIX Cookies!",
-      "price": "$22.00",
-      "retailer": "restaurant",
-      "source": "hip2save.com",
+      "list_date": "2026-11-12",
+      "name": "Shake Shack - BOGO Shackburger now through 11/30",
+      "price": "",
+      "retailer": "shake-shack",
+      "source": "slickdeals.net",
       "source_count": 1,
       "sources": [
-        "hip2save.com"
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Coupon code BOGOSHACK Good through November 30th Offer only valid for qualifying orders of two (2) Single ShackBurgers placed at a kiosk in-Shack, or for delivery or pick-up via the Shake..."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20298975-shake-shack-bogo-shackburger-now-through-11-30",
+      "valid_to": "2026-11-19",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-21",
+      "name": "Smoothie King - Free Vanilla Peppermint D-Lite Smoothie - December 1",
+      "price": "",
+      "retailer": "smoothie-king",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
       ],
       "steps": [],
       "upc": "",
-      "url": "https://hip2save.com/deals/subway-coupons/",
+      "url": "https://slickdeals.net/f/20365554-smoothie-king-free-vanilla-peppermint-d-lite-smoothie-december-1",
+      "valid_to": "2026-11-28",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://d.dlnws.com/64599/1795640807-0378400585_sqr_ins_frt_1_rr.png?h=84&w=250",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Fender Black Friday Sale: Up to 30% off + free shipping",
+      "price": "$175.00",
+      "retailer": "sonic",
+      "source": "dealnews.com",
+      "source_count": 1,
+      "sources": [
+        "dealnews.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.dealnews.com/Fender-Black-Friday-Sale-Up-to-30-off-free-shipping/22431642.html",
       "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "Sonic Drive-In 11/19 99 cent corn dogs",
+      "price": "$0.99",
+      "retailer": "sonic",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Discount will automatically apply."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20346351-sonic-drive-in-11-19-99-cent-corn-dogs",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://cs-images.bradsdeals.com/v3/assets/blt36da8807b5700e24/bltd9f91ef146747338/6b056fcd46647850c4b72ad8/9b470e6ec53ad4ea277c7756450986d1549f6a09.png?width=250&height=250&auto=webp&disable=upscale&quality=80&fit=crop",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "",
+      "name": "Sonic Electric Toothbrush $10 Shipped",
+      "price": "$10.00",
+      "retailer": "sonic",
+      "source": "bradsdeals.com",
+      "source_count": 1,
+      "sources": [
+        "bradsdeals.com"
+      ],
+      "steps": [
+        "Shipping is free when you sign into or create a free account, select the $8.99 membership or $9.99 shipping option, and use code BDFREE at checkout."
+      ],
+      "upc": "",
+      "url": "https://www.bradsdeals.com/deals/sonic-electric-toothbrush-10-shipped-2026-11-24-bltea036af97fa507bd",
+      "valid_to": "",
       "was": ""
     },
     {
@@ -39852,6 +41062,371 @@
       "was": ""
     },
     {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-15",
+      "name": "$100 LEGO, DoorDash, Starbucks, VISA Virtual eGift & More + $10 Giftcards eGC $100",
+      "price": "$100.00",
+      "retailer": "starbucks",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Buy a $100 DoorDash gift card and get a $10 Giftcards.com gift card free with code EARLYDASH..."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20313570-100-lego-doordash-starbucks-visa-virtual-egift-more-10-giftcards-egc-100",
+      "valid_to": "2026-11-22",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-23",
+      "name": "$11.91 FS PRIME WOOT Starbucks Decaf K-Cup Coffee Pods - Pike Place Roast for Keurig Brewers - 1 box (24 pods)",
+      "price": "$11.91",
+      "retailer": "starbucks",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20374353-11-91-fs-prime-woot-starbucks-decaf-k-cup-coffee-pods-pike-place-roast-for-keurig-brewers-1-box-24-pods",
+      "valid_to": "2026-11-30",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "$13.98 or less S&S 25% Clip Q AMZ Starbucks Espresso & Cream Light, 6.5 Fl Oz Cans (Pack of 12)",
+      "price": "$13.98",
+      "retailer": "starbucks",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "add for S&S, clip the 25% off Q if you have it."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20336943-13-98-or-less-s-s-25-clip-q-amz-starbucks-espresso-cream-light-6-5-fl-oz-cans-pack-of-12",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-21",
+      "name": "$40.77 or less S&S, 10% Clip Q Starbucks K-Cup Coffee Pods, Dark Roast Coffee, Sumatra for Keurig 4 boxes (96 pods total)",
+      "price": "$40.77",
+      "retailer": "starbucks",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "add for S&S, clip the 10% off Q."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20363796-40-77-or-less-s-s-10-clip-q-starbucks-k-cup-coffee-pods-dark-roast-coffee-sumatra-for-keurig-4-boxes-96-pods-total",
+      "valid_to": "2026-11-28",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-14",
+      "name": "$45, Starbucks $50 Gift Card (Email Delivery), Newegg",
+      "price": "$45.00",
+      "retailer": "starbucks",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20308794-45-starbucks-50-gift-card-email-delivery-newegg",
+      "valid_to": "2026-11-21",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "$6.99* | 32-Oz Starbucks Refreshers Concentrate (Strawberry Acai) at Amazon",
+      "price": "$6.99",
+      "retailer": "starbucks",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20347293-6-99-32-oz-starbucks-refreshers-concentrate-strawberry-acai-at-amazon",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-22",
+      "name": "5 Pack Starbucks - Red Cup - Christmas Holiday - 16oz Per Cup - Reusable $12.59",
+      "price": "$12.59",
+      "retailer": "starbucks",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "is having a sale on a 5 pack of Starbucks - Red Cup - Christmas Holiday - 16oz Per Cup - Reusable Plus get an additional 20%-30% off Use code BREW20 at checkout for an extra 20% off items..."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20367543-5-pack-starbucks-red-cup-christmas-holiday-16oz-per-cup-reusable-12-59",
+      "valid_to": "2026-11-29",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "50-Count Starbucks by Nespresso Single-Origin Colombia Medium Roast Coffee Capsules $20.89 w/ S&S + Free Shipping w/ Prime or on $35+",
+      "price": "$20.89",
+      "retailer": "starbucks",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Amazon [amazon.com] has 50-Count Starbucks by Nespresso Single-Origin Colombia Medium Roast Coffee Capsules for $21.99 - 5% off when you checkout via Subscribe & Save = $20.89."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20391225-50-count-starbucks-by-nespresso-single-origin-colombia-medium-roast-coffee-capsules-20-89-w-s-s-free-shipping-w-prime-or-on-35",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "[Live on 11/27 12am ET] $25 Starbucks Gift Card(Digital) + $5 Promo eGC for $25 @Starbucks",
+      "price": "$25.00",
+      "retailer": "starbucks",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20397225-live-on-11-27-12am-et-25-starbucks-gift-card-digital-5-promo-egc-for-25-starbucks",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Gift Card Deals Megathread: Best Buy, Apple, DoorDash, Starbucks, Nintendo, Xbox, Fandango & More",
+      "price": "",
+      "retailer": "starbucks",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20398254-gift-card-deals-megathread-best-buy-apple-doordash-starbucks-nintendo-xbox-fandango-more",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-20",
+      "name": "Starbucks by Nespresso Original Blonde Roast Espresso 50-Count $22.79 - Amazon",
+      "price": "$22.79",
+      "retailer": "starbucks",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20351412-starbucks-by-nespresso-original-blonde-roast-espresso-50-count-22-79-amazon",
+      "valid_to": "2026-11-27",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "GiftCards.com BF sale, 20% off $50 Crumbl, 10% off $100 Uber-Uber Eats, 15% off $50 Subway and more",
+      "price": "$100.00",
+      "retailer": "subway",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Buy $100 Uber or Uber Eats Gift Cards and save 10% with code UBERBF10..."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20398029-giftcards-com-bf-sale-20-off-50-crumbl-10-off-100-uber-uber-eats-15-off-50-subway-and-more",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "https://hip2save.com/wp-content/uploads/2026/11/Subway.jpg?w=912&#038;resize=912%2C532&#038;strip=all",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "WOW! Subway’s Black Friday Bundle Includes 2 Footlongs, Drinks & SIX Cookies!",
+      "price": "$22.00",
+      "retailer": "subway",
+      "source": "hip2save.com",
+      "source_count": 1,
+      "sources": [
+        "hip2save.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://hip2save.com/deals/subway-coupons/",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "$42.50: Taco Bell - $50 Gift Card [Digital] at BestBuy",
+      "price": "$42.50",
+      "retailer": "taco-bell",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20338887-42-50-taco-bell-50-gift-card-digital-at-bestbuy",
+      "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "Auto",
+      "first_seen": "2026-11-26",
+      "image": "https://d.dlnws.com/64599/1795635497-b5de0a6c-b8c7-4348-8d93-4e4b334385d7.webp?h=166&w=250",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Best Buy Black Friday Discounted Gift Card Deals: Up to 20% + free shipping",
+      "price": "$100.00",
+      "retailer": "taco-bell",
+      "source": "dealnews.com",
+      "source_count": 1,
+      "sources": [
+        "dealnews.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.dealnews.com/Best-Buy-Black-Friday-Discounted-Gift-Card-Deals-Up-to-20-free-shipping/22431513.html",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Taco Bell x Live Más Open Golf Capsule Tuesday Drop Sweepstakes (Today Only 5pm ET – 6pm ET)",
+      "price": "",
+      "retailer": "taco-bell",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Begins at 2 PM PT & ends at 3 PM PT on 10 / 24/ 26 Open to Taco Bell Rewards Program members...."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20391072-taco-bell-x-live-m-s-open-golf-capsule-tuesday-drop-sweepstakes-today-only-5pm-et-6pm-et",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
       "department": "General",
       "first_seen": "2026-11-26",
       "image": "",
@@ -39870,6 +41445,52 @@
       "upc": "",
       "url": "https://slickdeals.net/f/20390007-25-crocs-adult-classic-cozzzy-slippers-available-in-5-colors",
       "valid_to": "2026-12-01",
+      "was": ""
+    },
+    {
+      "department": "Baby & Kids",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Blank-1000-x-615-copy-192-12.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "$5 Sale Kids’ & Toddler Soft PJs | Target Black Friday",
+      "price": "$5.00",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [
+        "Get $5 Sale Kids’ & Toddler Soft PJs ."
+      ],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/5-sale-kids-toddler-soft-pjs-target-black-friday.html",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Clothing",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Blank-1000-x-615-copy-192-11.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "$5 Select Matching Pajama Pants & Tees | Target Black Friday",
+      "price": "$5.00",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [
+        "Get $5 Select Matching Pajama Pants & Tees ."
+      ],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/5-select-matching-pajama-pants-tees-target-black-friday.html",
+      "valid_to": "2026-12-02",
       "was": ""
     },
     {
@@ -39957,6 +41578,48 @@
       "steps": [],
       "upc": "",
       "url": "https://fabulesslyfrugal.com/deals/40-off-christmas-trees/",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Blank-1000-x-615-copy-192-9.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "40% off Jewelry, Hair Accessories, Belts & Handbags | Target Black Friday",
+      "price": "",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/40-off-jewelry-hair-accessories-belts-handbags-target-black-friday.html",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Home & Seasonal",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Blank-1000-x-615-copy-192-10.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "40% off Select Holiday Decor | Target Black Friday",
+      "price": "",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/40-off-select-holiday-decor-target-black-friday.html",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -40057,27 +41720,6 @@
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-25",
-      "name": "AMD Ryzen 7 9800X3D CPU w/ Rosewill FROSTMAX 240mm LCD ARGB Gaming AIO CPU Cooler = $369 @ Newegg $369.99",
-      "price": "$369.00",
-      "retailer": "target",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20397543-amd-ryzen-7-9800x3d-cpu-w-rosewill-frostmax-240mm-lcd-argb-gaming-aio-cpu-cooler-369-newegg-369-99",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
       "name": "Apple Watch Series 11 GPS + Cellular 42mm Gold Titanium Case with Gold Milanese Loop",
       "price": "$399.99",
       "retailer": "target",
@@ -40091,6 +41733,27 @@
       "url": "https://slickdeals.net/f/20395971-apple-watch-series-11-gps-cellular-42mm-gold-titanium-case-with-gold-milanese-loop",
       "valid_to": "2026-12-02",
       "was": ""
+    },
+    {
+      "department": "Electronics",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Blank-1000-x-615-copy-192-8.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Beats Pill Wireless Bluetooth Speaker $69.99 (Reg.$149.99) | Target Black Friday",
+      "price": "$69.99",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/beats-pill-wireless-bluetooth-speaker-69-99-reg-149-99-target-black-friday.html",
+      "valid_to": "2026-12-02",
+      "was": "$149.99"
     },
     {
       "department": "General",
@@ -40116,6 +41779,29 @@
     {
       "department": "General",
       "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/mccormick.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-24",
+      "name": "Better than FREE McCormick Gravy Mix at most stores! {Ibotta}",
+      "price": "",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [
+        "Our next Thanksgiving rebate has dropped in Ibotta!"
+      ],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/better-than-free-mccormick-gravy-mix-at-most-stores-ibotta.html",
+      "valid_to": "2026-12-01",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
       "image": "",
       "is_stack": false,
       "kind": "deal",
@@ -40131,6 +41817,30 @@
       "steps": [],
       "upc": "",
       "url": "https://fabulesslyfrugal.com/deals/black-friday-is-fa-la-la-la-live-top-deals-to-score-today/",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Blank-1000-x-615-copy-192-5.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "BOGO FREE Threshold Candles at Target Black Friday",
+      "price": "",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [
+        "BOGO FREE Threshold Candles at Target for Black Friday!",
+        "SHOP TARGET BOGO FREE Threshold Candles Target Black Friday Deals are LIVE 11/22 – 11/29 There are some great offers this year, and these are the ones I’d definitely check out first!"
+      ],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/bogo-free-threshold-candles-at-target-black-friday.html",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -40225,8 +41935,9 @@
       "was": "$422.63"
     },
     {
-      "department": "General",
+      "department": "Restaurant",
       "first_seen": "2026-11-26",
+      "food": true,
       "image": "",
       "is_stack": false,
       "kind": "deal",
@@ -40288,27 +41999,6 @@
       "was": "$109.99"
     },
     {
-      "department": "Clothing",
-      "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Diet Coke Women’s Sweatshirts from $14 Shipped for Target Circle 360 Members",
-      "price": "$14.00",
-      "retailer": "target",
-      "source": "hip2save.com",
-      "source_count": 1,
-      "sources": [
-        "hip2save.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://hip2save.com/deals/target-diet-coke-sweatshirts/",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
       "department": "Baby & Kids",
       "first_seen": "2026-11-26",
       "image": "",
@@ -40328,6 +42018,73 @@
       "url": "https://slickdeals.net/f/20396976-disney-baby-finding-nemo-sea-of-activities-jumper-70-free-shipping",
       "valid_to": "2026-12-02",
       "was": ""
+    },
+    {
+      "department": "Electronics",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/kings.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Easy Freebie! King’s Hawaiian Rolls available at most stores! Just Use Your Phone {Aisle}",
+      "price": "",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [
+        "We have an Aisle rebate for a FREE package of King’s Hawaiian Maple Brown Sugar Rolls (limit 1)!"
+      ],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/easy-freebie-kings-hawaiian-rolls-available-at-most-stores-just-use-your-phone-aisle.html",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Electronics",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/energizer.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-24",
+      "name": "Energizer Lights as low as $4.29 at Target (reg. $8.99)! Just Use Your Phone {Ibotta}",
+      "price": "$4.29",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [
+        "There is a $2 Ibotta rebate (limit 5) making them as low as $4.29!"
+      ],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/energizer-lights-as-low-as-4-29-at-target-reg-8-99-just-use-your-phone-ibotta.html",
+      "valid_to": "2026-12-01",
+      "was": "$8.99"
+    },
+    {
+      "department": "Baby & Kids",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Blank-1000-x-615-copy-192-14.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Faux Shearling Toddler Accent Chair $24.99 (Reg. $49.99) | Target Black Friday",
+      "price": "$24.99",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/faux-shearling-toddler-accent-chair-24-99-reg-49-99-target-black-friday.html",
+      "valid_to": "2026-12-02",
+      "was": "$49.99"
     },
     {
       "department": "Toys & Games",
@@ -40391,6 +42148,27 @@
       "url": "https://slickdeals.net/f/20397840-harry-potter-items-sale-clearance",
       "valid_to": "2026-12-02",
       "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Blank-1000-x-615-copy-192-6.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Instant Pot 6qt 9-in-1 Pressure Cooker $59.99 (Reg. $139.99) at Target Black Friday",
+      "price": "$59.99",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/instant-pot-6qt-9-in-1-pressure-cooker-59-99-reg-139-99-at-target-black-friday.html",
+      "valid_to": "2026-12-02",
+      "was": "$139.99"
     },
     {
       "department": "General",
@@ -40480,6 +42258,30 @@
       "was": ""
     },
     {
+      "department": "Grocery",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/pres-coffee.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-24",
+      "name": "PRES Protein Coffee 4pk only $5.50 each at Target (reg. $10.99)! Just Use Your Phone {Aisle}",
+      "price": "$5.50",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [
+        "And there is an Aisle rebate for BOGO FREE (limit 1)!"
+      ],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/pres-protein-coffee-4pk-only-5-50-each-at-target-reg-10-99-just-use-your-phone-aisle.html",
+      "valid_to": "2026-12-01",
+      "was": "$10.99"
+    },
+    {
       "department": "Toys & Games",
       "first_seen": "2026-11-26",
       "image": "",
@@ -40545,6 +42347,27 @@
       "was": "$504.50"
     },
     {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Blank-1000-x-615-copy-192-15.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Save 40% on Brookstone Throws & Blankets | Target Black Friday",
+      "price": "",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/save-40-on-brookstone-throws-blankets-target-black-friday.html",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
       "department": "Toys & Games",
       "first_seen": "2026-11-26",
       "image": "",
@@ -40562,6 +42385,69 @@
       "steps": [],
       "upc": "",
       "url": "https://fabulesslyfrugal.com/deals/save-40-on-gigglescape-toys/",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Baby & Kids",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Blank-1000-x-615-copy-192-16.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Save 40% on Kids’ Bedding and Bedroom Essentials | Target Black Friday",
+      "price": "",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/save-40-on-kids-bedding-and-bedroom-essentials-target-black-friday.html",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Blank-1000-x-615-copy-192-13.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Save 50% on Select Electric Ride-Ons | Target Black Friday",
+      "price": "",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/save-50-on-select-electric-ride-ons-target-black-friday.html",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Screenshot-2026-11-25-at-9.21.24 AM.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Save 50% on Select Threshold Throw Blankets | Target Black Friday",
+      "price": "",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/save-50-on-select-threshold-throw-blankets-target-black-friday.html",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -40631,6 +42517,49 @@
       "was": "$40.00"
     },
     {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-17",
+      "name": "Target 11/22-29: Get a $10 TGC wyb $50 in Domino Pizza or Outback/Bonefish EGC's",
+      "price": "$10.00",
+      "retailer": "target",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20329482-target-11-22-29-get-a-10-tgc-wyb-50-in-domino-pizza-or-outback-bonefish-egc-s",
+      "valid_to": "2026-11-24",
+      "was": ""
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Screenshot-2026-11-25-at-6.56.35 AM.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Target Black Friday 2026 | Early Access to New Deals for Circle360 Members",
+      "price": "",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/target-black-friday-deals-2026.html",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
       "department": "Toys & Games",
       "first_seen": "2026-11-26",
       "image": "",
@@ -40648,6 +42577,27 @@
       "steps": [],
       "upc": "",
       "url": "https://slickdeals.net/f/20394222-target-black-friday-50-off-select-board-card-games-exploding-kittens-qwirkle-trekking-the-national-parks-more-from-9-99-free-store-pickup",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Clothing",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/Blank-1000-x-615-copy-191-8.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Target Deal of the Day | 30% Off Brightroom Organization | Hangers, Shoe Storage, and More",
+      "price": "",
+      "retailer": "target",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/target-deal-of-the-day-30-off-brightroom-organization-hangers-shoe-storage-and-more.html",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -40885,6 +42835,28 @@
       "upc": "",
       "url": "https://fabulesslyfrugal.com/deals/up-to-50-off-toys-bogo-50-off-sales/",
       "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-19",
+      "name": "Tim Hortons $50 eGift Card $40 + Free Shipping",
+      "price": "$50.00",
+      "retailer": "tim-hortons",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20339658-tim-hortons-50-egift-card-40-free-shipping",
+      "valid_to": "2026-11-26",
       "was": ""
     },
     {
@@ -42296,7 +44268,7 @@
       "image": "https://content-images.thekrazycouponlady.com/nie44ndm9bqr/2637DaV9vXyMTvHaCDPYm9/77aaaaa3f6790c3d205d70e905cbdd6d/image?w=150&fit=max&auto=format",
       "is_stack": true,
       "kind": "deal",
-      "list_date": "2026-11-24",
+      "list_date": "2026-11-23",
       "name": "Eucerin Sunscreen Spray — $5.99 (was $19.99)",
       "price": "$5.99",
       "retailer": "walgreens",
@@ -43020,6 +44992,30 @@
       "url": "https://www.southernsavers.com/walgreens-ad-coupons-11-22-11-28/",
       "valid_to": "2026-11-28",
       "was": "$18.00"
+    },
+    {
+      "department": "Auto",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2019/11/nexxus1.jpg",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-24",
+      "name": "Nexxus Hair Care as low as $4.47 each at Walgreens | (reg. up to $21.99)",
+      "price": "$4.47",
+      "retailer": "walgreens",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [
+        "Through 11/28, Walgreens has select Nexxus hair care on sale for $18 each, and they’re spend $20 get $10 In-store rewards, OR clip the offer to earn W Cash when you buy online!",
+        "We also have this HUGE $9/2 digital coupon AND $4/2 Paypal rebate to clip!"
+      ],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/nexxus-hair-care-as-low-as-4-47-each-at-walgreens-reg-up-to-21-99.html",
+      "valid_to": "2026-12-01",
+      "was": ""
     },
     {
       "department": "General",
@@ -44164,6 +46160,29 @@
       "was": ""
     },
     {
+      "department": "Electronics",
+      "first_seen": "2026-11-26",
+      "image": "https://www.livingrichwithcoupons.com/wp-content/uploads/2026/11/wags-trip-3.png",
+      "is_stack": true,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "Walgreens Shopping Trip! Get $44 worth of Covergirl, Oral-B & Colgate for under $2 | Just Use Your Phone",
+      "price": "$2.00",
+      "retailer": "walgreens",
+      "source": "livingrichwithcoupons.com",
+      "source_count": 1,
+      "sources": [
+        "livingrichwithcoupons.com"
+      ],
+      "steps": [
+        "This trip combines sales, digital coupons, W Cash rewards and the Spend $35 get $7 W Cash rewards Booster!"
+      ],
+      "upc": "",
+      "url": "https://www.livingrichwithcoupons.com/2026/11/walgreens-shopping-trip-get-44-worth-of-covergirl-oral-b-colgate-for-under-2-just-use-your-phone.html",
+      "valid_to": "2026-12-02",
+      "was": "$44.00"
+    },
+    {
       "department": "Home & Seasonal",
       "first_seen": "2026-11-23",
       "image": "",
@@ -44205,6 +46224,120 @@
       "upc": "",
       "url": "https://slickdeals.net/f/20338947-wexford-multipurpose-paper-8-5x11-inch-400-0-ea-1-99-more-ymmv",
       "valid_to": "2026-11-26",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-18",
+      "name": "Wendy's 6pc Chicken Nuggets Free (w/ $5+ app purchase, Wednesdays) - Wendy's",
+      "price": "$5.00",
+      "retailer": "wendys",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "Be a Wendy's Rewards member 2."
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20336019-wendy-s-6pc-chicken-nuggets-free-w-5-app-purchase-wednesdays-wendy-s",
+      "valid_to": "2026-11-25",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-17",
+      "name": "Wendy's Holiday Trivia",
+      "price": "",
+      "retailer": "wendys",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20325729-wendy-s-holiday-trivia",
+      "valid_to": "2026-11-24",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-17",
+      "name": "Wendys- $3 frosty keytag for free jr frosty with purchase",
+      "price": "$3.00",
+      "retailer": "wendys",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20328567-wendys-3-frosty-keytag-for-free-jr-frosty-with-purchase",
+      "valid_to": "2026-11-24",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-15",
+      "name": "Wendys-$1.99 10 pc chicken nuggets with qualifying purchase",
+      "price": "$1.99",
+      "retailer": "wendys",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [
+        "In app or online Open app Click on offers (tag icon) Add items and checkout Expires 12/7/2026"
+      ],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20315541-wendys-1-99-10-pc-chicken-nuggets-with-qualifying-purchase",
+      "valid_to": "2026-11-22",
+      "was": ""
+    },
+    {
+      "department": "Restaurant",
+      "first_seen": "2026-11-26",
+      "food": true,
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-15",
+      "name": "Wingstop - 30 piece bone-in wings for $30, Sundays and Thursdays through 1/3/2027",
+      "price": "$30.00",
+      "retailer": "wingstop",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20315637-wingstop-30-piece-bone-in-wings-for-30-sundays-and-thursdays-through-1-3-2027",
+      "valid_to": "2026-11-22",
       "was": ""
     },
     {
@@ -44293,14 +46426,14 @@
       "was": "$50.00"
     },
     {
-      "department": "General",
+      "department": "Auto",
       "first_seen": "2026-11-26",
       "image": "",
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-26",
-      "name": "2-Pk Panasonic Eneloop AA NiMH Rechargeable Batteries w/ 2 C Size Adapters $5.85",
-      "price": "$5.85",
+      "name": "2-Pk Ozark Trail Magnetic Carabiners 5-Lb Capacity (Black & Blue) $6.75",
+      "price": "$6.75",
       "retailer": "wm-ct",
       "source": "slickdeals.net",
       "source_count": 1,
@@ -44309,28 +46442,7 @@
       ],
       "steps": [],
       "upc": "",
-      "url": "https://slickdeals.net/f/20396601-2-pack-panasonic-eneloop-aa-nimh-rechargeable-batteries-w-2-c-size-adapters-5-87-free-shipping-w-prime-or-on-35",
-      "valid_to": "2026-12-03",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-26",
-      "name": "20\" onn Bluetooth 2.0 Channel Soundbar w/ Multi-Color LED Lighting $19.95",
-      "price": "$19.95",
-      "retailer": "wm-ct",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20373567-onn-20-2-1-channel-soundbar-w-multi-color-led-lighting-19-94-free-shipping-w-walmart-or-on-35",
+      "url": "https://slickdeals.net/f/20394480-6-77-ozark-trail-magnetic-carabiners-5-lb-capacity-black-and-blue-2-count-at-walmart-com",
       "valid_to": "2026-12-03",
       "was": ""
     },
@@ -44505,6 +46617,27 @@
       "was": ""
     },
     {
+      "department": "Auto",
+      "first_seen": "2026-11-26",
+      "image": "https://hip2save.com/wp-content/uploads/2026/11/carote-24-piece-cookware-walmart-1.jpg?w=912&#038;resize=912%2C479&#038;strip=all",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Carote Cookware 24-Piece Set Only $55.99 Shipped on Walmart.com (Reg. $110)",
+      "price": "$55.99",
+      "retailer": "wm-ct",
+      "source": "hip2save.com",
+      "source_count": 1,
+      "sources": [
+        "hip2save.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://hip2save.com/deals/carote-cookware-set/",
+      "valid_to": "2026-12-03",
+      "was": "$110.00"
+    },
+    {
       "department": "Clothing",
       "first_seen": "2026-11-26",
       "image": "https://d.dlnws.com/64599/1795655038-product-trimmed.png?h=231&w=250",
@@ -44576,7 +46709,7 @@
       "is_stack": false,
       "kind": "deal",
       "list_date": "2026-11-25",
-      "name": "Crockpot 4-Quart Classic Slow Cooker, Black, $19.98",
+      "name": "Crockpot 4-Quart Classic Slow Cooker, Black, $19.98 @Walmart",
       "price": "$19.98",
       "retailer": "wm-ct",
       "source": "slickdeals.net",
@@ -44586,7 +46719,7 @@
       ],
       "steps": [],
       "upc": "",
-      "url": "https://slickdeals.net/f/20393193-crockpot-4-quart-classic-slow-cooker-black-19-98",
+      "url": "https://slickdeals.net/f/20393193-crockpot-4-quart-classic-slow-cooker-black-19-98-walmart",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -44610,27 +46743,6 @@
       "url": "https://passionatepennypincher.com/delonghi-espresso-machine/",
       "valid_to": "2026-12-02",
       "was": "$150.00"
-    },
-    {
-      "department": "Toys & Games",
-      "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-26",
-      "name": "GameSir Pocket Taco Bluetooth Vertical Mobile Gaming Controller $20",
-      "price": "$20.00",
-      "retailer": "wm-ct",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20398767-gamesir-pocket-taco-bluetooth-vertical-mobile-gaming-controller-19-99-free-shipping-w-walmart-or-on-35",
-      "valid_to": "2026-12-03",
-      "was": ""
     },
     {
       "department": "General",
@@ -44673,6 +46785,27 @@
       "url": "https://passionatepennypincher.com/gourmia-air-fryer/",
       "valid_to": "2026-12-02",
       "was": "$119.00"
+    },
+    {
+      "department": "General",
+      "first_seen": "2026-11-26",
+      "image": "",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-26",
+      "name": "Hyper Tough 3-in-1 Laser Line Torpedo Level w/ LED Lighted Vials $12",
+      "price": "$12.00",
+      "retailer": "wm-ct",
+      "source": "slickdeals.net",
+      "source_count": 1,
+      "sources": [
+        "slickdeals.net"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://slickdeals.net/f/20375640-12-wm-hyper-tough-3-in-1-laser-line-torpedo-level-with-led-lighted-vials",
+      "valid_to": "2026-12-03",
+      "was": ""
     },
     {
       "department": "General",
@@ -44755,6 +46888,27 @@
       "steps": [],
       "upc": "",
       "url": "https://hip2save.com/deals/walmart-weekend-academy/",
+      "valid_to": "2026-12-02",
+      "was": ""
+    },
+    {
+      "department": "Toys & Games",
+      "first_seen": "2026-11-26",
+      "image": "https://d.dlnws.com/64599/1795602539-product-trimmed.jpg?h=250&w=250",
+      "is_stack": false,
+      "kind": "deal",
+      "list_date": "2026-11-25",
+      "name": "LEGO Black Friday Deals at Walmart: Up to 50% off + free shipping w/ $35",
+      "price": "$15.00",
+      "retailer": "wm-ct",
+      "source": "dealnews.com",
+      "source_count": 1,
+      "sources": [
+        "dealnews.com"
+      ],
+      "steps": [],
+      "upc": "",
+      "url": "https://www.dealnews.com/LEGO-Black-Friday-Deals-at-Walmart-Up-to-50-off-free-shipping-w-35/22430610.html",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -44974,27 +47128,6 @@
       "was": ""
     },
     {
-      "department": "Toys & Games",
-      "first_seen": "2026-11-26",
-      "image": "",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Puyo Puyo Tetris 2S (Nintendo Switch 2, Game-Key Card) $15",
-      "price": "$15.00",
-      "retailer": "wm-ct",
-      "source": "slickdeals.net",
-      "source_count": 1,
-      "sources": [
-        "slickdeals.net"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://slickdeals.net/f/20391711-puyo-puyo-tetris-2s-nintendo-switch-2-15-free-shipping-w-prime-or-on-orders-over-35",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
       "department": "General",
       "first_seen": "2026-11-26",
       "image": "",
@@ -45058,27 +47191,6 @@
       "was": ""
     },
     {
-      "department": "Household",
-      "first_seen": "2026-11-26",
-      "image": "https://hip2save.com/wp-content/uploads/2026/09/Tyler-diva-laundry-detergent-.jpg?w=912&#038;resize=912%2C684&#038;strip=all",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "This Laundry Detergent Smells SO Good, Even a Police Officer Noticed (+ It’s On Sale!)",
-      "price": "$24.00",
-      "retailer": "wm-ct",
-      "source": "hip2save.com",
-      "source_count": 1,
-      "sources": [
-        "hip2save.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://hip2save.com/deals/tyler-glam-wash-laundry-detergent/",
-      "valid_to": "2026-12-02",
-      "was": "$35.00"
-    },
-    {
       "department": "General",
       "first_seen": "2026-11-26",
       "image": "",
@@ -45119,27 +47231,6 @@
       ],
       "upc": "",
       "url": "https://hip2save.com/deals/huffy-bikes/",
-      "valid_to": "2026-12-02",
-      "was": ""
-    },
-    {
-      "department": "General",
-      "first_seen": "2026-11-26",
-      "image": "https://d.dlnws.com/64599/1795597629-product-trimmed.jpg?h=250&w=124",
-      "is_stack": false,
-      "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Walmart Black Friday Resold Tech & More Deals: Up to 60% off + free shipping w/ $35",
-      "price": "$199.00",
-      "retailer": "wm-ct",
-      "source": "dealnews.com",
-      "source_count": 1,
-      "sources": [
-        "dealnews.com"
-      ],
-      "steps": [],
-      "upc": "",
-      "url": "https://www.dealnews.com/Walmart-Black-Friday-Resold-Tech-More-Deals-Up-to-60-off-free-shipping-w-35/22430500.html",
       "valid_to": "2026-12-02",
       "was": ""
     },
@@ -45354,15 +47445,16 @@
       "was": ""
     },
     {
-      "department": "Clothing",
+      "department": "Restaurant",
       "first_seen": "2026-11-26",
+      "food": true,
       "image": "",
       "is_stack": false,
       "kind": "deal",
-      "list_date": "2026-11-25",
-      "name": "Wrangler Workwear Men's Relaxed Fit Pullover Hoodie w/ Faux Shearling Lining $13",
-      "price": "$13.00",
-      "retailer": "wm-ct",
+      "list_date": "2026-11-16",
+      "name": "Zaxby's- 20 wings (traditional or boneless) for $20 (rewards members)",
+      "price": "$20.00",
+      "retailer": "zaxbys",
       "source": "slickdeals.net",
       "source_count": 1,
       "sources": [
@@ -45370,8 +47462,8 @@
       ],
       "steps": [],
       "upc": "",
-      "url": "https://slickdeals.net/f/20394552-wrangler-workwear-men-s-relaxed-fit-pullover-hoodie-w-faux-shearling-lining-various-sizes-s-3xl-13-free-shipping-w-walmart-or-on-35",
-      "valid_to": "2026-12-02",
+      "url": "https://slickdeals.net/f/20318007-zaxby-s-20-wings-traditional-or-boneless-for-20-rewards-members",
+      "valid_to": "2026-11-23",
       "was": ""
     }
   ],
@@ -45491,7 +47583,7 @@
       "url": "https://retailshout.com/cvs-weekly-ad/"
     },
     {
-      "item_count": 0,
+      "item_count": 22,
       "name": "Living Rich With Coupons — RSS",
       "status": "ok",
       "url": "https://www.livingrichwithcoupons.com/feed"
@@ -45644,7 +47736,7 @@
       "url": "https://s1.dlnws.com/dealnews/rss/todays-edition.xml"
     },
     {
-      "item_count": 50,
+      "item_count": 49,
       "name": "DealNews — editors' choice RSS",
       "status": "ok",
       "url": "https://www.dealnews.com/rss/editors-choice"
@@ -45784,6 +47876,282 @@
       "note": "Homepage yields no current list link (only a 2023 index) and the Oct 27 list page carries only 6 UPCs in static HTML, not the 27 claimed — the rest are not in the page text.",
       "status": "link-only",
       "url": "https://pennypuss.com/"
+    },
+    {
+      "item_count": 7,
+      "name": "Slickdeals — McDonald's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=mcdonalds&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 3,
+      "name": "Slickdeals — Burger King search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=burger+king&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 4,
+      "name": "Slickdeals — Wendy's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=wendys&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 3,
+      "name": "Slickdeals — Taco Bell search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=taco+bell&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 2,
+      "name": "Slickdeals — Chick-fil-A search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=chick-fil-a&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 2,
+      "name": "Slickdeals — Subway search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=subway&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 2,
+      "name": "Slickdeals — KFC search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=kfc&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 5,
+      "name": "Slickdeals — Domino's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=dominos&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Pizza Hut search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=pizza+hut&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 1,
+      "name": "Slickdeals — Little Caesars search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=little+caesars&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 1,
+      "name": "Slickdeals — Sonic search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=sonic+drive-in&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 3,
+      "name": "Slickdeals — Arby's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=arbys&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 4,
+      "name": "Slickdeals — Dairy Queen search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=dairy+queen&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Panda Express search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=panda+express&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 6,
+      "name": "Slickdeals — Chipotle search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=chipotle&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Jimmy John's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=jimmy+johns&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Jersey Mike's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=jersey+mikes&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 3,
+      "name": "Slickdeals — Panera search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=panera&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 12,
+      "name": "Slickdeals — Starbucks search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=starbucks&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 7,
+      "name": "Slickdeals — Dunkin' search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=dunkin&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 4,
+      "name": "Slickdeals — Popeyes search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=popeyes&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 1,
+      "name": "Slickdeals — Five Guys search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=five+guys&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 1,
+      "name": "Slickdeals — Wingstop search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=wingstop&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Raising Cane's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=raising+canes&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 1,
+      "name": "Slickdeals — Papa John's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=papa+johns&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Jack in the Box search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=jack+in+the+box&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 1,
+      "name": "Slickdeals — Hardee's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=hardees&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 3,
+      "name": "Slickdeals — Carl's Jr. search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=carls+jr&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Culver's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=culvers&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Whataburger search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=whataburger&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Del Taco search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=del+taco&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 1,
+      "name": "Slickdeals — Zaxby's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=zaxbys&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Firehouse Subs search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=firehouse+subs&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 1,
+      "name": "Slickdeals — Qdoba search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=qdoba&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 2,
+      "name": "Slickdeals — Shake Shack search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=shake+shack&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 1,
+      "name": "Slickdeals — Tim Hortons search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=tim+hortons&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 5,
+      "name": "Slickdeals — Krispy Kreme search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=krispy+kreme&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Baskin-Robbins search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=baskin+robbins&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 1,
+      "name": "Slickdeals — Smoothie King search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=smoothie+king&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 2,
+      "name": "Slickdeals — Jamba search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=jamba&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — El Pollo Loco search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=el+pollo+loco&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Bojangles search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=bojangles&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 0,
+      "name": "Slickdeals — Church's Chicken search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=churchs+chicken&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 1,
+      "name": "Slickdeals — White Castle search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=white+castle&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 1,
+      "name": "Slickdeals — Long John Silver's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=long+john+silvers&searcharea=deals&searchin=first&rss=1"
+    },
+    {
+      "item_count": 3,
+      "name": "Slickdeals — Moe's search",
+      "status": "ok",
+      "url": "https://slickdeals.net/newsearch.php?firstonly=1&q=moes&searcharea=deals&searchin=first&rss=1"
     }
   ]
 }
