@@ -1,4 +1,4 @@
-/* Penny Alerts v14 service worker.
+/* Penny Alerts v15 service worker.
  * Caches the app shell so the app opens offline. The deal briefing JSON is
  * NEVER cached here — it is always fetched fresh (network-first) because
  * penny lists go stale fast. v3 adds background push: the 'push' event
@@ -6,8 +6,8 @@
  * v4: new cache name for the thumbnail layout change. v14: real PNG
  * icons in the shell (the push icon/badge), and a richer push
  * notification — deal names + prices from the payload, a View deals
- * action, and vibration. */
-var CACHE = 'penny-alerts-v14';
+ * action, and vibration. v15: cache bump for the Food tab + drawer. */
+var CACHE = 'penny-alerts-v15';
 var SHELL = ['index.html', 'styles.css', 'app.js', 'manifest.json', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-512-maskable.png'];
 var BRIEFING = 'rocketshon.github.io/penny-finder-backend/briefings/latest.json';
 var WEEKLY = 'feed/weekly.json';

@@ -15,6 +15,7 @@
 <body>
 <header class="app-header">
   <div class="header-row">
+    <button id="menuBtn" type="button" class="menu-btn" aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     <h1>🪙 Penny Alerts</h1>
     <button id="installBtn" type="button" class="install-btn" aria-label="Install app" title="Install app" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11M7 10l5 5 5-5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
@@ -30,8 +31,16 @@
 <nav class="tabs" role="tablist" aria-label="Sections">
   <button type="button" class="tab active" data-tab="deals" role="tab">Deals <span id="dealCount" class="count"></span></button>
   <button type="button" class="tab" data-tab="bundles" role="tab">Bundles <span id="bundleCount" class="count"></span></button>
-  <button type="button" class="tab" data-tab="watchlist" role="tab">Watchlist <span id="watchCount" class="count"></span></button>
-  <button type="button" class="tab" data-tab="lists" role="tab">Lists &amp; Sources</button>
+  <button type="button" class="tab" data-tab="food" role="tab">Food <span id="foodCount" class="count"></span></button>
+</nav>
+
+<!-- Hamburger drawer (v15): Watchlist and Lists & Sources live here so
+     the top tab bar stays to Deals, Bundles, Food. -->
+<div id="drawerBackdrop" class="drawer-backdrop" hidden></div>
+<nav id="drawer" class="drawer" aria-label="More sections" hidden>
+  <div class="drawer-head"><span>Penny Alerts</span><button id="drawerClose" type="button" class="drawer-close" aria-label="Close menu">✕</button></div>
+  <button type="button" class="drawer-link" data-tab="watchlist">Watchlist <span id="watchCount" class="count"></span></button>
+  <button type="button" class="drawer-link" data-tab="lists">Lists &amp; Sources</button>
 </nav>
 
 <main>
@@ -40,6 +49,8 @@
       <select id="sortSelect" aria-label="Sort deals">
         <option value="recent">Most recent</option>
         <option value="verified">Most verified</option>
+        <option value="biggest">Biggest deals</option>
+        <option value="price">Price: Low to High</option>
       </select>
       <select id="retailerFilter" aria-label="Filter by store">
         <option value="">All stores</option>
@@ -62,6 +73,7 @@
         <option value="verified">Most verified</option>
         <option value="recent">Most recent</option>
         <option value="biggest">Biggest deals</option>
+        <option value="price">Price: Low to High</option>
       </select>
       <select id="bundleStore" aria-label="Filter bundles by store">
         <option value="">All stores</option>
@@ -74,6 +86,27 @@
     </div>
     <p class="hint">Coupon stacks: buy the bundle, clip the digitals, earn the rewards — final price is the out-of-pocket after rewards. Digital coupons vary by account: clip them in the store app first and confirm before you shop.</p>
     <div id="bundleList" class="deal-list"></div>
+  </section>
+
+  <section id="tab-food" class="tab-panel" hidden>
+    <div class="filters">
+      <select id="foodSort" aria-label="Sort food deals">
+        <option value="price">Price: Low to High</option>
+        <option value="recent">Most recent</option>
+        <option value="verified">Most verified</option>
+        <option value="biggest">Biggest deals</option>
+      </select>
+      <select id="foodStore" aria-label="Filter food deals by store">
+        <option value="">All stores</option>
+      </select>
+      <div class="dept-dd" id="foodDeptDd" data-scope="food">
+        <button type="button" class="dept-dd-btn" id="foodDeptDdBtn" data-action="dept-toggle" aria-label="Filter food deals by department">All departments</button>
+        <div class="dept-dd-panel" id="foodDeptDdPanel" hidden></div>
+      </div>
+      <label class="check"><input id="foodFuture" type="checkbox"> Future</label>
+    </div>
+    <p class="hint">Grocery, fast-food and restaurant deals near Aurora — free means $0 after coupons and rebates. King Soopers is Kroger here. The register is still the final truth.</p>
+    <div id="foodList" class="deal-list"></div>
   </section>
 
   <section id="tab-watchlist" class="tab-panel" hidden>
@@ -110,7 +143,7 @@
 
 <footer class="app-footer">
   <p>Free forever. Data: Penny Hunter’s public briefing + the community penny lists linked above. Not affiliated with Walmart, Target, Dollar General, Home Depot or Penny Hunter.</p>
-  <p id="appVersion" class="version">Penny Alerts v14</p>
+  <p id="appVersion" class="version">Penny Alerts v15</p>
 </footer>
 
 <!-- Instructions modal (v13): one deal's how-to, opened from any card's

@@ -16,10 +16,35 @@ phone's home screen (it's a PWA).
   shows the **list date** the item came from ("penny list 2026-10-27") —
   not the date the parser ran — so an old archive item reads as old.
 - **Sort + Future**: the Deals tab sorts **Most recent** (newest list date
-  first, the default) or **Most verified** (most independent sources first;
-  in that mode each card shows "✓ N sources" under its picture). The
-  **Future** checkbox shows only deals whose list date is after today —
-  right now that is PennyPinchinMom's Nov 24 list (105 items).
+  first, the default), **Most verified** (most independent sources first;
+  in that mode each card shows "✓ N sources" under its picture),
+  **Price: Low to High** (by final price after all coupons/discounts,
+  cheapest first) or **Biggest deals** (largest dollar saving, was −
+  price). The **Future** checkbox shows only deals whose list date is
+  after today. **v15:** "today" is now Denver time, not UTC — before,
+  after 5pm MST the app already treated tomorrow's deals as today's.
+  Future items roll into "today" as the calendar advances, because the
+  comparison happens at render time, not at parse time.
+- **Food tab (v15)**: a third tab next to Deals and Bundles, for
+  grocery / food / restaurant deals — especially local fast food and
+  restaurant deals near Aurora/Denver (80017). Free means $0 after
+  coupons/rebates, and the tab defaults to **Price: Low to High** so
+  the free deals sit at the top. Pennies stay on the Deals tab even
+  when they are food (the penny hunt is the Deals tab's job); food
+  stacks stay on Bundles (stack wins over food). Sources: Slickdeals
+  free-food / fast-food / restaurant / Kroger searches, Hip2Save
+  restaurant deals, KCL Kroger stacks, plus any deal whose department
+  is Grocery.
+- **Hamburger drawer (v15):** the top-left three-line button opens a
+  drawer with Watchlist and Lists & Sources. The Deals / Bundles /
+  Food tabs stay visible on top — nothing else crowds the header.
+- **Expiry + stop dates (v15):** an item past its valid-to / end date
+  is expired — hidden from the feed and excluded from dropdown counts.
+  A deal with no end date gets a stop date of list_date + 7 days, so
+  stale deals stop showing a week after they were listed (penny items
+  never get a stop date — their list date is when the item pennied,
+  not when the deal ends). Dropdown counts exclude expired items, and
+  entries with a zero count do not appear at all.
 - **Bundles tab — coupon stacks (v13)**: a second tab next to Deals,
   for coupon-stack / bundle deals — buy the bundle, clip the digitals,
   earn the rewards, pay the out-of-pocket price after rewards (e.g.
@@ -316,23 +341,35 @@ items land in General, and a few will be misfiled. There is no
 "Penny" department — penny-ness shows via the $0.01 price and the
 PENNY badge, not the department.
 
-**Sort (v12):** "Most recent" (default) orders by the item's list date,
-newest first; "Most verified" orders by how many independent lists
-carried the item, then by list date. In Most verified mode each card
-shows "✓ N sources" under its picture. **Future (v13 fix):** the checkbox
-next to "Show expired" shows only deals whose list date is after today
-— currently PennyPinchinMom's Nov 24 list. Before v13 it only narrowed
-when checked and let future-dated deals through when unchecked; now it
-is symmetric with "Show expired": Future OFF hides any deal dated after
-today, Future ON shows only those. Undated deals (no list date) are
-never future and show by default.
+**Sort (v12, extended v14/v15):** "Most recent" (default) orders by the
+item's list date, newest first; "Most verified" orders by how many
+independent lists carried the item, then by list date. In Most verified
+mode each card shows "✓ N sources" under its picture. **v15:** "Price:
+Low to High" orders by final price after all coupons/discounts,
+cheapest first (null prices last), on all three tabs; "Biggest deals"
+(largest dollar saving, was − price) is on Deals and Food as well as
+Bundles. **Expiry (v15):** an item past its valid-to date is expired —
+hidden from the feed and excluded from dropdown counts. A deal with no
+end date gets a stop date of list_date + 7 days; penny items never get
+one. Dropdown counts exclude expired items and zero-count entries do
+not appear. **Future (v13 fix, v15 Denver fix):** the checkbox next to
+"Show expired" shows only deals whose list date is after today — "today"
+is Denver time since v15 (before, after 5pm MST the UTC date was
+already tomorrow). Before v13 it only narrowed when checked and let
+future-dated deals through when unchecked; now it is symmetric with
+"Show expired": Future OFF hides any deal dated after today, Future ON
+shows only those. Undated deals (no list date) are never future and show
+by default.
 
 **Bundles tab (v13):** shows only coupon stacks (`is_stack`), newest
 first, undated last; its badge counts the visible stacks. The Deals tab
 excludes stacks entirely. **v14:** the Bundles tab has its own sort
 (Most verified by default, Most recent, Biggest deals), store and
 department dropdowns built from the stacks only, and a Future checkbox
-with the Deals-tab semantics.
+with the Deals-tab semantics. **v15:** the Bundles sort adds Price:
+Low to High. The **Food tab (v15)** shows only food deals
+(`food: true`, kind deal, not stacks) with the same store/department/
+sort/Future controls, defaulting to Price: Low to High.
 
 **Department hide (v14):** the department dropdown is a button + panel
 (a native `<select>` cannot carry a per-row button). Each row has an ✕
@@ -390,13 +427,18 @@ MIT): the UPC-line regex for the penny-list pages, the category/signal
 logic for RSS, and the retailer map + price extraction for Slickdeals.
 
 Verified live 2026-11-22, re-verified and corrected 2026-11-23
-(counts from the regenerated run — 2,234 items total, 51 ok sources, 7 link-only, 0 failed):
+(counts from the regenerated run — 2,234 items total, 51 ok sources, 7 link-only, 0 failed).
+Re-run 2026-11-25 (v15 — 2,084 items, 55 ok sources, 7 link-only, 4 failed):
+Freebie Guy blocked the parser (HTTP 403 on all three pages, confirmed
+twice) and Kart.deals rate-limited it (HTTP 429); the feed ships
+without them this run and the harness records the blocks. The DG penny
+list is still covered by seven other sources.
 
 ### Penny lists (Dollar General $0.01)
 
 | Source | What happens |
 | --- | --- |
-| Freebie Guy — DG penny list (master list) | Parsed — 135 items, all from previous weeks' lists (see audit below) |
+| Freebie Guy — DG penny list (master list) | Parsed — 135 items, all from previous weeks' lists (see audit below). **Nov 25: blocked (HTTP 403), 0 items this run** |
 | RetailShout — DG penny items | Parsed — 50 items (structured cards); 38 survive dedupe |
 | Krazy Coupon Lady — DG penny list | Parsed — 105 items; 88 survive dedupe |
 | PennyPinchinMom — DG penny list | Parsed — 113 items (table), all dated Nov 24, 2026 |
@@ -406,11 +448,48 @@ Verified live 2026-11-22, re-verified and corrected 2026-11-23
 | GlitchNDealz — DG penny list | Parsed — 39 items in dated tables (Nov 17 / Nov 3 / Oct 27 / Oct 20) |
 | Penny Puss — DG penny list | Link-only — the homepage yields no current list link (only a 2023 index) and the Oct 27 list page carries only 6 UPCs in static HTML, not the 27 claimed — the rest are not in the page text |
 
+### Penny lists (Dollar Tree $0.01 — v15)
+
+Dollar Tree pennies are nationwide (unlike DG's store-by-store lists),
+and a DT sits across from the apartment. The DT penny page mirrors the
+DG page's card structure (`dt-penny-*` classes), with the was-price in
+the price line ("Was $6.00 → now $0.01") and the SKU in the note.
+
+| Source | What happens |
+| --- | --- |
+| RetailShout — Dollar Tree penny items | Parsed — 134 items, 62 with a photo (the rest get OFF/OPF enrichment via UPC); 134 carry a was-price; list date is the penny date |
+| Slickdeals — Dollar Tree search | Parsed — 1 item (a 50%-off-shipping code thread, no price; the search is noisy and most threads fail the "dollar tree" text filter) |
+
+Not wired: KCL's Dollar Tree list (name-only, last real update May
+2026); Hip2Save's `dollar-tree` search (0 Dollar Tree mentions — the
+WP search is fuzzy); Freebie Guy's Dollar Tree pages (403
+Cloudflare); Yo! Free Samples (Cloudflare-blocked). Facebook/TikTok
+DT lists are group-gated, not parseable.
+
+### Food / restaurant deals (Food tab — v15)
+
+| Source | What happens |
+| --- | --- |
+| Slickdeals — free food / fast food / restaurant searches | Parsed — 25 / 20 / 25 items (RSS search, ≤14 days old, marked `food`, department Restaurant) |
+| Slickdeals — Kroger search | Parsed — 4 items (marked `food`, department Grocery) |
+| Hip2Save — restaurant deals (WP API) | Parsed — 5 items (marked `food`) |
+| Krazy Coupon Lady — Kroger stacks | Parsed — 11 stack cards (marked `food`, department Grocery; they live on Bundles, not Food — stack wins over food) |
+| Any deal whose department is Grocery | Marked `food` by the parser, so grocery deals from every source feed the Food tab |
+
+Not wired: Freebie Guy food pages (403 Cloudflare); Yo! Free Samples
+(Cloudflare-blocked); KCL `/deals/restaurants` (404); RetailShout's
+Kroger / Dollar Tree weekly-ad hubs (landing pages, no ad dates, no
+priced items); Southern Savers has no Kroger ad series. A Slickdeals
+McDonald's search was skipped — covered by the fast-food / restaurant
+searches. Slickdeals threads about future deals are dated by post date,
+so a deal starting in the future but posted today is not recognised as
+future (known limitation).
+
 ### Home Depot / Lowe's penny lists
 
 | Source | What happens |
 | --- | --- |
-| PennyRecon — Home Depot penny items | Parsed — 166 of 304 live on site (name + HD SKU + retail; no UPC is exposed in the list HTML; only items with detail pages are parseable) |
+| PennyRecon — Home Depot penny items | Parsed — 169 of 313 live on site (name + HD SKU + retail; no UPC is exposed in the list HTML; only items with detail pages are parseable) |
 | Aminahstore — Home Depot penny list | Parsed — 16 items with HD SKUs (mixed formats: 12-digit internet SKUs like 1009-074-829 and 6-digit legacy SKUs like 215-583, stored as `sku`, never as UPC). The scout report claimed 47 SKUs; only 16 are on the live page |
 | ClearanceFinds — Lowe's penny list | Parsed — 121 items keyed by Lowe's item number (2–7 digits, stored as `sku`, never as UPC — no UPCs exist on the page; observed prices 1¢–6¢) |
 | Krazy Coupon Lady — Home Depot penny items | Link-only — the page loads but the list is not in the static HTML (JS-rendered) |
@@ -421,8 +500,9 @@ Verified live 2026-11-22, re-verified and corrected 2026-11-23
 | --- | --- |
 | Krazy Coupon Lady — Walgreens / CVS / Target deals | Parsed — 11 deal cards each (title + final price + was price + coupon/reward lines as steps) |
 | Krazy Coupon Lady — Michaels / Kohl's / JCPenney deals | Parsed — 11 / 14 / 14 deal cards, same structure |
-| Freebie Guy — Walgreens deals | Parsed — 18 article cards, titles carry final price |
-| Freebie Guy — Target deals | Parsed — 18 article cards (some titles are "$X.xx" placeholders — those get no price) |
+| Krazy Coupon Lady — Kroger deals | Parsed — 11 deal cards (v15; marked `food`, department Grocery) |
+| Freebie Guy — Walgreens deals | Parsed — 18 article cards, titles carry final price. **Nov 25: blocked (HTTP 403), 0 items this run** |
+| Freebie Guy — Target deals | Parsed — 18 article cards (some titles are "$X.xx" placeholders — those get no price). **Nov 25: blocked (HTTP 403), 0 items this run** |
 | Freebie Guy — CVS deals | Link-only — only 1 CVS-titled deal on the page, not a real CVS list |
 | RetailShout — Walgreens weekly ad | Parsed — 70 sale items (ad prices, not pennies; list Nov 22–28) |
 | RetailShout — CVS weekly ad | Link-only — this week's page is a gift guide, not a priced deal list |
@@ -446,7 +526,7 @@ Verified live 2026-11-22, re-verified and corrected 2026-11-23
 | GlitchNDealz — RSS | Parsed — 42 items (store + exact price in titles) |
 | Brad's Deals — homepage | Parsed — 24 deal tiles (no RSS exists; search page useless) |
 | weeklyadhunters — DG weekly ad | Parsed — 272 items (273 listed; the Dixie/Vanity Fair row is skipped — its price is garbled, $2.95 name vs $9.95 price — and the curated Dixie deal below covers it) |
-| Kart.deals — JCPenney | Parsed — 25 items (first 30 of 540 live; prices from the static card HTML, JSON-LD carries name+url only) |
+| Kart.deals — JCPenney | Parsed — 25 items (first 30 of 540 live; prices from the static card HTML, JSON-LD carries name+url only). **Nov 25: rate-limited (HTTP 429), 0 items this run** |
 | Weekly Bargains — Hobby Lobby flyer | Parsed — 8 items (Nov 18–30, 75% fall decor; e.g. White Layered Wood Pumpkin $1.62, was $6.49) |
 | Katalozi365 — Hobby Lobby leaflet | Link-only — leaflet is image-based; page text gives only the category discounts (75% fall decor, 50% tableware), no per-item prices |
 | Milled — Hobby Lobby email (75% fall decor) | Link-only — the parser couldn't fetch the page (connection reset twice, 2026-11-22); open it manually |
@@ -570,12 +650,13 @@ previous good items; the Lists & Sources tab shows each source's status.
 ## Planned next
 
 - Optional King Soopers auto price-check via Kroger's free public API
-  (needs a free Kroger developer account).
+  (needs a free Kroger developer account). KCL Kroger stacks are
+  already wired (v15) — the API would add live per-item prices.
 
 ## Files
 
 `index.html`, `app.js`, `styles.css`, `manifest.json`, `sw.js`
-(service-worker cache `penny-alerts-v14`), `icon.svg`,
+(service-worker cache `penny-alerts-v15`), `icon.svg`,
 `icon-192.png`, `icon-512.png`, `icon-512-maskable.png`, `README.md`,
 `scripts/parse-lists.py` + `scripts/send-push.py` +
 `scripts/make-icons.py` (regenerates the PNG icons from `icon.svg`) +

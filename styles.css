@@ -29,6 +29,78 @@ body {
 }
 .install-btn svg { width: 20px; height: 20px; }
 .install-btn[hidden] { display: none; }
+/* Hamburger button (v15) — three lines, top left, same circle treatment
+ * as the install button. Opens the drawer; Watchlist and Lists &
+ * Sources live there so the top tab bar stays to three tabs. */
+.menu-btn {
+  flex: 0 0 auto;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.7);
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.menu-btn svg { width: 20px; height: 20px; }
+/* Hamburger drawer (v15) — slides in from the left over the page. */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 55;
+}
+.drawer-backdrop[hidden] { display: none; }
+.drawer {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 260px;
+  max-width: 80vw;
+  background: #fff;
+  z-index: 60;
+  box-shadow: 4px 0 24px rgba(0,0,0,.25);
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.drawer[hidden] { display: none; }
+.drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 16px 12px;
+  font-weight: 800;
+  font-size: 17px;
+  color: #14532d;
+  border-bottom: 1px solid #e2e2e2;
+}
+.drawer-close {
+  width: 32px; height: 32px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  background: #fff;
+  color: #555;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.drawer-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  cursor: pointer;
+}
+.drawer-link:hover { background: #f0f4f0; }
+.drawer-link .count { color: #888; font-weight: 400; }
 .app-header .sub { margin: 0 0 10px; opacity: .85; font-size: 13px; }
 .briefing-bar {
   background: rgba(255,255,255,.14);

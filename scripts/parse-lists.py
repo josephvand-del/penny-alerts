@@ -166,6 +166,7 @@ def make_item(name, retailer, source, kind="deal", upc="", price="", was="",
     name = clean(name)[:140] or "Unknown item"
     return {
         "name": name,
+        "kind": kind,
         "upc": normalize_upc(upc),
         "price": price,
         "was": was,
@@ -445,13 +446,22 @@ def extract_fg_dg(html_text: str, base_url: str = ""):
     return items
 
 
-def parse_retailshout(html_text: str):
-    """RetailShout: li.dg-penny-item cards (h4 name, penny date, UPC span)."""
+def parse_retailshout(html_text: str, retailer: str = "dollar-general",
+                      prefix: str = "dg"):
+    """RetailShout penny-item cards (DG verified 2026-11-22, DT verified
+    2026-11-25): .<prefix>-penny-item cards (h4 name, penny date, UPC
+    span). DG cards are <li>, DT cards are <div> — the selector is
+    class-only, tag-agnostic. DT cards also carry a price line ('Was
+    $6.00 → now $0.01') — the was price is kept (it is the savings for
+    the Biggest-deals sort) — and a SKU, which rides in the note (the
+    app shows the UPC on the card). The card's own penny date ('Penny
+    Date: Nov 20, 2026' / 'Date Pennied: Sep 17, 2026') is the list
+    date for this item. Penny items never get a stop date (see main)."""
     tree = HTMLParser(html_text)
     items = []
     seen = set()
-    for card in tree.css("li.dg-penny-item"):
-        upc_el = card.css_first("span.dg-penny-upc")
+    for card in tree.css(f".{prefix}-penny-item"):
+        upc_el = card.css_first(f"span.{prefix}-penny-upc")
         if not upc_el:
             continue
         upc = clean(upc_el.text())
@@ -462,20 +472,39 @@ def parse_retailshout(html_text: str):
             continue
         seen.add(upc)
         name_el = card.css_first("h4")
-        date_el = card.css_first("p.dg-penny-date")
-        name = clean(name_el.text()) if name_el else "Dollar General penny item"
+        date_el = card.css_first(f"p.{prefix}-penny-date")
+        name = clean(name_el.text()) if name_el else "Penny item"
         note = clean(date_el.text()) if date_el else ""
+        was = ""
+        price_el = card.css_first(f"p.{prefix}-penny-price")
+        if price_el is not None:
+            wm = re.search(r"[Ww]as\s*\$([\d,]+(?:\.\d{2})?)",
+                           clean(price_el.text()))
+            if wm:
+                try:
+                    was = f"${float(wm.group(1).replace(',', '')):.2f}"
+                except ValueError:
+                    was = ""
+        sku_el = card.css_first(f"span.{prefix}-penny-sku")
+        if sku_el is not None:
+            sku = clean(sku_el.text())
+            if sku:
+                note = (note + f" · SKU {sku}") if note else f"SKU {sku}"
         # Each card carries its own product photo (webp on retailshout.com).
+        # DT cards lazy-load: src is a data: placeholder and the real URL
+        # is data-lazy-src — prefer the lazy attributes first (DG cards
+        # carry a plain src and fall through to it).
         img = ""
         img_el = card.css_first("img")
         if img_el is not None:
             attrs = img_el.attributes or {}
             img = clean_image_url(
-                attrs.get("src") or attrs.get("data-src")
-                or attrs.get("data-lazy-src") or "",
+                attrs.get("data-lazy-src") or attrs.get("data-src")
+                or attrs.get("src") or "",
                 "https://retailshout.com/")
-        it = make_item(name, "dollar-general", "retailshout.com",
-                       kind="penny", upc=upc, price="$0.01", image=img,
+        it = make_item(name, retailer, "retailshout.com",
+                       kind="penny", upc=upc, price="$0.01", was=was,
+                       image=img,
                        # The card's own penny date ("Penny Date: Nov 20,
                        # 2026") is the list date for this item.
                        list_date=parse_list_date(note) or "")
@@ -695,7 +724,6 @@ def _entry_date(entry) -> str:
 def parse_rss(raw: str, source_name: str):
     """Returns (items, error_or_None)."""
     parsed = feedparser.parse(raw)
-    today = today_str()
     items = []
     seen_upcs = set()
     for entry in parsed.entries[:60]:
@@ -738,10 +766,11 @@ def parse_rss(raw: str, source_name: str):
                                        kind="penny", upc=upc, price="$0.01",
                                        url=link, list_date=list_date))
         elif heat == "med":
+            # No source-given end date: main() assigns the stop date
+            # (list_date + 7 days).
             items.append(make_item(title, store_id, source_name,
                                    kind="deal", upc="", price="",
-                                   valid_to=today, url=link,
-                                   list_date=list_date))
+                                   url=link, list_date=list_date))
     return items, None
 
 
@@ -836,7 +865,6 @@ def parse_slickdeals(raw: str, force_retailer: str = "", require_title: str = ""
     force_stack forces is_stack True (a 'walgreens free' search is
     stack-style by construction)."""
     parsed = feedparser.parse(raw)
-    today = today_str()
     today_d = datetime.now(timezone.utc).date()
     items = []
     for entry in parsed.entries[:40]:
@@ -874,7 +902,7 @@ def parse_slickdeals(raw: str, force_retailer: str = "", require_title: str = ""
             thumb = clean_image_url((media[0] or {}).get("url", ""))
         items.append(make_item(title, store_id, "slickdeals.net",
                                kind="deal", upc="", price=cur, was=orig,
-                               valid_to=today, url=link, image=thumb,
+                               url=link, image=thumb,
                                list_date=list_date,
                                is_stack=True if force_stack else
                                (False if no_stack else looks_like_stack(title, summary, store_id)),
@@ -1580,11 +1608,10 @@ def parse_dealnews(raw: str):
     in the XML — the price lives in the title ('... for $200 + free
     shipping'), so _extract_price does the work after stripping the
     'free shipping w/ $99' threshold (a shipping minimum, not a price).
-    valid_to is today — these are daily deals, like the Slickdeals
-    frontpage (the dealnews:expires values run months out and are not
-    the deal's real end)."""
+    No source-given end date (the dealnews:expires values run months
+    out and are not the deal's real end) — main() assigns the stop
+    date (list_date + 7 days)."""
     parsed = feedparser.parse(raw)
-    today = today_str()
     items = []
     for entry in parsed.entries[:50]:
         title = clean(getattr(entry, "title", "") or "")
@@ -1610,7 +1637,7 @@ def parse_dealnews(raw: str):
             thumb = _summary_image(entry)
         items.append(make_item(title, retailer, "dealnews.com",
                                kind="deal", upc="", price=cur, was=orig,
-                               valid_to=today, url=link, image=thumb,
+                               url=link, image=thumb,
                                list_date=_entry_date(entry),
                                is_stack=looks_like_stack(title, summary, retailer),
                                steps=_steps_from_text(summary)))
@@ -1641,7 +1668,6 @@ def parse_deal_feed(raw: str, source_name: str):
     FREE and no stack signal is skipped (a claims/giveaway post is not
     a deal). Steps from the summary text."""
     parsed = feedparser.parse(raw)
-    today = today_str()
     items = []
     seen_links = set()
     for entry in parsed.entries[:60]:
@@ -1680,7 +1706,7 @@ def parse_deal_feed(raw: str, source_name: str):
             price = "$0.00"
         items.append(make_item(title, store_id, source_name,
                                kind="deal", upc="", price=price, was=was,
-                               valid_to=today, url=link,
+                               url=link,
                                image=_summary_image(entry),
                                list_date=_entry_date(entry),
                                is_stack=is_stack,
@@ -1702,7 +1728,6 @@ def parse_hip2save_api(raw: str, search_store: str):
         return []
     if not isinstance(posts, list):
         return []
-    today = today_str()
     items = []
     for post in posts[:10]:
         title = clean(TAG_STRIP.sub("", html.unescape(
@@ -1729,7 +1754,7 @@ def parse_hip2save_api(raw: str, search_store: str):
             img = clean_image_url(m.group(1))
         items.append(make_item(title, store_id, "hip2save.com",
                                kind="deal", upc="", price=price, was=was,
-                               valid_to=today, url=link, image=img,
+                               url=link, image=img,
                                list_date=date, is_stack=is_stack,
                                steps=_steps_from_text(body)))
     return items
@@ -1987,7 +2012,7 @@ def parse_bradsdeals(html_text: str, page_url: str):
                                   page_url)
         items.append(make_item(title, store_id, "bradsdeals.com",
                                kind="deal", upc="", price=price, was=was,
-                               valid_to=today_str(), url=link, image=img,
+                               url=link, image=img,
                                list_date=list_date, is_stack=is_stack,
                                steps=_steps_from_text(details)))
     return items
@@ -2170,11 +2195,26 @@ def drop_shared_images(deduped):
 # ------------------------------------------------------------------- sources
 # (key, display name, url, kind) — kind "fetch" means parse it, "link-only"
 # means record it as a manual link with a reason, never fetched for items.
+def _mark_food(items, dept):
+    """Food-tab marking (v15): a source whose whole feed is food
+    (restaurant/fast-food/free-food searches, Kroger) marks every item
+    food=True and pins its department — 'Restaurant' for restaurant
+    threads, 'Grocery' for grocery deals. The app's Food tab reads the
+    flag, not the name; the department gives the Food tab its dept
+    filter. Stacks keep is_stack=True and still live on Bundles."""
+    for it in items:
+        it["food"] = True
+        it["department"] = dept
+    return items
+
+
 SOURCES = [
     ("freebie-guy-dg", "Freebie Guy — DG penny list",
      "https://THEFREEBIEGUY.COM/DOLLAR-GENERAL-PENNY-SHOPPING-MASTER-LIST/", "fetch"),
     ("retailshout-dg", "RetailShout — DG penny items",
      "https://retailshout.com/latest-dollar-general-penny-items-near-you/", "fetch"),
+    ("retailshout-dt", "RetailShout — Dollar Tree penny items",
+     "https://retailshout.com/latest-dollar-tree-penny-items-near-you/", "fetch"),
     ("kcl-dg", "Krazy Coupon Lady — DG penny list",
      "https://thekrazycouponlady.com/tips/store-hacks/dollar-general-penny-list", "fetch"),
     ("pennypinchinmom-dg", "PennyPinchinMom — DG penny list",
@@ -2225,12 +2265,22 @@ SOURCES = [
      "https://slickdeals.net/newsearch.php?firstonly=1&q=target&searcharea=deals&searchin=first&rss=1", "fetch"),
     ("slickdeals-search-dollar-general", "Slickdeals — Dollar General search",
      "https://slickdeals.net/newsearch.php?firstonly=1&q=dollar+general&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("slickdeals-search-dollar-tree", "Slickdeals — Dollar Tree search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=dollar+tree&searcharea=deals&searchin=first&rss=1", "fetch"),
     ("slickdeals-search-home-depot", "Slickdeals — Home Depot search",
      "https://slickdeals.net/newsearch.php?firstonly=1&q=home+depot&searcharea=deals&searchin=first&rss=1", "fetch"),
     ("slickdeals-search-clearance", "Slickdeals — clearance search",
      "https://slickdeals.net/newsearch.php?firstonly=1&q=clearance&searcharea=deals&searchin=first&rss=1", "fetch"),
     ("slickdeals-search-walgreens-free", "Slickdeals — Walgreens free search",
      "https://slickdeals.net/newsearch.php?firstonly=1&q=walgreens+free&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("slickdeals-search-free-food", "Slickdeals — free food search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=free+food&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("slickdeals-search-fast-food", "Slickdeals — fast food search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=fast+food&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("slickdeals-search-restaurant", "Slickdeals — restaurant search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=restaurant&searcharea=deals&searchin=first&rss=1", "fetch"),
+    ("slickdeals-search-kroger", "Slickdeals — Kroger search",
+     "https://slickdeals.net/newsearch.php?firstonly=1&q=kroger&searcharea=deals&searchin=first&rss=1", "fetch"),
     ("saving-with-dana-dg", "Saving With Dana — DG penny list",
      "https://savingwithdana.com/sitemap.xml", "fetch"),
     ("crazy4couponing-dg", "Crazy4Couponing — DG penny list",
@@ -2261,12 +2311,16 @@ SOURCES = [
      "https://hip2save.com/wp-json/wp/v2/deals?search=hobby-lobby&per_page=5", "fetch"),
     ("hip2save-api-home-depot", "Hip2Save — Home Depot deals (WP API)",
      "https://hip2save.com/wp-json/wp/v2/deals?search=home-depot&per_page=5", "fetch"),
+    ("hip2save-api-restaurant", "Hip2Save — restaurant deals (WP API)",
+     "https://hip2save.com/wp-json/wp/v2/deals?search=restaurant&per_page=5", "fetch"),
     ("kcl-michaels", "Krazy Coupon Lady — Michaels stacks",
      "https://www.thekrazycouponlady.com/coupons-for/michaels", "fetch"),
     ("kcl-kohls", "Krazy Coupon Lady — Kohl's stacks",
      "https://www.thekrazycouponlady.com/coupons-for/kohls", "fetch"),
     ("kcl-jcpenney", "Krazy Coupon Lady — JCPenney stacks",
      "https://www.thekrazycouponlady.com/coupons-for/jcpenney", "fetch"),
+    ("kcl-kroger", "Krazy Coupon Lady — Kroger stacks",
+     "https://thekrazycouponlady.com/coupons-for/kroger", "fetch"),
     ("clearancefinds-lowes", "ClearanceFinds — Lowe's penny list",
      "https://clearancefinds.com/alerts/lowes-penny-list-november-2026/", "fetch"),
     ("aminahstore-hd", "Aminahstore — Home Depot penny list",
@@ -2367,13 +2421,24 @@ def run_source(client: httpx.Client, key: str, name: str, url: str, kind: str):
         if key == "southern-savers-walgreens":
             # The SOURCES url is the homepage (discovery doc). The
             # current Walgreens ad post comes from the homepage links —
-            # never a guessed date slug.
+            # never a guessed date slug. The homepage only links the ad
+            # while it is fresh (2026-11-25: the 11/22 ad had already
+            # scrolled off, so discovery failed outright) — fall back
+            # to the site's own search page, which lists the ad posts
+            # newest-first even after they leave the homepage.
             page_url = discover_ss_walgreens_url(body)
+            if not page_url:
+                search_body, _err = safe_get(
+                    client,
+                    "https://www.southernsavers.com/?s=walgreens+ad+coupons")
+                if search_body:
+                    page_url = discover_ss_walgreens_url(search_body)
             if not page_url:
                 return [], {"name": name, "url": url, "status": "failed",
                             "item_count": 0,
-                            "note": "discovery failed — homepage links no "
-                            "Walgreens ad post; skipped rather than guessing"}
+                            "note": "discovery failed — homepage and site "
+                            "search link no Walgreens ad post; skipped "
+                            "rather than guessing"}
             page_body, err2 = safe_get(client, page_url)
             if page_body is None:
                 return [], {"name": name, "url": page_url, "status": "failed",
@@ -2385,6 +2450,9 @@ def run_source(client: httpx.Client, key: str, name: str, url: str, kind: str):
             items = extract_fg_dg(body, url)
         elif key == "retailshout-dg":
             items = parse_retailshout(body)
+        elif key == "retailshout-dt":
+            items = parse_retailshout(body, retailer="dollar-tree",
+                                      prefix="dt")
         elif key == "kcl-dg":
             # The page's H1 carries the current list's date
             # ("Dollar General Penny List Nov 3: ...").
@@ -2440,6 +2508,25 @@ def run_source(client: httpx.Client, key: str, name: str, url: str, kind: str):
             items = parse_slickdeals(body, force_retailer="dollar-general",
                                      require_text="dollar general",
                                      max_age_days=14, no_stack=True)
+        elif key == "slickdeals-search-dollar-tree":
+            # Same noise filter as the Dollar General search.
+            items = parse_slickdeals(body, force_retailer="dollar-tree",
+                                     require_text="dollar tree",
+                                     max_age_days=14, no_stack=True)
+        elif key in ("slickdeals-search-free-food",
+                     "slickdeals-search-fast-food",
+                     "slickdeals-search-restaurant"):
+            # Food-tab sources: restaurant/fast-food threads, routed to
+            # Deals-shaped items and marked food (Restaurant dept).
+            items = _mark_food(
+                parse_slickdeals(body, max_age_days=14, no_stack=True),
+                "Restaurant")
+        elif key == "slickdeals-search-kroger":
+            # Kroger = King Soopers in Colorado. Grocery dept, Food tab.
+            items = _mark_food(
+                parse_slickdeals(body, force_retailer="kroger",
+                                 max_age_days=14, no_stack=True),
+                "Grocery")
         elif key == "slickdeals-search-home-depot":
             items = parse_slickdeals(body, force_retailer="home-depot",
                                      max_age_days=14, no_stack=True)
@@ -2460,6 +2547,11 @@ def run_source(client: httpx.Client, key: str, name: str, url: str, kind: str):
             items = parse_dealnews(body)
         elif key == "hip2save-feed":
             items = parse_deal_feed(body, "hip2save.com")
+        elif key == "hip2save-api-restaurant":
+            # The WP search is the retailer fallback ('restaurant' when
+            # the post names no chain); the whole feed is food.
+            items = _mark_food(parse_hip2save_api(body, "restaurant"),
+                               "Restaurant")
         elif key.startswith("hip2save-api-"):
             store = key[len("hip2save-api-"):]
             items = parse_hip2save_api(body, store)
@@ -2469,6 +2561,11 @@ def run_source(client: httpx.Client, key: str, name: str, url: str, kind: str):
             items = parse_kcl_store(body, url, "kohls")
         elif key == "kcl-jcpenney":
             items = parse_kcl_store(body, url, "jcp")
+        elif key == "kcl-kroger":
+            # Kroger stacks (King Soopers in Colorado) — coupon stacks,
+            # so they live on Bundles; marked food + Grocery anyway.
+            items = _mark_food(parse_kcl_store(body, url, "kroger"),
+                               "Grocery")
         elif key == "clearancefinds-lowes":
             items = parse_clearancefinds_lowes(body, url)
         elif key == "aminahstore-hd":
@@ -2590,6 +2687,13 @@ def main() -> int:
                 kept["sku"] = it["sku"]
             if it.get("is_stack") and not kept.get("is_stack"):
                 kept["is_stack"] = True
+            if it.get("food") and not kept.get("food"):
+                # A later copy from a food source marks the kept item
+                # food too (first source wins on everything else).
+                kept["food"] = True
+                if kept.get("department") in ("", "General") \
+                        and it.get("department"):
+                    kept["department"] = it["department"]
             if it.get("steps") and not kept.get("steps"):
                 kept["steps"] = it["steps"]
             if it["first_seen"] < kept["first_seen"]:
@@ -2610,6 +2714,33 @@ def main() -> int:
                    else ("name", (it["name"].lower(), it["retailer"])))
             if key in prev_seen:
                 it["first_seen"] = prev_seen[key]
+
+        # Stop date (v15): a deal with no source-given end date stops
+        # list_date + 7 days, so a deal from a finished week stops
+        # crowding the feed instead of hovering for months. Penny items
+        # never stop — their list date is when the item pennied, not
+        # when the deal ends (a September penny is still a penny).
+        # A source-given valid_to is never overwritten. An item with no
+        # list date and no end date keeps no stop date.
+        for it in deduped:
+            if it["kind"] != "penny" and not it.get("valid_to") \
+                    and it.get("list_date"):
+                try:
+                    stop = (datetime.strptime(
+                        it["list_date"], "%Y-%m-%d").date()
+                        + timedelta(days=7)).isoformat()
+                    it["valid_to"] = stop
+                except ValueError:
+                    pass
+
+        # Food tab (v15): any non-penny deal whose department is
+        # Grocery is food, even from a general source (a Walgreens ad
+        # snack, a Slickdeals grocery thread). Penny items stay on the
+        # Deals tab whatever their department — the penny hunt is the
+        # Deals tab's job.
+        for it in deduped:
+            if it["kind"] != "penny" and it.get("department") == "Grocery":
+                it["food"] = True
 
         # Shared decorative images (page header photos) are not product
         # photos — drop them before enrichment.

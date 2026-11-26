@@ -91,6 +91,7 @@ var STORE_NAMES = {
 var SOURCE_LINKS = [
   { name: 'Freebie Guy — Dollar General penny list (master list)', url: 'https://THEFREEBIEGUY.COM/DOLLAR-GENERAL-PENNY-SHOPPING-MASTER-LIST/', note: 'The weekly DG penny list. New list usually Tuesday morning. Honest note: the current section has no itemized list — its items come from previous weeks’ lists, and each card shows its list date.' },
   { name: 'RetailShout — latest Dollar General penny items', url: 'https://retailshout.com/latest-dollar-general-penny-items-near-you/', note: 'DG penny items with SKU, UPC and penny date.' },
+  { name: 'RetailShout — latest Dollar Tree penny items', url: 'https://retailshout.com/latest-dollar-tree-penny-items-near-you/', note: 'Dollar Tree penny items with SKU, UPC, was-price and Date Pennied. DT pennies are nationwide, unlike DG store-by-store pennies.' },
   { name: 'SavingK — Walmart hidden clearance', url: 'https://savingk.com/walmart-hidden-clearance-how-to-find-these-secret-deals/', note: 'How Walmart hidden clearance works + the clearance database.' },
   { name: 'PennyRecon — Home Depot penny lists', url: 'https://www.pennyrecon.com/', note: 'Community Home Depot penny lists by store.' },
   { name: 'Penny Hunter — daily briefing (raw JSON this app reads)', url: 'https://rocketshon.github.io/penny-finder-backend/briefings/latest.json', note: 'The public briefing file. Open it to see exactly what the app sees.' },
@@ -108,16 +109,22 @@ var SOURCE_LINKS = [
   { name: 'Slickdeals — Home Depot search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=home+depot&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals Home Depot threads.' },
   { name: 'Slickdeals — clearance search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=clearance&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals clearance threads across stores.' },
   { name: 'Slickdeals — Walgreens free search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=walgreens+free&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals free-at-Walgreens threads — Bundles-tab material.' },
+  { name: 'Slickdeals — free food search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=free+food&searcharea=deals&searchin=first&rss=1', note: 'Free-food threads — Food-tab material. Free means $0 after coupons and rebates.' },
+  { name: 'Slickdeals — fast food search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=fast+food&searcharea=deals&searchin=first&rss=1', note: 'Fast-food deal threads — Food-tab material.' },
+  { name: 'Slickdeals — restaurant search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=restaurant&searcharea=deals&searchin=first&rss=1', note: 'Restaurant deal threads — Food-tab material.' },
+  { name: 'Slickdeals — Kroger search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=kroger&searcharea=deals&searchin=first&rss=1', note: 'Kroger threads — Kroger is King Soopers in Colorado. Food-tab material.' },
+  { name: 'Slickdeals — Dollar Tree search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=dollar+tree&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals Dollar Tree threads, filtered to posts that actually name Dollar Tree.' },
   { name: 'Slickdeals — Hobby Lobby search', url: 'https://slickdeals.net/newsearch.php?firstonly=1&q=hobby+lobby&searcharea=deals&searchin=first&rss=1', note: 'Slickdeals Hobby Lobby threads, fresh ones only (≤7 days).' },
   { name: 'Saving With Dana — DG penny list', url: 'https://savingwithdana.com/penny-list/2026-11-22.html', note: 'DG penny list in a clean table (name + UPC + Pennied date). The parser finds the current week from the site sitemap — never a guessed date.' },
   { name: 'Crazy4Couponing — DG penny list', url: 'https://crazy4couponing.com/dollar-general-penny-list', note: 'DG penny list by dated sections (current section is categories-only; UPCs live in the archived sections, each dated).' },
   { name: 'GlitchNDealz — DG penny list', url: 'https://glitchndealz.com/penny-list-for-dollar-general', note: 'DG penny list in dated tables (Nov 17 / Nov 3 / Oct 27 / Oct 20). Also a deals RSS feed.' },
   { name: 'Southern Savers — Walgreens ad & coupons', url: 'https://www.southernsavers.com/walgreens-ad-coupons-11-22-11-28/', note: 'The best Walgreens stack-math source: per-deal "makes it" final prices with coupon/reward steps. The parser finds the current week from the homepage — never a guessed slug. Also an RSS feed.' },
   { name: 'DealNews — today’s edition', url: 'https://www.dealnews.com/', note: 'Daily deals RSS (price in the title, retailer + expiry + photo in the feed).' },
-  { name: 'Hip2Save', url: 'https://hip2save.com/', note: 'Deal posts via its RSS feed and store-filtered WordPress API (Walgreens/CVS/Target/DG/Hobby Lobby/Home Depot).' },
+  { name: 'Hip2Save', url: 'https://hip2save.com/', note: 'Deal posts via its RSS feed and store-filtered WordPress API (Walgreens/CVS/Target/DG/Hobby Lobby/Home Depot/restaurant).' },
   { name: 'Krazy Coupon Lady — Michaels stacks', url: 'https://www.thekrazycouponlady.com/coupons-for/michaels', note: 'Michaels coupon deals, same card format as Walgreens.' },
   { name: 'Krazy Coupon Lady — Kohl’s stacks', url: 'https://www.thekrazycouponlady.com/coupons-for/kohls', note: 'Kohl’s coupon deals, same card format.' },
   { name: 'Krazy Coupon Lady — JCPenney stacks', url: 'https://www.thekrazycouponlady.com/coupons-for/jcpenney', note: 'JCPenney coupon deals, same card format.' },
+  { name: 'Krazy Coupon Lady — Kroger stacks', url: 'https://thekrazycouponlady.com/coupons-for/kroger', note: 'Kroger coupon deals — Kroger is King Soopers in Colorado, the local grocery store. Stacks, so they live on Bundles.' },
   { name: 'ClearanceFinds — Lowe’s penny list', url: 'https://clearancefinds.com/alerts/lowes-penny-list-november-2026/', note: 'Lowe’s penny list by 7-digit item number (NOT a UPC — shown as SKU) with observed 1¢–6¢ prices and seen-date ranges. First Lowe’s source.' },
   { name: 'Aminahstore — Home Depot penny list', url: 'https://aminahstore.com/article/111', note: 'Home Depot penny list by SKU (12-digit internet and 6-digit legacy formats — shown as SKU, never UPC).' },
   { name: 'weeklyadhunters — Dollar General weekly ad', url: 'https://weeklyadhunters.com/dollar-general-weekly-ad/', note: 'DG weekly-ad price list (273 items, Nov 22–28). Ad prices, not pennies. Source of the Dixie 4-for-$8.50 reel deal — the ad lists Dixie but its price row is garbled, so the reel’s $8.50 is the item’s price.' },
@@ -315,10 +322,36 @@ function normalizeWeekly(data) {
       /* Coupon stack (Bundles tab) + how-to steps from the source's own
        * text ([] = the source gave no usable steps). */
       stack: !!it.is_stack,
+      /* Food-tab flag (v15): grocery / restaurant / fast-food deal.
+       * The parser sets it from food sources + Grocery department;
+       * pennies are never food (they stay on the Deals tab). */
+      food: !!it.food,
       steps: Array.isArray(it.steps) ? it.steps : []
     });
   });
   return { meta: meta, deals: deals };
+}
+
+/* "Today" in the user's timezone (v15): the app runs in Denver, and
+ * new Date().toISOString() is UTC — after 5pm MST the UTC date is
+ * already tomorrow, so the Future toggle and the expiry check were a
+ * day early all evening. Intl with America/Denver gives the calendar
+ * date on Joseph's wall; if Intl/timezone data is missing, fall back
+ * to the UTC date rather than crashing. */
+function denverToday() {
+  try {
+    var parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Denver', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date());
+    var y = '', m = '', d = '';
+    parts.forEach(function (p) {
+      if (p.type === 'year') y = p.value;
+      else if (p.type === 'month') m = p.value;
+      else if (p.type === 'day') d = p.value;
+    });
+    if (y && m && d) return y + '-' + m + '-' + d;
+  } catch (e) { /* fall through */ }
+  return new Date().toISOString().slice(0, 10);
 }
 
 /* ---------------- app state ---------------- */
@@ -330,7 +363,7 @@ var state = {
   weeklyMeta: { generatedAt: '', sources: [] },
   loadError: '',
   weeklyError: '',
-  today: new Date().toISOString().slice(0, 10),
+  today: denverToday(),
   watch: {},      // id -> deal snapshot
   ignored: {},    // id -> true
   seen: {},       // id -> first-seen date (YYYY-MM-DD)
@@ -340,7 +373,13 @@ var state = {
   /* Bundles tab controls (v14): same shape as the Deals filters, but
    * for stacks only. Default sort is Most verified — stacks are about
    * trust (a stack listed by several sources is the better lead). */
-  bundleFilters: { sort: 'verified', retailer: '', dept: '', futureOnly: false }
+  bundleFilters: { sort: 'verified', retailer: '', dept: '', futureOnly: false },
+  /* Food tab controls (v15): same shape, for food deals only (grocery
+   * + restaurant + fast food, non-stack, non-penny). Default sort is
+   * Price: Low to High — the tab's whole point is what's free or
+   * cheapest right now, and free ($0.00 after coupons/rebates) sorts
+   * first. */
+  foodFilters: { sort: 'price', retailer: '', dept: '', futureOnly: false }
 };
 function loadState() {
   state.watch = store.get(LS.watch, {});
@@ -381,24 +420,34 @@ function savingsOf(d) {
   if (p === null || w === null || w <= p) return null;
   return w - p;
 }
-/* Sort a filtered deal list (v12, extended v14). Most recent: list
+/* Sort a filtered deal list (v12, extended v14, v15). Most recent: list
  * date DESC, ties by name. Most verified: number of independent
  * sources DESC, then list date DESC, then name. Biggest deals: largest
  * dollar savings (was − price) DESC; items with no usable saving sort
- * last, tie-break Most recent. The mode defaults to the Deals tab's
- * sort; the Bundles tab passes its own. Returns a new array; the
- * input is untouched. */
+ * last, tie-break Most recent. Price: Low to High (v15): final price
+ * after all coupons/discounts ASC — free ($0.00) first; items with no
+ * price sort last, tie-break Most recent. The mode defaults to the
+ * Deals tab's sort; the Bundles/Food tabs pass their own. Returns a
+ * new array; the input is untouched. */
 function sortDeals(list, mode) {
   var m = mode || state.filters.sort;
   var copy = list.slice();
   var verified = (m === 'verified');
   var biggest = (m === 'biggest');
+  var byPrice = (m === 'price');
   copy.sort(function (a, b) {
+    if (byPrice) {
+      var pa = moneyOf(a.price), pb = moneyOf(b.price);
+      var ha = (pa !== null), hb = (pb !== null);
+      if (ha !== hb) return ha ? -1 : 1;
+      if (ha && hb && pa !== pb) return pa - pb;
+      /* Tie (or both no price): fall through to Most recent. */
+    }
     if (biggest) {
       var sa = savingsOf(a), sb = savingsOf(b);
-      var ha = (sa !== null), hb = (sb !== null);
-      if (ha !== hb) return ha ? -1 : 1;
-      if (ha && hb && sb !== sa) return sb - sa;
+      var ha2 = (sa !== null), hb2 = (sb !== null);
+      if (ha2 !== hb2) return ha2 ? -1 : 1;
+      if (ha2 && hb2 && sb !== sa) return sb - sa;
       /* Tie (or both no-saving): fall through to Most recent. */
     }
     if (verified) {
@@ -416,6 +465,7 @@ function visibleDeals() {
   var filtered = state.deals.filter(function (d) {
     if (state.ignored[d.id]) return false;
     if (d.stack) return false; /* stacks live on the Bundles tab (v13) */
+    if (d.food && d.kind === 'deal') return false; /* food deals live on the Food tab (v15); pennies stay here */
     if (state.hiddenDepts[d.dept]) return false; /* v14 dept hide */
     if (f.pennyOnly && d.kind !== 'penny') return false;
     if (!f.showExpired && isExpired(d, state.today)) return false;
@@ -430,6 +480,28 @@ function visibleDeals() {
     return true;
   });
   return sortDeals(filtered);
+}
+/* Food tab (v15): ONLY food deals — grocery / restaurant / fast food,
+ * non-stack, non-penny. Same filter shape as Bundles (sort, store,
+ * department, Future) and the same Future semantics; expired food
+ * always hides. Pennies stay on Deals even when they are food (the
+ * penny hunt is the Deals tab's job); stacks stay on Bundles even
+ * when they are food (Kroger coupon stacks). */
+function visibleFood() {
+  var f = state.foodFilters;
+  var list = state.deals.filter(function (d) {
+    if (!d.food || d.kind !== 'deal' || d.stack) return false;
+    if (state.ignored[d.id]) return false;
+    if (state.hiddenDepts[d.dept]) return false;
+    if (isExpired(d, state.today)) return false;
+    var dd = dealDate(d);
+    if (f.futureOnly) { if (!(dd && dd > state.today)) return false; }
+    else if (dd && dd > state.today) return false;
+    if (f.retailer && d.storeId !== f.retailer) return false;
+    if (f.dept && d.dept !== f.dept) return false;
+    return true;
+  });
+  return sortDeals(list, f.sort);
 }
 /* Bundles tab (v13, controls added v14): ONLY stack items, filtered
  * and sorted by the Bundles controls — sort (Most verified default),
@@ -494,7 +566,7 @@ function visibleStacks() {
  * utm, or redirector parameters in any link. Labels say "app" /
  * "search", never "buy" — a search link is not a verified price or a
  * confirmed listing. */
-var APP_VERSION = 'v14';
+var APP_VERSION = 'v15';
 var SELLER_SEARCH = {
   'wm-ct': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
   'walmart': { label: 'Walmart', host: 'www.walmart.com', path: '/search?q=', pkg: 'com.walmart.android' },
@@ -685,13 +757,14 @@ function thumbHtml(d) {
 /* Source count under the picture (v12) — shown ONLY in "Most verified"
  * mode, on deal cards. The count is the number of independent lists that
  * carried the item (recorded by the parser before dedupe), so a "3
- * sources" item was listed by three lists, not one. */
-function sourceCountHtml(d) {
-  if (state.filters.sort !== 'verified') return '';
+ * sources" item was listed by three lists, not one. sortMode is the
+ * calling tab's sort (v15: Deals/Bundles/Food each pass their own). */
+function sourceCountHtml(d, sortMode) {
+  if ((sortMode || state.filters.sort) !== 'verified') return '';
   var n = d.sourceCount || 1;
   return '<div class="source-count">✓ ' + n + (n === 1 ? ' source' : ' sources') + '</div>';
 }
-function dealCard(d) {
+function dealCard(d, sortMode) {
   var isW = !!state.watch[d.id];
   var price = d.price ? '<span class="price">' + esc(d.price) + '</span>' : '';
   var was = d.originalPrice ? '<span class="was">was ' + esc(d.originalPrice) + '</span>' : '';
@@ -704,7 +777,7 @@ function dealCard(d) {
   var upc = d.upc ? '<span class="meta">UPC ' + esc(d.upc) + '</span>' : '<span class="meta">no UPC in this listing</span>';
   var badge = isNew(d.id) ? '<span class="badge-new">NEW</span>' : '';
   var penny = d.kind === 'penny' ? '<span class="badge-penny">PENNY</span>' : '';
-  return '<article class="deal"><div class="deal-row"><div class="deal-thumb-col">' + thumbHtml(d) + sourceCountHtml(d) + '</div><div class="deal-main">' +
+  return '<article class="deal"><div class="deal-row"><div class="deal-thumb-col">' + thumbHtml(d) + sourceCountHtml(d, sortMode) + '</div><div class="deal-main">' +
     '<div class="deal-top">' + penny + badge + '<span class="retailer">' + esc(prettyStore(d.storeId)) + '</span>' +
     '<span class="dept">' + esc(d.dept) + '</span></div>' +
     '<h3>' + esc(d.name) + ' <button type="button" class="btn small" data-action="copy" data-name="' + esc(d.name) + '">Copy</button></h3>' +
@@ -751,8 +824,27 @@ function renderBundles() {
     el.innerHTML = '<p class="empty">No bundle stacks right now. New stacks appear here when the morning feed finds one.</p>';
     return;
   }
-  el.innerHTML = list.slice(0, 400).map(dealCard).join('') +
+  el.innerHTML = list.slice(0, 400).map(function (d) { return dealCard(d, state.bundleFilters.sort); }).join('') +
     (list.length > 400 ? '<p class="hint">Showing the first 400 of ' + list.length + ' stacks — the rest are older.</p>' : '');
+}
+/* Food tab (v15): food deals only (visibleFood). The badge counts
+ * visible food deals; the empty state explains itself. */
+function renderFood() {
+  var el = $('foodList');
+  if (!el) return;
+  var list = visibleFood();
+  var fc = $('foodCount');
+  if (fc) fc.textContent = list.length ? '(' + list.length + ')' : '';
+  if (!state.deals.length) {
+    el.innerHTML = '<p class="empty">No deals loaded yet. ' + (state.loadError ? esc(state.loadError) : 'Try again in a moment.') + '</p>';
+    return;
+  }
+  if (!list.length) {
+    el.innerHTML = '<p class="empty">No food deals right now. New grocery, fast-food and restaurant deals appear here when the morning feed finds one — free means $0 after coupons and rebates.</p>';
+    return;
+  }
+  el.innerHTML = list.slice(0, 400).map(function (d) { return dealCard(d, state.foodFilters.sort); }).join('') +
+    (list.length > 400 ? '<p class="hint">Showing the first 400 of ' + list.length + ' food deals — narrow the search to see more.</p>' : '');
 }
 /* Store filter options (v9): only stores that have deals in the given
  * feed, with a deal count after each name. Returns [{value, label}]
@@ -787,14 +879,40 @@ function deptFilterOptions(deals) {
   ids.forEach(function (id) { out.push({ value: id, label: id + ' (' + counts[id] + ')' }); });
   return out;
 }
+/* Dropdown pools (v15): each tab's store/department dropdowns are built
+ * from that tab's own items, EXPIRED items excluded — an expired deal
+ * must not keep its store or department in a dropdown, and a store or
+ * department with zero live items does not appear at all (the counts
+ * come from the pool, so a zero-count entry can never be built). The
+ * pools are the weekly feed only (the stale briefing's stores never
+ * appear) and never hardcoded. Future-dated items stay in the pools —
+ * the Future toggle, not the dropdown, governs them. Hidden
+ * departments stay in the dept pool so they can be found and
+ * un-hidden. */
+function dealsPool() {
+  return state.weeklyDeals.filter(function (d) {
+    return !d.stack && !(d.food && d.kind === 'deal') && !isExpired(d, state.today);
+  });
+}
+function foodPool() {
+  return state.weeklyDeals.filter(function (d) {
+    return d.food && d.kind === 'deal' && !d.stack && !isExpired(d, state.today);
+  });
+}
+function stacksPool() {
+  return state.weeklyDeals.filter(function (d) {
+    return d.stack && !isExpired(d, state.today);
+  });
+}
 function renderFilters() {
   var rf = $('retailerFilter');
   if (rf) {
-    /* Rebuild from the WEEKLY deals only, every time the feeds finish
-     * loading — the stale briefing's stores never appear. Never a
-     * hardcoded full store list. */
+    /* Rebuild from the DEALS pool every time the feeds finish loading —
+     * the stale briefing's stores never appear, expired deals never
+     * appear, and food deals (Food tab) and stacks (Bundles tab) never
+     * appear here. Never a hardcoded full store list. */
     var prev = rf.value;
-    var opts = storeFilterOptions(state.weeklyDeals);
+    var opts = storeFilterOptions(dealsPool());
     rf.innerHTML = '';
     opts.forEach(function (o) {
       var el = (typeof document !== 'undefined') ? document.createElement('option') : null;
@@ -815,7 +933,7 @@ function renderFilters() {
     /* Bundles store dropdown (v14): only stores that have stacks in
      * the loaded feed — the same rule as the Deals store dropdown. */
     var prevB = bf.value;
-    var bOpts = storeFilterOptions(state.weeklyDeals.filter(function (d) { return d.stack; }));
+    var bOpts = storeFilterOptions(stacksPool());
     bf.innerHTML = '';
     bOpts.forEach(function (o) {
       var oEl = (typeof document !== 'undefined') ? document.createElement('option') : null;
@@ -827,6 +945,24 @@ function renderFilters() {
     bf.value = stillThereB ? prevB : '';
     if (!stillThereB) state.bundleFilters.retailer = '';
   }
+  var ff = $('foodStore');
+  if (ff) {
+    /* Food store dropdown (v15): only stores that have food deals. */
+    var prevF = ff.value;
+    var fOpts = storeFilterOptions(foodPool());
+    ff.innerHTML = '';
+    fOpts.forEach(function (o) {
+      var oEl = (typeof document !== 'undefined') ? document.createElement('option') : null;
+      if (!oEl) return;
+      oEl.value = o.value; oEl.textContent = o.label;
+      ff.appendChild(oEl);
+    });
+    var stillThereF = fOpts.some(function (o) { return o.value === prevF; });
+    ff.value = stillThereF ? prevF : '';
+    if (!stillThereF) state.foodFilters.retailer = '';
+  }
+  var fdf = $('foodDeptDdBtn');
+  if (fdf) renderDeptDropdown('food');
 }
 /* Department dropdown (v14) — a native <select> cannot carry a
  * per-row hide toggle, so the department filter is a button + panel.
@@ -854,17 +990,22 @@ function renderDeptDropdown(scope) {
   var btn, panel, deals, current;
   if (scope === 'bundles') {
     btn = $('bundleDeptDdBtn'); panel = $('bundleDeptDdPanel');
-    deals = state.weeklyDeals.filter(function (d) { return d.stack; });
+    deals = stacksPool();
     current = state.bundleFilters.dept;
+  } else if (scope === 'food') {
+    btn = $('foodDeptDdBtn'); panel = $('foodDeptDdPanel');
+    deals = foodPool();
+    current = state.foodFilters.dept;
   } else {
     btn = $('deptDdBtn'); panel = $('deptDdPanel');
-    deals = state.weeklyDeals;
+    deals = dealsPool();
     current = state.filters.dept;
   }
   var opts = deptFilterOptions(deals);
   var stillThere = opts.some(function (o) { return o.value === current; });
   if (!stillThere && current) {
     if (scope === 'bundles') state.bundleFilters.dept = '';
+    else if (scope === 'food') state.foodFilters.dept = '';
     else state.filters.dept = '';
     current = '';
   }
@@ -877,6 +1018,7 @@ function renderDeptDropdown(scope) {
 }
 function setDeptFilter(scope, dept) {
   if (scope === 'bundles') { state.bundleFilters.dept = dept; renderBundles(); }
+  else if (scope === 'food') { state.foodFilters.dept = dept; renderFood(); }
   else { state.filters.dept = dept; renderDeals(); }
   renderDeptDropdown(scope);
 }
@@ -887,8 +1029,10 @@ function toggleHiddenDept(dept) {
   saveState();
   renderDeals();
   renderBundles();
+  renderFood();
   renderDeptDropdown('deals');
   renderDeptDropdown('bundles');
+  renderDeptDropdown('food');
   return !!state.hiddenDepts[dept];
 }
 function isDeptHidden(dept) { return !!state.hiddenDepts[dept]; }
@@ -899,7 +1043,8 @@ function deptDdClick(ev, scope) {
   var b = ev.target && ev.target.closest ? ev.target.closest('[data-action]') : null;
   if (!b) return;
   var a = b.getAttribute('data-action');
-  var panel = scope === 'bundles' ? $('bundleDeptDdPanel') : $('deptDdPanel');
+  var panel = scope === 'bundles' ? $('bundleDeptDdPanel')
+    : scope === 'food' ? $('foodDeptDdPanel') : $('deptDdPanel');
   if (a === 'dept-toggle') {
     if (panel) panel.hidden = !panel.hidden;
     return;
@@ -1349,6 +1494,7 @@ function handleAction(action, id) {
   saveState();
   renderDeals();
   renderBundles();
+  renderFood();
   renderWatchlist();
 }
 function handleCheck(id, key, checked) {
@@ -1433,7 +1579,7 @@ function loadBriefing() {
   return Promise.all([weeklyP, briefingP]).then(function () {
     mergeFeeds();
     var fresh = markSeenAndNotify(state.deals.map(function (d) { return d.id; }));
-    renderBriefingBar(); renderFilters(); renderDeals(); renderBundles(); renderWatchlist(); renderWeeklySources();
+    renderBriefingBar(); renderFilters(); renderDeals(); renderBundles(); renderFood(); renderWatchlist(); renderWeeklySources();
     return fresh;
   });
 }
@@ -1449,6 +1595,33 @@ function switchTab(name) {
   });
   if (name === 'watchlist') renderWatchlist();
   if (name === 'bundles') renderBundles();
+  if (name === 'food') renderFood();
+  closeDrawer();
+}
+/* ---------------- hamburger drawer (v15) ----------------
+ * The top tab bar stays uncrowded — Deals, Bundles, Food only.
+ * Watchlist and Lists & Sources live in the drawer (three lines, top
+ * left): the drawer buttons switch to those panels exactly like the
+ * old tab buttons did. Opens/closes via the hamburger, the ✕, the
+ * backdrop, Esc, or picking a destination. */
+var drawerOpen = false;
+function openDrawer() {
+  var dr = $('drawer'), bd = $('drawerBackdrop');
+  if (!dr) return false;
+  dr.hidden = false;
+  if (bd) bd.hidden = false;
+  drawerOpen = true;
+  return true;
+}
+function closeDrawer() {
+  var dr = $('drawer'), bd = $('drawerBackdrop');
+  if (dr) dr.hidden = true;
+  if (bd) bd.hidden = true;
+  drawerOpen = false;
+  return true;
+}
+function toggleDrawer() {
+  return drawerOpen ? closeDrawer() : openDrawer();
 }
 function init() {
   loadState();
@@ -1477,6 +1650,13 @@ function init() {
     if (b.getAttribute('data-action') === 'copy') { copyDealName(b.getAttribute('data-name') || '', b); return; }
     handleAction(b.getAttribute('data-action'), b.getAttribute('data-id'));
   });
+  var fl = $('foodList');
+  if (fl) fl.addEventListener('click', function (ev) {
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-action]') : null;
+    if (!b) return;
+    if (b.getAttribute('data-action') === 'copy') { copyDealName(b.getAttribute('data-name') || '', b); return; }
+    handleAction(b.getAttribute('data-action'), b.getAttribute('data-id'));
+  });
   /* Instructions modal: backdrop/X close it, its Copy button copies the
    * UPC/SKU; Esc and the phone Back button close it too. */
   var im = $('instrModal');
@@ -1489,6 +1669,7 @@ function init() {
   });
   document.addEventListener('keydown', function (ev) {
     if (ev && ev.key === 'Escape' && instrOpen) closeInstructions();
+    else if (ev && ev.key === 'Escape' && drawerOpen) closeDrawer();
   });
   if (typeof window !== 'undefined' && window.addEventListener) {
     window.addEventListener('popstate', function () { if (instrOpen) closeInstructions(); });
@@ -1516,6 +1697,7 @@ function init() {
   var ss = $('sortSelect');
   if (ss) ss.addEventListener('change', function () { state.filters.sort = ss.value; renderDeals(); });
   var rf = $('retailerFilter');
+  if (rf) rf.addEventListener('change', function () { state.filters.retailer = rf.value; renderDeals(); });
   if (rf) rf.addEventListener('change', function () { state.filters.retailer = rf.value; renderDeals(); });
   /* Department dropdowns (v14, custom button + panel — a native
    * <select> cannot carry a per-row hide ✕). One delegated handler
@@ -1548,6 +1730,31 @@ function init() {
   if (bst) bst.addEventListener('change', function () { state.bundleFilters.retailer = bst.value; renderBundles(); });
   var bfu = $('bundleFuture');
   if (bfu) bfu.addEventListener('change', function () { state.bundleFilters.futureOnly = bfu.checked; renderBundles(); });
+  /* Food tab controls (v15). */
+  var fs = $('foodSort');
+  if (fs) fs.addEventListener('change', function () { state.foodFilters.sort = fs.value; renderFood(); });
+  var fst = $('foodStore');
+  if (fst) fst.addEventListener('change', function () { state.foodFilters.retailer = fst.value; renderFood(); });
+  var fdd = $('foodDeptDd');
+  if (fdd) fdd.addEventListener('click', function (ev) { deptDdClick(ev, 'food'); });
+  var ffu = $('foodFuture');
+  if (ffu) ffu.addEventListener('change', function () { state.foodFilters.futureOnly = ffu.checked; renderFood(); });
+  /* Hamburger drawer (v15): the button toggles it; the ✕ and the
+   * backdrop close it; the drawer links switch tabs (and close it). */
+  var mb = $('menuBtn');
+  if (mb) mb.addEventListener('click', function () { toggleDrawer(); });
+  var dc = $('drawerClose');
+  if (dc) dc.addEventListener('click', function () { closeDrawer(); });
+  var db = $('drawerBackdrop');
+  if (db) db.addEventListener('click', function () { closeDrawer(); });
+  var dr = $('drawer');
+  if (dr) dr.addEventListener('click', function (ev) {
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-tab]') : null;
+    if (b) switchTab(b.getAttribute('data-tab'));
+  });
+  /* The drawer starts closed (the HTML carries hidden too; init makes
+   * the state explicit so a stale cached page cannot leave it open). */
+  closeDrawer();
   /* Stale-briefing banner dismiss ✕ (v14). */
   var sb = $('staleBar');
   if (sb) sb.addEventListener('click', function (ev) {
@@ -1630,7 +1837,17 @@ if (typeof window !== 'undefined') {
     sortDeals: sortDeals,
     dealDate: dealDate,
     visibleStacks: visibleStacks,
+    visibleFood: visibleFood,
     renderBundles: renderBundles,
+    renderFood: renderFood,
+    denverToday: denverToday,
+    _openDrawer: openDrawer,
+    _closeDrawer: closeDrawer,
+    _toggleDrawer: toggleDrawer,
+    _drawerOpen: function () { return drawerOpen; },
+    _dealsPool: dealsPool,
+    _foodPool: foodPool,
+    _stacksPool: stacksPool,
     instructionsHtml: instructionsHtml,
     _openInstructions: openInstructions,
     _closeInstructions: closeInstructions,
